@@ -13,19 +13,21 @@ const server = new McpServer({
 server.tool(
   "retrieve",
   `Retrieve content from Graphlit knowledge base.
-   Accepts a search prompt and optional content type filter.
+   Accepts a search prompt, optional recency filter, and optional content type filter.
    Content types: Email, Event, File, Issue, Message, Page, Post, Text.
+   Format for 'inLast' should be ISO 8601: for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly.
    Prompt should be optimized for vector search, via text embeddings. Rewrite prompt as appropriate for higher relevance to search results.
    Returns the content sources in XML format, including metadata and Markdown text.`,
   { 
     prompt: z.string(),
+    inLast: z.string().optional(),
     contentType: z.nativeEnum(ContentTypes).optional()
   },
-  async ({ prompt, contentType }) => {
+  async ({ prompt, contentType, inLast }) => {
     const client = new Graphlit();
 
     try {
-      const filter: ContentFilter = { types: contentType ? [contentType] : null };
+      const filter: ContentFilter = { inLast: inLast, types: contentType ? [contentType] : null };
 
       const response = await client.retrieveSources(prompt, filter, undefined, { type: RetrievalStrategyTypes.Section }, { serviceType: RerankingModelServiceTypes.Cohere });
       
@@ -552,16 +554,18 @@ server.tool(
 server.tool(
   "webSearch",
   `Performs web search based on search query. Format the search query as what would be entered into a Google search.
-   Accepts search query as string.
+   Accepts search query as string, and optional search service type.
+   Search service types: Tavily, Exa. Defaults to Tavily.
    Returns URL, title and relevant Markdown text from resulting web pages.`,
   { 
-    search: z.string()
+    search: z.string(),
+    searchService: z.nativeEnum(SearchServiceTypes).optional().default(SearchServiceTypes.Tavily)
   },
-  async ({ search }) => {
+  async ({ search, searchService }) => {
     const client = new Graphlit();
 
     try {
-      const response = await client.searchWeb(search, SearchServiceTypes.Tavily);
+      const response = await client.searchWeb(search, searchService);
 
       return {
         content: [{
