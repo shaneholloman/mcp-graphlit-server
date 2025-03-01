@@ -1,0 +1,48 @@
+{
+  "name": "graphlit-mcp-server",
+  "version": "1.0.0",
+  "description": "Graphlit MCP Server",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/graphlit/graphlit-mcp-server"
+  },
+  "contributors": [
+    "Kirk Marple (https://github.com/kirk-marple)"
+  ],
+  "bin": {
+    "graphlit-mcp-server": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc --watch",
+    "inspector": "npx @modelcontextprotocol/inspector node build/index.js"
+  },
+  "keywords": [
+    "Graphlit",
+    "API",
+    "LLM",
+    "AI",
+    "RAG",
+    "OpenAI",
+    "PDF",
+    "parsing",
+    "preprocessing",
+    "MCP"
+  ],
+  "author": "Unstruk Data Inc.",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.0",
+    "graphlit-client": "^1.0.20250225001"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
