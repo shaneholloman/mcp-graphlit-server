@@ -39,7 +39,6 @@ To use the Graphlit MCP Server in Claude Desktop application, use:
 }
 ```
 
-
 ## Configuration
 
 The Graphlit MCP Server supports environment variables to be set for authentication and configuration:
