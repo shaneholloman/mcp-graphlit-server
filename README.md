@@ -1,1 +1,37 @@
-# graphlit-mcp-server
+# Model Context Protocol (MCP) Server for Graphlit Platform
+## Overview
+
+The Model Context Protocol (MCP) Server enables integration between MCP clients and the Graphlit service. This document outlines the setup process and provides a basic example of using the client.
+
+## Prerequisites
+
+Before you begin, ensure you have the following:
+
+- Node.js installed on your system (recommended version 14.x or higher).
+- An active account on the [Graphlit Platform](https://portal.graphlit.dev) with access to the API settings dashboard.
+
+## Installation
+
+To install the Graphlit MCP Server, use npx:
+
+```bash
+npx install graphlit/graphlit-mcp-server
+```
+
+## Configuration
+
+The Graphlit MCP Server supports environment variables to be set for authentication and configuration:
+
+- `GRAPHLIT_ENVIRONMENT_ID`: Your environment ID.
+- `GRAPHLIT_ORGANIZATION_ID`: Your organization ID.
+- `GRAPHLIT_JWT_SECRET`: Your JWT secret for signing the JWT token.
+
+You can find these values in the API settings dashboard on the [Graphlit Platform](https://portal.graphlit.dev).
+
+## Support
+
+Please refer to the [Graphlit API Documentation](https://docs.graphlit.dev/).
+
+For support with the Graphlit Client, please submit a [GitHub Issue](https://github.com/graphlit/graphlit-mcp-server/issues).  
+
+For further support with the Graphlit Platform, please join our [Discord](https://discord.gg/ygFmfjy3Qx) community.
