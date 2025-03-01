@@ -15,8 +15,30 @@ Before you begin, ensure you have the following:
 To install the Graphlit MCP Server, use npx:
 
 ```bash
-npx install graphlit/graphlit-mcp-server
+npx install graphlit-mcp-server
 ```
+
+To use the Graphlit MCP Server in Claude Desktop application, use:
+
+```
+{
+    "mcpServers": {
+        "graphlit-mcp-server": {
+            "command": "npx",
+            "args": [
+				"-y",
+                "graphlit-mcp-server"
+            ],
+            "env": {
+                "GRAPHLIT_ORGANIZATION_ID": "your-organization-id",
+                "GRAPHLIT_ENVIRONMENT_ID": "your-environment-id",
+                "GRAPHLIT_JWT_SECRET": "your-jwt-secret",
+            }
+        }
+    }
+}
+```
+
 
 ## Configuration
 
