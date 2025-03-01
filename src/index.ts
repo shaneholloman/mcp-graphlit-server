@@ -13,14 +13,14 @@ const server = new McpServer({
 server.tool(
   "retrieve",
   `Retrieve content from Graphlit knowledge base.
-   Accepts a search prompt, optional recency filter, and optional content type filter.
+   Accepts a search prompt, optional recency filter (defaults to last 30 days), and optional content type filter.
    Content types: Email, Event, File, Issue, Message, Page, Post, Text.
    Format for 'inLast' should be ISO 8601: for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly.
    Prompt should be optimized for vector search, via text embeddings. Rewrite prompt as appropriate for higher relevance to search results.
    Returns the content sources in XML format, including metadata and Markdown text.`,
   { 
     prompt: z.string(),
-    inLast: z.string().optional(),
+    inLast: z.string().optional().default("P30D"),
     contentType: z.nativeEnum(ContentTypes).optional()
   },
   async ({ prompt, contentType, inLast }) => {
