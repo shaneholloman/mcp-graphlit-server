@@ -160,6 +160,46 @@ server.tool(
 );
 
 server.tool(
+  "listSlackChannels",
+  `Lists available Slack channels.
+    Returns a list of Slack channels, which can be used with ingestSlack to ingest messages into Graphlit knowledge base.`,
+  { 
+  },
+  async ({ }) => {
+    const client = new Graphlit();
+
+    try {
+      const botToken = process.env.SLACK_BOT_TOKEN;
+      if (!botToken) {
+        console.error("Please set SLACK_BOT_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.querySlackChannels({
+        token: botToken
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(response.slackChannels?.results, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
   "ingestDiscord",
   `Ingests messages from Discord channel into Graphlit knowledge base.
     Accepts Discord channel name and an optional read limit for the number of messages to ingest.

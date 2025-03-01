@@ -40,7 +40,7 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.0",
-    "graphlit-client": "^1.0.20250225001"
+    "graphlit-client": "^1.0.20250301001"
   },
   "devDependencies": {
     "typescript": "^5.4.5"
