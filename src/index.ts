@@ -276,6 +276,39 @@ server.tool(
 );
 
 server.tool(
+  "createCollection",
+  `Create a collection.
+   Accepts a collection name.
+   Returns the collection identifier`,
+  { 
+    name: z.string().describe("Collection name."),
+  },
+  async ({ name}) => {
+    const client = new Graphlit();
+
+    try {
+      const response = await client.createCollection({ name: name });
+            
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.createCollection?.id }, null, 2)
+        }]
+      };
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
   "deleteCollection",
   `Delete a collection. Does *not* delete the content in the collection.
    Accepts a collection identifier.
@@ -1679,55 +1712,9 @@ server.tool(
 );
 
 server.tool(
-  "webScrape",
-  `Scrapes web page into Graphlit knowledge base.
-   Returns Markdown text and metadata extracted from web page.`,
-  { 
-    url: z.string()
-  },
-  async ({ url }) => {
-    const client = new Graphlit();
-
-    try {
-      const response = await client.ingestUri(url, undefined, undefined, true);
-
-      const id = response.ingestUri?.id;
-
-      if (id === undefined) {
-        return {
-          content: [{
-            type: "text",
-            text: "Error: Unable to scrape web page."
-          }],
-          isError: true
-        };
-      }
-
-      const cresponse = await client.getContent(id);
-
-      return {
-        content: [{
-          type: "text",
-          text: formatContent(cresponse)
-        }]
-      };
-      
-    } catch (err: unknown) {
-      const error = err as Error;
-      return {
-        content: [{
-          type: "text",
-          text: `Error: ${error.message}`
-        }],
-        isError: true
-      };
-    }
-  }
-);
-
-server.tool(
   "webMap",
-  `Enumerates the web pages at or beneath the provided URL using web sitemap.
+  `Enumerates the web pages at or beneath the provided URL using web sitemap. 
+   Does *not* ingest web pages into Graphlit knowledge base.
    Accepts web page URL as string.
    Returns list of mapped URIs from web site.`,
   { 
@@ -1762,6 +1749,7 @@ server.tool(
 server.tool(
   "webSearch",
   `Performs web search based on search query. Format the search query as what would be entered into a Google search.
+   Does *not* ingest pages into Graphlit knowledge base.
    Accepts search query as string, and optional search service type.
    Search service types: Tavily, Exa. Defaults to Tavily.
    Returns URL, title and relevant Markdown text from resulting web pages.`,
