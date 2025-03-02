@@ -409,6 +409,39 @@ server.tool(
 );
 
 server.tool(
+  "isContentDone",
+  `Check if content has completed asynchronous ingestion.
+   Accepts a content identifier which was returned from one of the non-feed ingestion tools, like ingestUrl.
+   Returns whether the content is done or not.`,
+  { 
+    id: z.string().describe("Content identifier."),
+  },
+  async ({ id}) => {
+    const client = new Graphlit();
+
+    try {
+      const response = await client.isContentDone(id);
+            
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ done: response.isContentDone?.result }, null, 2)
+        }]
+      };
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
   "isFeedDone",
   `Check if an asynchronous feed has completed ingesting all the available content.
    Accepts a feed identifier which was returned from one of the ingestion tools, like ingestGoogleDriveFiles.
