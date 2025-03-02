@@ -40,7 +40,9 @@ server.resource(
             .filter(content => content !== null)
             .map(content => ({
               name: content.name,
-              uri: `contents://${content.id}/markdown`
+              description: content.description || '',
+              uri: `contents://${content.id}`,
+              mimeType: content.mimeType || 'text/markdown'
             }))
         };
       } catch (error) {
@@ -57,8 +59,8 @@ server.resource(
 );
 
 server.resource(
-  "content-markdown",
-  new ResourceTemplate("contents://{id}/markdown", { list: undefined }),
+  "content-formatted",
+  new ResourceTemplate("contents://{id}", { list: undefined }),
   async (uri: URL, variables) => {
     const id = variables.id as string;
     const client = new Graphlit();
@@ -69,7 +71,7 @@ server.resource(
         contents: [
           {
             uri: uri.toString(),
-            text: response.content?.markdown || '',
+            text: formatContent(response),
             mimeType: 'text/markdown'
           }
         ]
