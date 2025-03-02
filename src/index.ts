@@ -276,6 +276,39 @@ server.tool(
 );
 
 server.tool(
+  "deleteCollection",
+  `Delete a collection. Does *not* delete the content in the collection.
+   Accepts a collection identifier.
+   Returns the collection identifier and collection state, i.e. Deleted.`,
+  { 
+    id: z.string().describe("Collection identifier."),
+  },
+  async ({ id}) => {
+    const client = new Graphlit();
+
+    try {
+      const response = await client.deleteCollection(id);
+            
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(response.deleteCollection, null, 2)
+        }]
+      };
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
   "deleteFeed",
   `Delete a feed and all of its ingested content.
    Accepts a feed identifier which was returned from one of the ingestion tools, like ingestGoogleDriveFiles.
