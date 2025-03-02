@@ -271,6 +271,7 @@ server.tool(
             libraryId: libraryId,
             folderId: folderId
           },
+          isRecursive: true,
           readLimit: readLimit || 100
         }
       });
@@ -342,6 +343,7 @@ server.tool(
             clientSecret: clientSecret,
             refreshToken: refreshToken,
           },
+          isRecursive: true,
           readLimit: readLimit || 100
         }
       });
@@ -413,6 +415,158 @@ server.tool(
             clientSecret: clientSecret,
             refreshToken: refreshToken,
           },
+          isRecursive: true,
+          readLimit: readLimit || 100
+        }
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.createFeed?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "ingestDropboxFiles",
+  `Ingests files from Dropbox folder into Graphlit knowledge base.
+   Accepts optional relative path to Dropbox folder (i.e. /Pictures), and an optional read limit for the number of files to ingest.
+   If no path provided, ingests files from root Dropbox folder.
+   Executes asynchonously and returns the feed identifier.`,
+  { 
+    path: z.string().optional(),
+    readLimit: z.number().optional()
+  },
+  async ({ path, readLimit }) => {
+    const client = new Graphlit();
+
+    try {
+      const appKey = process.env.DROPBOX_APP_KEY;
+      if (!appKey) {
+        console.error("Please set DROPBOX_APP_KEY environment variable.");
+        process.exit(1);
+      }
+
+      const appSecret = process.env.DROPBOX_APP_SECRET;
+      if (!appSecret) {
+        console.error("Please set DROPBOX_APP_SECRET environment variable.");
+        process.exit(1);
+      }
+
+      const redirectUri = process.env.DROPBOX_REDIRECT_URI;
+      if (!redirectUri) {
+        console.error("Please set DROPBOX_REDIRECT_URI environment variable.");
+        process.exit(1);
+      }
+
+      const refreshToken = process.env.DROPBOX_REFRESH_TOKEN;
+      if (!refreshToken) {
+        console.error("Please set DROPBOX_REFRESH_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.createFeed({
+        name: `Dropbox`,
+        type: FeedTypes.Site,
+        site: {
+          type: FeedServiceTypes.Dropbox,
+          dropbox: {
+            path: path,
+            appKey: appKey,
+            appSecret: appSecret,
+            redirectUri: redirectUri,
+            refreshToken: refreshToken,
+          },
+          isRecursive: true,
+          readLimit: readLimit || 100
+        }
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.createFeed?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "ingestBoxFiles",
+  `Ingests files from Box folder into Graphlit knowledge base.
+   Accepts optional Box folder identifier, and an optional read limit for the number of files to ingest.
+   If no folder identifier provided, ingests files from root Box folder (i.e. "0").
+   Folder identifier can be inferred from Box URL. https://app.box.com/folder/123456 -> folder identifier is "123456".
+   Executes asynchonously and returns the feed identifier.`,
+  { 
+    folderId: z.string().optional().default("0"),
+    readLimit: z.number().optional()
+  },
+  async ({ folderId, readLimit }) => {
+    const client = new Graphlit();
+
+    try {
+      const clientId = process.env.BOX_CLIENT_ID;
+      if (!clientId) {
+        console.error("Please set BOX_CLIENT_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientSecret = process.env.BOX_CLIENT_SECRET;
+      if (!clientSecret) {
+        console.error("Please set BOX_CLIENT_SECRET environment variable.");
+        process.exit(1);
+      }
+
+      const redirectUri = process.env.BOX_REDIRECT_URI;
+      if (!redirectUri) {
+        console.error("Please set BOX_REDIRECT_URI environment variable.");
+        process.exit(1);
+      }
+
+      const refreshToken = process.env.BOX_REFRESH_TOKEN;
+      if (!refreshToken) {
+        console.error("Please set BOX_REFRESH_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.createFeed({
+        name: `Box`,
+        type: FeedTypes.Site,
+        site: {
+          type: FeedServiceTypes.Box,
+          box: {
+            folderId: folderId,
+            clientId: clientId,
+            clientSecret: clientSecret,
+            redirectUri: redirectUri,
+            refreshToken: refreshToken,
+          },
+          isRecursive: true,
           readLimit: readLimit || 100
         }
       });
