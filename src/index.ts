@@ -65,9 +65,120 @@ server.tool(
 );
 
 server.tool(
+  "listMicrosoftTeamsTeams",
+  `Lists available Microsoft Teams teams.
+    Returns a list of Microsoft Teams teams, where the team identifier can be used with listMicrosoftTeamsChannels to enumerate Microsoft Teams channels.`,
+  { 
+  },
+  async ({ }) => {
+    const client = new Graphlit();
+
+    try {
+      const clientId = process.env.MICROSOFT_TEAMS_CLIENT_ID;
+      if (!clientId) {
+        console.error("Please set MICROSOFT_TEAMS_CLIENT_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientSecret = process.env.MICROSOFT_TEAMS_CLIENT_SECRET;
+      if (!clientSecret) {
+        console.error("Please set MICROSOFT_TEAMS_CLIENT_SECRET environment variable.");
+        process.exit(1);
+      }
+
+      const refreshToken = process.env.MICROSOFT_TEAMS_REFRESH_TOKEN;
+      if (!refreshToken) {
+        console.error("Please set MICROSOFT_TEAMS_REFRESH_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      // REVIEW: client ID/secret not exposed in SDK
+      const response = await client.queryMicrosoftTeamsTeams({
+        //clientId: clientId,
+        //clientSecret: clientSecret,
+        refreshToken: refreshToken,
+    });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(response.microsoftTeamsTeams?.results, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "listMicrosoftTeamsChannels",
+  `Lists available Microsoft Teams channels.
+    Returns a list of Microsoft Teams channels, where the channel identifier can be used with ingestMicrosoftTeamsMessages to ingest messages into Graphlit knowledge base.`,
+  { 
+    teamId: z.string()
+  },
+  async ({ teamId }) => {
+    const client = new Graphlit();
+
+    try {
+      const clientId = process.env.MICROSOFT_TEAMS_CLIENT_ID;
+      if (!clientId) {
+        console.error("Please set MICROSOFT_TEAMS_CLIENT_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientSecret = process.env.MICROSOFT_TEAMS_CLIENT_SECRET;
+      if (!clientSecret) {
+        console.error("Please set MICROSOFT_TEAMS_CLIENT_SECRET environment variable.");
+        process.exit(1);
+      }
+
+      const refreshToken = process.env.MICROSOFT_TEAMS_REFRESH_TOKEN;
+      if (!refreshToken) {
+        console.error("Please set MICROSOFT_TEAMS_REFRESH_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      // REVIEW: client ID/secret not exposed in SDK
+      const response = await client.queryMicrosoftTeamsChannels({
+        //clientId: clientId,
+        //clientSecret: clientSecret,
+        refreshToken: refreshToken,
+    }, teamId);
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(response.microsoftTeamsChannels?.results, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
   "listSlackChannels",
   `Lists available Slack channels.
-    Returns a list of Slack channels, where the channel name which can be used with ingestSlackMessages to ingest messages into Graphlit knowledge base.`,
+    Returns a list of Slack channels, where the channel name can be used with ingestSlackMessages to ingest messages into Graphlit knowledge base.`,
   { 
   },
   async ({ }) => {
@@ -645,6 +756,72 @@ server.tool(
 );
 
 server.tool(
+  "ingestMicrosoftTeamsMessages",
+  `Ingests messages from Microsoft Teams channel into Graphlit knowledge base.
+   Accepts Microsoft Teams team identifier and channel identifier, and an optional read limit for the number of messages to ingest.
+   Executes asynchonously and returns the feed identifier.`,
+  { 
+    teamId: z.string(),
+    channelId: z.string(),
+    readLimit: z.number().optional().describe("Number of messages to ingest, optional. Defaults to 100.")
+  },
+  async ({ teamId, channelId, readLimit }) => {
+    const client = new Graphlit();
+
+    try {
+      const clientId = process.env.MICROSOFT_TEAMS_CLIENT_ID;
+      if (!clientId) {
+        console.error("Please set MICROSOFT_TEAMS_CLIENT_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientSecret = process.env.MICROSOFT_TEAMS_CLIENT_SECRET;
+      if (!clientSecret) {
+        console.error("Please set MICROSOFT_TEAMS_CLIENT_SECRET environment variable.");
+        process.exit(1);
+      }
+
+      const refreshToken = process.env.MICROSOFT_TEAMS_REFRESH_TOKEN;
+      if (!refreshToken) {
+        console.error("Please set MICROSOFT_TEAMS_REFRESH_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.createFeed({
+        name: `Microsoft Teams [${teamId}/${channelId}]`,
+        type: FeedTypes.MicrosoftTeams,
+        microsoftTeams: {
+          type: FeedListingTypes.Past,
+          clientId: clientId,
+          clientSecret: clientSecret,
+          refreshToken: refreshToken,
+          channelId: channelId,
+          teamId: teamId,
+          readLimit: readLimit || 100
+        }
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.createFeed?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
   "ingestSlackMessages",
   `Ingests messages from Slack channel into Graphlit knowledge base.
     Accepts Slack channel name and an optional read limit for the number of messages to ingest.
@@ -824,6 +1001,72 @@ server.tool(
         email: {
           type: FeedServiceTypes.GoogleEmail,
           google: {
+            type: EmailListingTypes.Past,
+            refreshToken: refreshToken,
+            clientId: clientId,
+            clientSecret: clientSecret,
+          },
+          includeAttachments: true,
+          readLimit: readLimit || 100
+        }
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.createFeed?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "ingestMicrosoftEmail",
+  `Ingests emails from Microsoft Email account into Graphlit knowledge base.
+   Accepts an optional read limit for the number of emails to ingest.
+   Executes asynchonously and returns the feed identifier.`,
+  { 
+    readLimit: z.number().optional().describe("Number of emails to ingest, optional. Defaults to 100.")
+  },
+  async ({ readLimit }) => {
+    const client = new Graphlit();
+
+    try {
+      const refreshToken = process.env.MICROSOFT_EMAIL_REFRESH_TOKEN;
+      if (!refreshToken) {
+        console.error("Please set MICROSOFT_EMAIL_REFRESH_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const clientId = process.env.MICROSOFT_EMAIL_CLIENT_ID;
+      if (!clientId) {
+        console.error("Please set MICROSOFT_EMAIL_CLIENT_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientSecret = process.env.MICROSOFT_EMAIL_CLIENT_SECRET;
+      if (!clientSecret) {
+        console.error("Please set MICROSOFT_EMAIL_CLIENT_SECRET environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.createFeed({
+        name: `Microsoft Email`,
+        type: FeedTypes.Email,
+        email: {
+          type: FeedServiceTypes.MicrosoftEmail,
+          microsoft: {
             type: EmailListingTypes.Past,
             refreshToken: refreshToken,
             clientId: clientId,
