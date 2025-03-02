@@ -16,15 +16,139 @@ import {
   RerankingModelServiceTypes, 
   RetrievalStrategyTypes, 
   SharePointAuthenticationTypes, 
-  FeedFilter,
   FileTypes
 } from "graphlit-client/dist/generated/graphql-types.js";
-import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
 const server = new McpServer({
   name: "Graphlit MCP Server",
   version: "1.0.0"
 });
+
+server.resource(
+  "feeds-list",
+  new ResourceTemplate("feeds://", {
+    list: async (extra) => {
+      const client = new Graphlit();
+      
+      try {
+        const response = await client.queryFeeds();
+        
+        return {
+          resources: (response.feeds?.results || [])
+            .filter(feed => feed !== null)
+            .map(feed => ({
+              name: feed.name,
+              uri: `feeds://${feed.id}`
+            }))
+        };
+      } catch (error) {
+        console.error("Error fetching feed list:", error);
+        return { resources: [] };
+      }
+    }
+  }),
+  async (uri, variables) => {
+    return {
+      contents: []
+    };
+  }
+);
+
+server.resource(
+  "feed",
+  new ResourceTemplate("feeds://{id}", { list: undefined }),
+  async (uri: URL, variables) => {
+    const id = variables.id as string;
+    const client = new Graphlit();
+    
+    try {
+      const response = await client.getFeed(id);
+
+      return {
+        contents: [
+          {
+            uri: uri.toString(),
+            text: JSON.stringify({ 
+              id: response.feed?.id, 
+              name: response.feed?.name,
+              type: response.feed?.type,
+              state: response.feed?.state,
+            }, null, 2),
+            mimeType: 'application/json'
+          }
+        ]
+      };
+    } catch (error) {
+      console.error("Error fetching feed:", error);
+      return {
+        contents: []
+      };
+    }
+  }
+);
+
+server.resource(
+  "collections-list",
+  new ResourceTemplate("collections://", {
+    list: async (extra) => {
+      const client = new Graphlit();
+      
+      try {
+        const response = await client.queryCollections();
+        
+        return {
+          resources: (response.collections?.results || [])
+            .filter(collection => collection !== null)
+            .map(collection => ({
+              name: collection.name,
+              uri: `collections://${collection.id}`
+            }))
+        };
+      } catch (error) {
+        console.error("Error fetching collection list:", error);
+        return { resources: [] };
+      }
+    }
+  }),
+  async (uri, variables) => {
+    return {
+      contents: []
+    };
+  }
+);
+
+server.resource(
+  "collection",
+  new ResourceTemplate("collections://{id}", { list: undefined }),
+  async (uri: URL, variables) => {
+    const id = variables.id as string;
+    const client = new Graphlit();
+    
+    try {
+      const response = await client.getCollection(id);
+      return {
+        contents: [
+          {
+            uri: uri.toString(),
+            text: JSON.stringify({
+              id: response.collection?.id,
+              name: response.collection?.name,
+              contents: (response.collection?.contents || [])
+                .filter(content => content !== null)
+                .map(content => `contents://${content.id}`)
+            }, null, 2),
+            mimeType: 'application/json'
+          }
+        ]
+      };
+    } catch (error) {
+      console.error("Error fetching collection:", error);
+      return {
+        contents: []
+      };
+    }
+  }
+);
 
 server.resource(
   "contents-list",
@@ -86,68 +210,57 @@ server.resource(
 );
 
 server.tool(
-  "retrieveContent",
-  `Retrieve content from Graphlit knowledge base.
+  "retrieveContentSources",
+  `Retrieve relevant text chunks of content from Graphlit knowledge base.
    Accepts a search prompt, optional recency filter (defaults to all time), and optional content type and file type filters.
+   Also accepts optional feed and collection identifiers to filter content by.
    Prompt should be optimized for vector search, via text embeddings. Rewrite prompt as appropriate for higher relevance to search results.
-   Returns the content sources in XML format, including metadata and Markdown text.`,
+   Returns the content sources, including content metadata (in XML) and text chunk (in Markdown).`,
   { 
     prompt: z.string().describe("Search prompt for content retrieval."),
     inLast: z.string().optional().describe("Recency filter for content 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
     contentType: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."),
-    fileType: z.nativeEnum(FileTypes).optional().describe("File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video.")
+    fileType: z.nativeEnum(FileTypes).optional().describe("File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video."),
+    feeds: z.array(z.string()).optional().describe("Feed identifiers to filter content by, optional."),
+    collections: z.array(z.string()).optional().describe("Collection identifiers to filter content by, optional.")
   },
-  async ({ prompt, contentType, fileType, inLast }) => {
+  async ({ prompt, contentType, fileType, inLast, feeds, collections }) => {
     const client = new Graphlit();
 
     try {
-      const filter: ContentFilter = { inLast: inLast, types: contentType ? [contentType] : null, fileTypes: fileType ? [fileType] : null};
-
-      const response = await client.retrieveSources(prompt, filter, undefined, { type: RetrievalStrategyTypes.Section, disableFallback: true }, { serviceType: RerankingModelServiceTypes.Cohere });
-      
-      const results = response.retrieveSources?.results || [];
-      const xml = formatResultsToXML(results.filter(result => result !== null));
-      
-      return {
-        content: [{
-          type: "text",
-          text: xml
-        }]
+      const filter: ContentFilter = { 
+        feeds: feeds?.map(feed => ({ id: feed })),
+        collections: collections?.map(collection => ({ id: collection })),
+        inLast: inLast, 
+        types: contentType ? [contentType] : null, 
+        fileTypes: fileType ? [fileType] : null
       };
-    } catch (err: unknown) {
-      const error = err as Error;
+
+      const response = await client.retrieveSources(prompt, filter, undefined, { type: RetrievalStrategyTypes.Chunk, disableFallback: true }, { serviceType: RerankingModelServiceTypes.Cohere });
+      
+      const sources = response.retrieveSources?.results || [];
+      
       return {
-        content: [{
-          type: "text",
-          text: `Error: ${error.message}`
-        }],
-        isError: true
-      };
-    }
-  }
-);
-
-server.tool(
-  "queryFeeds",
-  `Query feeds by name and/or feed type.
-   Returns the feed name, identifier and other feed properties.`,
-  { 
-    name: z.string().optional().describe("Feed name."),
-    feedType: z.nativeEnum(FeedTypes).optional().describe("Feed type filter, optional. One of: Discord, Email, Intercom, Issue, MicrosoftTeams, Notion, Reddit, Rss, Search, Site, Slack, Web, YouTube, Zendesk.")
-  },
-  async ({ name, feedType }) => {
-    const client = new Graphlit();
-
-    try {
-      const filter : FeedFilter = { name: name, types: feedType ? [feedType] : null };
-
-      const response = await client.queryFeeds(filter);
-
-      return {
-        content: [{
-          type: "text",
-          text: JSON.stringify(response.feeds?.results, null, 2)
-        }]
+        content: sources
+          .filter(source => source !== null)
+          .map(source => ({
+            type: "resource",
+            resource: {
+              uri: `contents://${source.content?.id}`,
+              mimeType: "application/json",
+              text: JSON.stringify({
+                content: { id: source.content?.id },
+                type: source.type,
+                pageNumber: source.pageNumber,
+                frameNumber: source.frameNumber,
+                startTime: source.startTime,
+                endTime: source.endTime,
+                relevance: source.relevance,
+                metadata: source.metadata,
+                text: source.text
+              }, null, 2)
+            }
+          }))
       };
     } catch (err: unknown) {
       const error = err as Error;
@@ -1747,30 +1860,6 @@ runServer().catch((error) => {
   
   process.exit(1);
 });
-
-function formatResultsToXML(results: Array<Record<string, any>>): string {
-  const xmlParts: string[] = [];
-  xmlParts.push('<results>');
-
-  results.forEach((result) => {
-    let attributes = '';
-    Object.keys(result).forEach((key) => {
-      if (key === 'metadata') return;
-      if (key === 'text') return;
-      if (key === 'content' || key === '__typename') return;
-      if (result[key] === null) return;
-      const kebabKey = key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-      attributes += ` ${kebabKey}="${result[key]}"`;
-    });
-    const metadata = result.metadata || '';
-    const text = result.text || '';
-    xmlParts.push(`  <result${attributes}>\n${metadata}\n${text}\n</result>`);
-  });
-  
-  xmlParts.push('</results>');
-  
-  return xmlParts.join('\n');
-}
 
 function formatContent(response: GetContentQuery): string {
   const results: string[] = [];
