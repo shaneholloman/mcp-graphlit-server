@@ -7,6 +7,8 @@
 
 The Model Context Protocol (MCP) Server enables integration between MCP clients and the Graphlit service. This document outlines the setup process and provides a basic example of using the client.
 
+Ingest anything from Slack to Gmail to podcast feeds, in addition to web crawling, into a Graphlit project - and then retrieve relevant contents from the MCP client.
+
 ## Prerequisites
 
 Before you begin, ensure you have the following:
