@@ -15,7 +15,9 @@ import {
   GetContentQuery, 
   RerankingModelServiceTypes, 
   RetrievalStrategyTypes, 
-  SharePointAuthenticationTypes 
+  SharePointAuthenticationTypes, 
+  FeedFilter,
+  FileTypes
 } from "graphlit-client/dist/generated/graphql-types.js";
 
 const server = new McpServer({
@@ -26,19 +28,20 @@ const server = new McpServer({
 server.tool(
   "retrieveContent",
   `Retrieve content from Graphlit knowledge base.
-   Accepts a search prompt, optional recency filter (defaults to last 30 days), and optional content type filter.
+   Accepts a search prompt, optional recency filter (defaults to last 30 days), and optional content type and file type filters.
    Prompt should be optimized for vector search, via text embeddings. Rewrite prompt as appropriate for higher relevance to search results.
    Returns the content sources in XML format, including metadata and Markdown text.`,
   { 
     prompt: z.string().describe("Search prompt for content retrieval."),
     inLast: z.string().optional().default("P30D").describe("Recency filter for content 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
-    contentType: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text.")
+    contentType: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."),
+    fileType: z.nativeEnum(FileTypes).optional().describe("File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video.")
   },
-  async ({ prompt, contentType, inLast }) => {
+  async ({ prompt, contentType, fileType, inLast }) => {
     const client = new Graphlit();
 
     try {
-      const filter: ContentFilter = { inLast: inLast, types: contentType ? [contentType] : null };
+      const filter: ContentFilter = { inLast: inLast, types: contentType ? [contentType] : null, fileTypes: fileType ? [fileType] : null};
 
       const response = await client.retrieveSources(prompt, filter, undefined, { type: RetrievalStrategyTypes.Section }, { serviceType: RerankingModelServiceTypes.Cohere });
       
@@ -64,10 +67,40 @@ server.tool(
   }
 );
 
-//
-// TODO: add queryFeeds tool
-// query feeds by name and/or feed type, return feed identifiers
-//
+server.tool(
+  "queryFeeds",
+  `Query feeds by name and/or feed type.
+   Returns the feed name, identifier and other feed properties.`,
+  { 
+    name: z.string().optional().describe("Feed name."),
+    feedType: z.nativeEnum(FeedTypes).optional().describe("Feed type filter, optional. One of: Discord, Email, Intercom, Issue, MicrosoftTeams, Notion, Reddit, Rss, Search, Site, Slack, Web, YouTube, Zendesk.")
+  },
+  async ({ name, feedType }) => {
+    const client = new Graphlit();
+
+    try {
+      const filter : FeedFilter = { name: name, types: feedType ? [feedType] : null };
+
+      const response = await client.queryFeeds(filter);
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(response.feeds?.results, null, 2)
+        }]
+      };
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
 
 server.tool(
   "deleteFeed",
