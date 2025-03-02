@@ -27,14 +27,12 @@ server.tool(
   "retrieveContent",
   `Retrieve content from Graphlit knowledge base.
    Accepts a search prompt, optional recency filter (defaults to last 30 days), and optional content type filter.
-   Content types: Email, Event, File, Issue, Message, Page, Post, Text.
-   Format for 'inLast' should be ISO 8601: for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly.
    Prompt should be optimized for vector search, via text embeddings. Rewrite prompt as appropriate for higher relevance to search results.
    Returns the content sources in XML format, including metadata and Markdown text.`,
   { 
-    prompt: z.string(),
-    inLast: z.string().optional().default("P30D"),
-    contentType: z.nativeEnum(ContentTypes).optional()
+    prompt: z.string().describe("Search prompt for content retrieval."),
+    inLast: z.string().optional().default("P30D").describe("Recency filter for content 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
+    contentType: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text.")
   },
   async ({ prompt, contentType, inLast }) => {
     const client = new Graphlit();
@@ -227,7 +225,7 @@ server.tool(
   { 
     libraryId: z.string(),
     folderId: z.string().optional(),
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
   },
   async ({ libraryId, folderId, readLimit }) => {
     const client = new Graphlit();
@@ -302,7 +300,7 @@ server.tool(
    Accepts an optional read limit for the number of files to ingest.
    Executes asynchonously and returns the feed identifier.`,
   { 
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
   },
   async ({ readLimit }) => {
     const client = new Graphlit();
@@ -374,7 +372,7 @@ server.tool(
    Accepts an optional read limit for the number of files to ingest.
    Executes asynchonously and returns the feed identifier.`,
   { 
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
   },
   async ({ readLimit }) => {
     const client = new Graphlit();
@@ -448,7 +446,7 @@ server.tool(
    Executes asynchonously and returns the feed identifier.`,
   { 
     path: z.string().optional(),
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
   },
   async ({ path, readLimit }) => {
     const client = new Graphlit();
@@ -524,7 +522,7 @@ server.tool(
    Executes asynchonously and returns the feed identifier.`,
   { 
     folderId: z.string().optional().default("0"),
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
   },
   async ({ folderId, readLimit }) => {
     const client = new Graphlit();
@@ -597,7 +595,7 @@ server.tool(
     Accepts an optional read limit for the number of messages to ingest.
     Executes asynchonously and returns the feed identifier.`,
   { 
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of pages to ingest, optional. Defaults to 100.")
   },
   async ({ readLimit }) => {
     const client = new Graphlit();
@@ -653,7 +651,7 @@ server.tool(
     Executes asynchonously and returns the feed identifier.`,
   { 
     channelName: z.string(),
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of messages to ingest, optional. Defaults to 100.")
   },
   async ({ channelName, readLimit }) => {
     const client = new Graphlit();
@@ -704,7 +702,7 @@ server.tool(
     Executes asynchonously and returns the feed identifier.`,
   { 
     channelName: z.string(),
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of messages to ingest, optional. Defaults to 100.")
   },
   async ({ channelName, readLimit }) => {
     const client = new Graphlit();
@@ -755,7 +753,7 @@ server.tool(
     Executes asynchonously and returns the feed identifier.`,
   { 
     subredditName: z.string(),
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of posts to ingest, optional. Defaults to 100.")
   },
   async ({ subredditName, readLimit }) => {
     const client = new Graphlit();
@@ -796,7 +794,7 @@ server.tool(
    Accepts an optional read limit for the number of emails to ingest.
    Executes asynchonously and returns the feed identifier.`,
   { 
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of emails to ingest, optional. Defaults to 100.")
   },
   async ({ readLimit }) => {
     const client = new Graphlit();
@@ -863,7 +861,7 @@ server.tool(
    Executes asynchonously and returns the feed identifier.`,
   { 
     projectName: z.string(),
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of issues to ingest, optional. Defaults to 100.")
   },
   async ({ projectName, readLimit }) => {
     const client = new Graphlit();
@@ -918,7 +916,7 @@ server.tool(
   { 
     repositoryName: z.string(),
     repositoryOwner: z.string(),
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of issues to ingest, optional. Defaults to 100.")
   },
   async ({ repositoryName, repositoryOwner, readLimit }) => {
     const client = new Graphlit();
@@ -973,7 +971,7 @@ server.tool(
   { 
     url: z.string(),
     projectName: z.string(),
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of issues to ingest, optional. Defaults to 100.")
   },
   async ({ url, projectName, readLimit }) => {
     const client = new Graphlit();
@@ -1035,7 +1033,7 @@ server.tool(
    Executes asynchonously and returns the feed identifier.`,
   { 
     url: z.string(),
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of web pages to ingest, optional. Defaults to 100.")
   },
   async ({ url, readLimit }) => {
     const client = new Graphlit();
@@ -1195,7 +1193,7 @@ server.tool(
    Executes asynchonously and returns the feed identifier.`,
   { 
     url: z.string(),
-    readLimit: z.number().optional()
+    readLimit: z.number().optional().describe("Number of issues to posts, optional. Defaults to 25.")
   },
   async ({ url, readLimit }) => {
     const client = new Graphlit();
@@ -1206,7 +1204,7 @@ server.tool(
         type: FeedTypes.Rss,
         rss: {
           uri: url,
-          readLimit: readLimit || 10
+          readLimit: readLimit || 25
         }
       });
 
