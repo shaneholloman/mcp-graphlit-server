@@ -64,6 +64,78 @@ server.tool(
   }
 );
 
+//
+// TODO: add queryFeeds tool
+// query feeds by name and/or feed type, return feed identifiers
+//
+
+server.tool(
+  "deleteFeed",
+  `Delete a feed and all of its ingested content.
+   Accepts a feed identifier which was returned from one of the ingestion tools, like ingestGoogleDriveFiles.
+   Content deletion will happen asynchronously.
+   Returns the feed identifier and feed state, i.e. Deleted.`,
+  { 
+    id: z.string().describe("Feed identifier."),
+  },
+  async ({ id}) => {
+    const client = new Graphlit();
+
+    try {
+      const response = await client.deleteFeed(id);
+            
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(response.deleteFeed, null, 2)
+        }]
+      };
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "isFeedDone",
+  `Check if an asynchronous feed has completed ingesting all the available content.
+   Accepts a feed identifier which was returned from one of the ingestion tools, like ingestGoogleDriveFiles.
+   Returns whether the feed is done or not.`,
+  { 
+    id: z.string().describe("Feed identifier."),
+  },
+  async ({ id}) => {
+    const client = new Graphlit();
+
+    try {
+      const response = await client.isFeedDone(id);
+            
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ done: response.isFeedDone?.result }, null, 2)
+        }]
+      };
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
 server.tool(
   "listMicrosoftTeamsTeams",
   `Lists available Microsoft Teams teams.
@@ -704,6 +776,7 @@ server.tool(
   "ingestGitHubFiles",
   `Ingests files from GitHub repository into Graphlit knowledge base.
    Accepts GitHub repository owner and repository name and an optional read limit for the number of files to ingest.
+   For example, for GitHub repository (https://github.com/openai/tiktoken), 'openai' is the repository owner, and 'tiktoken' is the repository name.
    Executes asynchonously and returns the feed identifier.`,
   { 
     repositoryName: z.string().describe("GitHub repository name."),
