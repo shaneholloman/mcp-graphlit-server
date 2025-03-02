@@ -1,4 +1,6 @@
 # Model Context Protocol (MCP) Server for Graphlit Platform
+[![smithery badge](https://smithery.ai/badge/@graphlit/graphlit-mcp-server)](https://smithery.ai/server/@graphlit/graphlit-mcp-server)
+
 ## Overview
 
 The Model Context Protocol (MCP) Server enables integration between MCP clients and the Graphlit service. This document outlines the setup process and provides a basic example of using the client.
@@ -12,12 +14,15 @@ Before you begin, ensure you have the following:
 
 ## Installation
 
-To install the Graphlit MCP Server, use npx:
+### Installing via Smithery
+
+To install graphlit-mcp-server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@graphlit/graphlit-mcp-server):
 
 ```bash
-npx install graphlit-mcp-server
+npx -y @smithery/cli install @graphlit/graphlit-mcp-server --client claude
 ```
 
+### Installing manually for Claude Desktop
 To use the Graphlit MCP Server in Claude Desktop application, use:
 
 ```
@@ -70,6 +75,14 @@ Optionally, you can configure the credentials for data connectors, such as Slack
     }
 }
 ```
+
+### Installing manually via terminal
+To install the Graphlit MCP Server, use npx:
+
+```bash
+npx install graphlit-mcp-server
+```
+
 
 ## Configuration
 
