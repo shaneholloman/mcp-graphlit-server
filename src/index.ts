@@ -3,7 +3,20 @@ import { Graphlit } from "graphlit-client";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { ContentFilter, ContentTypes, FeedServiceTypes, EmailListingTypes, SearchServiceTypes, FeedListingTypes, FeedTypes, NotionTypes, GetContentQuery, RerankingModelServiceTypes, RetrievalStrategyTypes, SharePointAuthenticationTypes } from "graphlit-client/dist/generated/graphql-types.js";
+import { 
+  ContentFilter, 
+  ContentTypes, 
+  FeedServiceTypes, 
+  EmailListingTypes, 
+  SearchServiceTypes, 
+  FeedListingTypes, 
+  FeedTypes, 
+  NotionTypes, 
+  GetContentQuery, 
+  RerankingModelServiceTypes, 
+  RetrievalStrategyTypes, 
+  SharePointAuthenticationTypes 
+} from "graphlit-client/dist/generated/graphql-types.js";
 
 const server = new McpServer({
   name: "Graphlit MCP Server",
@@ -56,7 +69,7 @@ server.tool(
 server.tool(
   "listSlackChannels",
   `Lists available Slack channels.
-    Returns a list of Slack channels, which can be used with ingestSlackMessages to ingest messages into Graphlit knowledge base.`,
+    Returns a list of Slack channels, where the channel name which can be used with ingestSlackMessages to ingest messages into Graphlit knowledge base.`,
   { 
   },
   async ({ }) => {
