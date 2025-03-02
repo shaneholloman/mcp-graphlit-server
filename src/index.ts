@@ -43,7 +43,7 @@ server.tool(
     try {
       const filter: ContentFilter = { inLast: inLast, types: contentType ? [contentType] : null, fileTypes: fileType ? [fileType] : null};
 
-      const response = await client.retrieveSources(prompt, filter, undefined, { type: RetrievalStrategyTypes.Section }, { serviceType: RerankingModelServiceTypes.Cohere });
+      const response = await client.retrieveSources(prompt, filter, undefined, { type: RetrievalStrategyTypes.Section, disableFallback: true }, { serviceType: RerankingModelServiceTypes.Cohere });
       
       const results = response.retrieveSources?.results || [];
       const xml = formatResultsToXML(results.filter(result => result !== null));
