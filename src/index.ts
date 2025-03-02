@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Graphlit } from "graphlit-client";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { 
@@ -19,11 +19,69 @@ import {
   FeedFilter,
   FileTypes
 } from "graphlit-client/dist/generated/graphql-types.js";
+import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
 const server = new McpServer({
   name: "Graphlit MCP Server",
   version: "1.0.0"
 });
+
+server.resource(
+  "contents-list",
+  new ResourceTemplate("contents://", {
+    list: async (extra) => {
+      const client = new Graphlit();
+      
+      try {
+        const response = await client.queryContents();
+        
+        return {
+          resources: (response.contents?.results || [])
+            .filter(content => content !== null)
+            .map(content => ({
+              name: content.name,
+              uri: `contents://${content.id}/markdown`
+            }))
+        };
+      } catch (error) {
+        console.error("Error fetching content list:", error);
+        return { resources: [] };
+      }
+    }
+  }),
+  async (uri, variables) => {
+    return {
+      contents: []
+    };
+  }
+);
+
+server.resource(
+  "content-markdown",
+  new ResourceTemplate("contents://{id}/markdown", { list: undefined }),
+  async (uri: URL, variables) => {
+    const id = variables.id as string;
+    const client = new Graphlit();
+    
+    try {
+      const response = await client.getContent(id);
+      return {
+        contents: [
+          {
+            uri: uri.toString(),
+            text: response.content?.markdown || '',
+            mimeType: 'text/markdown'
+          }
+        ]
+      };
+    } catch (error) {
+      console.error("Error fetching content:", error);
+      return {
+        contents: []
+      };
+    }
+  }
+);
 
 server.tool(
   "retrieveContent",
