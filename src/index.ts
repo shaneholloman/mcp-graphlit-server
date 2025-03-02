@@ -376,6 +376,39 @@ server.tool(
 );
 
 server.tool(
+  "deleteContent",
+  `Delete content.
+   Accepts a content identifier.
+   Returns the content identifier and content state, i.e. Deleted.`,
+  { 
+    id: z.string().describe("Content identifier."),
+  },
+  async ({ id}) => {
+    const client = new Graphlit();
+
+    try {
+      const response = await client.deleteContent(id);
+            
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(response.deleteContent, null, 2)
+        }]
+      };
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
   "isFeedDone",
   `Check if an asynchronous feed has completed ingesting all the available content.
    Accepts a feed identifier which was returned from one of the ingestion tools, like ingestGoogleDriveFiles.
