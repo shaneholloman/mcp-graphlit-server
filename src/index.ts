@@ -701,6 +701,61 @@ server.tool(
 );
 
 server.tool(
+  "ingestGitHubFiles",
+  `Ingests files from GitHub repository into Graphlit knowledge base.
+   Accepts GitHub repository owner and repository name and an optional read limit for the number of files to ingest.
+   Executes asynchonously and returns the feed identifier.`,
+  { 
+    repositoryName: z.string().describe("GitHub repository name."),
+    repositoryOwner: z.string().describe("GitHub repository owner."),
+    readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
+  },
+  async ({ repositoryOwner, repositoryName, readLimit }) => {
+    const client = new Graphlit();
+
+    try {
+      const personalAccessToken = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
+      if (!personalAccessToken) {
+        console.error("Please set GITHUB_PERSONAL_ACCESS_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.createFeed({
+        name: `GitHub`,
+        type: FeedTypes.Site,
+        site: {
+          type: FeedServiceTypes.GitHub,
+          github: {
+            repositoryOwner: repositoryOwner,
+            repositoryName: repositoryName,
+            personalAccessToken: personalAccessToken
+          },
+          isRecursive: true,
+          readLimit: readLimit || 100
+        }
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.createFeed?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
   "ingestNotionPages",
   `Ingests pages from Notion database into Graphlit knowledge base.
     Accepts an optional read limit for the number of messages to ingest.
@@ -1157,8 +1212,8 @@ server.tool(
    For example, for GitHub repository (https://github.com/openai/tiktoken), 'openai' is the repository owner, and 'tiktoken' is the repository name.
    Executes asynchonously and returns the feed identifier.`,
   { 
-    repositoryName: z.string(),
-    repositoryOwner: z.string(),
+    repositoryName: z.string().describe("GitHub repository name."),
+    repositoryOwner: z.string().describe("GitHub repository owner."),
     readLimit: z.number().optional().describe("Number of issues to ingest, optional. Defaults to 100.")
   },
   async ({ repositoryName, repositoryOwner, readLimit }) => {
