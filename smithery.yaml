@@ -1,0 +1,106 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - organizationId
+      - environmentId
+      - jwtSecret
+    properties:
+      organizationId:
+        type: string
+        default: your-organization-id
+        description: Graphlit organization ID
+      environmentId:
+        type: string
+        default: your-environment-id
+        description: Graphlit environment ID
+      jwtSecret:
+        type: string
+        default: your-jwt-secret
+        description: JWT secret for signing tokens
+      slackBotToken:
+        type: string
+        default: ""
+        description: Slack bot token (optional)
+      discordBotToken:
+        type: string
+        default: ""
+        description: Discord bot token (optional)
+      googleEmailRefreshToken:
+        type: string
+        default: ""
+        description: Google Email refresh token (optional)
+      googleEmailClientId:
+        type: string
+        default: ""
+        description: Google Email Client ID (optional)
+      googleEmailClientSecret:
+        type: string
+        default: ""
+        description: Google Email Client Secret (optional)
+      linearApiKey:
+        type: string
+        default: ""
+        description: Linear API Key (optional)
+      githubPersonalAccessToken:
+        type: string
+        default: ""
+        description: GitHub Personal Access Token (optional)
+      jiraEmail:
+        type: string
+        default: ""
+        description: Jira email (optional)
+      jiraToken:
+        type: string
+        default: ""
+        description: Jira token (optional)
+      notionApiKey:
+        type: string
+        default: ""
+        description: Notion API Key (optional)
+      notionDatabaseId:
+        type: string
+        default: ""
+        description: Notion Database ID (optional)
+  commandFunction:
+    # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
+    |-
+    (config) => ({
+      command: 'node',
+      args: ['build/index.js'],
+      env: {
+        GRAPHLIT_ORGANIZATION_ID: config.organizationId,
+        GRAPHLIT_ENVIRONMENT_ID: config.environmentId,
+        GRAPHLIT_JWT_SECRET: config.jwtSecret,
+        SLACK_BOT_TOKEN: config.slackBotToken || '',
+        DISCORD_BOT_TOKEN: config.discordBotToken || '',
+        GOOGLE_EMAIL_REFRESH_TOKEN: config.googleEmailRefreshToken || '',
+        GOOGLE_EMAIL_CLIENT_ID: config.googleEmailClientId || '',
+        GOOGLE_EMAIL_CLIENT_SECRET: config.googleEmailClientSecret || '',
+        LINEAR_API_KEY: config.linearApiKey || '',
+        GITHUB_PERSONAL_ACCESS_TOKEN: config.githubPersonalAccessToken || '',
+        JIRA_EMAIL: config.jiraEmail || '',
+        JIRA_TOKEN: config.jiraToken || '',
+        NOTION_API_KEY: config.notionApiKey || '',
+        NOTION_DATABASE_ID: config.notionDatabaseId || ''
+      }
+    })
+  exampleConfig:
+    organizationId: your-organization-id
+    environmentId: your-environment-id
+    jwtSecret: your-jwt-secret
+    slackBotToken: example-slack-bot-token
+    discordBotToken: example-discord-bot-token
+    googleEmailRefreshToken: example-google-refresh-token
+    googleEmailClientId: example-google-client-id
+    googleEmailClientSecret: example-google-client-secret
+    linearApiKey: example-linear-api-key
+    githubPersonalAccessToken: example-github-pat
+    jiraEmail: example-jira-email
+    jiraToken: example-jira-token
+    notionApiKey: example-notion-api-key
+    notionDatabaseId: example-notion-database-id
