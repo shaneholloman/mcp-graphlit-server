@@ -278,16 +278,20 @@ server.tool(
 server.tool(
   "createCollection",
   `Create a collection.
-   Accepts a collection name.
+   Accepts a collection name, and optional list of content identifiers to add to collection.
    Returns the collection identifier`,
   { 
     name: z.string().describe("Collection name."),
+    contents: z.array(z.string()).optional().describe("Content identifiers to add to collection, optional.")
   },
-  async ({ name}) => {
+  async ({ name, contents }) => {
     const client = new Graphlit();
 
     try {
-      const response = await client.createCollection({ name: name });
+      const response = await client.createCollection({ 
+        name: name, 
+        contents: contents?.map(content => ({ id: content })), 
+      });
             
       return {
         content: [{
