@@ -61,6 +61,8 @@ Optionally, you can configure the credentials for data connectors, such as Slack
                 "GOOGLE_EMAIL_CLIENT_SECRET": "your-google-client-secret",
                 "LINEAR_API_KEY": "your-linear-api-key",
                 "GITHUB_PERSONAL_ACCESS_TOKEN": "your-github-pat",
+                "JIRA_EMAIL": "your-jira-email",
+                "JIRA_TOKEN": "your-jira-token",
                 "NOTION_API_KEY": "your-notion-api-key",
                 "NOTION_DATABASE_ID": "your-notion-database-id"
             }

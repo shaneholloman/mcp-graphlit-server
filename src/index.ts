@@ -3,7 +3,7 @@ import { Graphlit } from "graphlit-client";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { ContentFilter, ContentTypes, FeedServiceTypes, EmailListingTypes, SearchServiceTypes, FeedListingTypes, FeedTypes, NotionTypes, GetContentQuery, RerankingModelServiceTypes, RetrievalStrategyTypes } from "graphlit-client/dist/generated/graphql-types.js";
+import { ContentFilter, ContentTypes, FeedServiceTypes, EmailListingTypes, SearchServiceTypes, FeedListingTypes, FeedTypes, NotionTypes, GetContentQuery, RerankingModelServiceTypes, RetrievalStrategyTypes, SharePointAuthenticationTypes } from "graphlit-client/dist/generated/graphql-types.js";
 
 const server = new McpServer({
   name: "Graphlit MCP Server",
@@ -11,7 +11,7 @@ const server = new McpServer({
 });
 
 server.tool(
-  "retrieve",
+  "retrieveContent",
   `Retrieve content from Graphlit knowledge base.
    Accepts a search prompt, optional recency filter (defaults to last 30 days), and optional content type filter.
    Content types: Email, Event, File, Issue, Message, Page, Post, Text.
@@ -54,7 +54,378 @@ server.tool(
 );
 
 server.tool(
-  "ingestNotion",
+  "listSlackChannels",
+  `Lists available Slack channels.
+    Returns a list of Slack channels, which can be used with ingestSlackMessages to ingest messages into Graphlit knowledge base.`,
+  { 
+  },
+  async ({ }) => {
+    const client = new Graphlit();
+
+    try {
+      const botToken = process.env.SLACK_BOT_TOKEN;
+      if (!botToken) {
+        console.error("Please set SLACK_BOT_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.querySlackChannels({
+        token: botToken
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(response.slackChannels?.results, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "listSharePointLibraries",
+  `Lists available SharePoint libraries.
+   Returns a list of SharePoint libraries, where the selected libraryId can be used with listSharePointFolders to enumerate SharePoint folders in a library.`,
+  { 
+  },
+  async ({ }) => {
+    const client = new Graphlit();
+
+    try {
+      const clientId = process.env.SHAREPOINT_CLIENT_ID;
+      if (!clientId) {
+        console.error("Please set SHAREPOINT_CLIENT_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientSecret = process.env.SHAREPOINT_CLIENT_SECRET;
+      if (!clientSecret) {
+        console.error("Please set SHAREPOINT_CLIENT_SECRET environment variable.");
+        process.exit(1);
+      }
+
+      const refreshToken = process.env.SHAREPOINT_REFRESH_TOKEN;
+      if (!refreshToken) {
+        console.error("Please set SHAREPOINT_REFRESH_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.querySharePointLibraries({
+        authenticationType: SharePointAuthenticationTypes.User,
+        clientId: clientId,
+        clientSecret: clientSecret,
+        refreshToken: refreshToken,
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(response.sharePointLibraries?.results, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "listSharePointFolders",
+  `Lists available SharePoint folders.
+    Returns a list of SharePoint folders, which can be used with ingestSharePointFiles to ingest files into Graphlit knowledge base.`,
+  { 
+    libraryId: z.string()
+  },
+  async ({ libraryId }) => {
+    const client = new Graphlit();
+
+    try {
+      const clientId = process.env.SHAREPOINT_CLIENT_ID;
+      if (!clientId) {
+        console.error("Please set SHAREPOINT_CLIENT_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientSecret = process.env.SHAREPOINT_CLIENT_SECRET;
+      if (!clientSecret) {
+        console.error("Please set SHAREPOINT_CLIENT_SECRET environment variable.");
+        process.exit(1);
+      }
+
+      const refreshToken = process.env.SHAREPOINT_REFRESH_TOKEN;
+      if (!refreshToken) {
+        console.error("Please set SHAREPOINT_REFRESH_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.querySharePointFolders({
+        authenticationType: SharePointAuthenticationTypes.User,
+        clientId: clientId,
+        clientSecret: clientSecret,
+        refreshToken: refreshToken,
+        }, libraryId);
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify(response.sharePointFolders?.results, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "ingestSharePointFiles",
+  `Ingests files from SharePoint library into Graphlit knowledge base.
+   Accepts a SharePoint libraryId and an optional folderId to ingest files from a specific SharePoint folder.
+   Libraries can be enumerated with listSharePointLibraries and library folders with listSharePointFolders.
+   Accepts an optional read limit for the number of files to ingest.
+   Executes asynchonously and returns the feed identifier.`,
+  { 
+    libraryId: z.string(),
+    folderId: z.string().optional(),
+    readLimit: z.number().optional()
+  },
+  async ({ libraryId, folderId, readLimit }) => {
+    const client = new Graphlit();
+
+    try {
+      const accountName = process.env.SHAREPOINT_ACCOUNT_NAME;
+      if (!accountName) {
+        console.error("Please set SHAREPOINT_ACCOUNT_NAME environment variable.");
+        process.exit(1);
+      }
+
+      const clientId = process.env.SHAREPOINT_CLIENT_ID;
+      if (!clientId) {
+        console.error("Please set SHAREPOINT_CLIENT_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientSecret = process.env.SHAREPOINT_CLIENT_SECRET;
+      if (!clientSecret) {
+        console.error("Please set SHAREPOINT_CLIENT_SECRET environment variable.");
+        process.exit(1);
+      }
+
+      const refreshToken = process.env.SHAREPOINT_REFRESH_TOKEN;
+      if (!refreshToken) {
+        console.error("Please set SHAREPOINT_REFRESH_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.createFeed({
+        name: `SharePoint`,
+        type: FeedTypes.Site,
+        site: {
+          type: FeedServiceTypes.SharePoint,
+          sharePoint: {
+            authenticationType: SharePointAuthenticationTypes.User,
+            accountName: accountName,
+            clientId: clientId,
+            clientSecret: clientSecret,
+            refreshToken: refreshToken,
+            libraryId: libraryId,
+            folderId: folderId
+          },
+          readLimit: readLimit || 100
+        }
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.createFeed?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "ingestOneDriveFiles",
+  `Ingests files from OneDrive folder into Graphlit knowledge base.
+   Accepts an optional read limit for the number of files to ingest.
+   Executes asynchonously and returns the feed identifier.`,
+  { 
+    readLimit: z.number().optional()
+  },
+  async ({ readLimit }) => {
+    const client = new Graphlit();
+
+    try {
+      const folderId = process.env.ONEDRIVE_FOLDER_ID;
+      if (!folderId) {
+        console.error("Please set ONEDRIVE_FOLDER_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientId = process.env.ONEDRIVE_CLIENT_ID;
+      if (!clientId) {
+        console.error("Please set ONEDRIVE_CLIENT_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientSecret = process.env.ONEDRIVE_CLIENT_SECRET;
+      if (!clientSecret) {
+        console.error("Please set ONEDRIVE_CLIENT_SECRET environment variable.");
+        process.exit(1);
+      }
+
+      const refreshToken = process.env.ONEDRIVE_REFRESH_TOKEN;
+      if (!refreshToken) {
+        console.error("Please set ONEDRIVE_REFRESH_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.createFeed({
+        name: `OneDrive`,
+        type: FeedTypes.Site,
+        site: {
+          type: FeedServiceTypes.OneDrive,
+          oneDrive: {
+            folderId: folderId,
+            clientId: clientId,
+            clientSecret: clientSecret,
+            refreshToken: refreshToken,
+          },
+          readLimit: readLimit || 100
+        }
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.createFeed?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "ingestGoogleDriveFiles",
+  `Ingests files from Google Drive folder into Graphlit knowledge base.
+   Accepts an optional read limit for the number of files to ingest.
+   Executes asynchonously and returns the feed identifier.`,
+  { 
+    readLimit: z.number().optional()
+  },
+  async ({ readLimit }) => {
+    const client = new Graphlit();
+
+    try {
+      const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+      if (!folderId) {
+        console.error("Please set GOOGLE_DRIVE_FOLDER_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
+      if (!clientId) {
+        console.error("Please set GOOGLE_DRIVE_CLIENT_ID environment variable.");
+        process.exit(1);
+      }
+
+      const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
+      if (!clientSecret) {
+        console.error("Please set GOOGLE_DRIVE_CLIENT_SECRET environment variable.");
+        process.exit(1);
+      }
+
+      const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
+      if (!refreshToken) {
+        console.error("Please set GOOGLE_DRIVE_REFRESH_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.createFeed({
+        name: `Google Drive`,
+        type: FeedTypes.Site,
+        site: {
+          type: FeedServiceTypes.GoogleDrive,
+          googleDrive: {
+            folderId: folderId,
+            clientId: clientId,
+            clientSecret: clientSecret,
+            refreshToken: refreshToken,
+          },
+          readLimit: readLimit || 100
+        }
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.createFeed?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "ingestNotionPages",
   `Ingests pages from Notion database into Graphlit knowledge base.
     Accepts an optional read limit for the number of messages to ingest.
     Executes asynchonously and returns the feed identifier.`,
@@ -109,7 +480,7 @@ server.tool(
 );
 
 server.tool(
-  "ingestSlack",
+  "ingestSlackMessages",
   `Ingests messages from Slack channel into Graphlit knowledge base.
     Accepts Slack channel name and an optional read limit for the number of messages to ingest.
     Executes asynchonously and returns the feed identifier.`,
@@ -160,47 +531,7 @@ server.tool(
 );
 
 server.tool(
-  "listSlackChannels",
-  `Lists available Slack channels.
-    Returns a list of Slack channels, which can be used with ingestSlack to ingest messages into Graphlit knowledge base.`,
-  { 
-  },
-  async ({ }) => {
-    const client = new Graphlit();
-
-    try {
-      const botToken = process.env.SLACK_BOT_TOKEN;
-      if (!botToken) {
-        console.error("Please set SLACK_BOT_TOKEN environment variable.");
-        process.exit(1);
-      }
-
-      const response = await client.querySlackChannels({
-        token: botToken
-      });
-
-      return {
-        content: [{
-          type: "text",
-          text: JSON.stringify(response.slackChannels?.results, null, 2)
-        }]
-      };
-      
-    } catch (err: unknown) {
-      const error = err as Error;
-      return {
-        content: [{
-          type: "text",
-          text: `Error: ${error.message}`
-        }],
-        isError: true
-      };
-    }
-  }
-);
-
-server.tool(
-  "ingestDiscord",
+  "ingestDiscordMessages",
   `Ingests messages from Discord channel into Graphlit knowledge base.
     Accepts Discord channel name and an optional read limit for the number of messages to ingest.
     Executes asynchonously and returns the feed identifier.`,
@@ -251,7 +582,7 @@ server.tool(
 );
 
 server.tool(
-  "ingestReddit",
+  "ingestRedditPosts",
   `Ingests posts from Reddit subreddit into Graphlit knowledge base.
     Accepts a subreddit name and an optional read limit for the number of posts to ingest.
     Executes asynchonously and returns the feed identifier.`,
@@ -441,6 +772,68 @@ server.tool(
             repositoryName: repositoryName,
             repositoryOwner: repositoryOwner,
             personalAccessToken: personalAccessToken
+          },
+          includeAttachments: true,
+          readLimit: readLimit || 100
+        }
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.createFeed?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "ingestJiraIssues",
+  `Ingests issues from Atlassian Jira repository into Graphlit knowledge base.
+   Accepts Atlassian Jira server URL and project name, and an optional read limit for the number of issues to ingest.
+   Executes asynchonously and returns the feed identifier.`,
+  { 
+    url: z.string(),
+    projectName: z.string(),
+    readLimit: z.number().optional()
+  },
+  async ({ url, projectName, readLimit }) => {
+    const client = new Graphlit();
+
+    try {
+      const email = process.env.JIRA_EMAIL;
+      if (!email) {
+        console.error("Please set JIRA_EMAIL environment variable.");
+        process.exit(1);
+      }
+
+      const token = process.env.JIRA_TOKEN;
+      if (!token) {
+        console.error("Please set JIRA_TOKEN environment variable.");
+        process.exit(1);
+      }
+
+      const response = await client.createFeed({
+        name: `Jira [${projectName}]`,
+        type: FeedTypes.Issue,
+        issue: {
+          type: FeedServiceTypes.AtlassianJira,
+          jira: {
+            uri: url,
+            project: projectName,
+            email: email,
+            token: token,
           },
           includeAttachments: true,
           readLimit: readLimit || 100
