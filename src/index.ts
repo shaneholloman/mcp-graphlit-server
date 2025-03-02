@@ -25,7 +25,7 @@ const server = new McpServer({
 });
 
 server.resource(
-  "feeds-list",
+  "Feeds: Returns list of feed resources.",
   new ResourceTemplate("feeds://", {
     list: async (extra) => {
       const client = new Graphlit();
@@ -55,7 +55,7 @@ server.resource(
 );
 
 server.resource(
-  "feed",
+  "Feed: Returns feed metadata.",
   new ResourceTemplate("feeds://{id}", { list: undefined }),
   async (uri: URL, variables) => {
     const id = variables.id as string;
@@ -88,7 +88,7 @@ server.resource(
 );
 
 server.resource(
-  "collections-list",
+  "Collections: Returns list of collection resources.",
   new ResourceTemplate("collections://", {
     list: async (extra) => {
       const client = new Graphlit();
@@ -118,7 +118,7 @@ server.resource(
 );
 
 server.resource(
-  "collection",
+  "Collection: Returns collection metadata and list of content resources.",
   new ResourceTemplate("collections://{id}", { list: undefined }),
   async (uri: URL, variables) => {
     const id = variables.id as string;
@@ -151,7 +151,7 @@ server.resource(
 );
 
 server.resource(
-  "contents-list",
+  "Contents list: Returns list of content resources.",
   new ResourceTemplate("contents://", {
     list: async (extra) => {
       const client = new Graphlit();
@@ -183,7 +183,7 @@ server.resource(
 );
 
 server.resource(
-  "content-formatted",
+  "Content: Returns content metadata and complete Markdown text.",
   new ResourceTemplate("contents://{id}", { list: undefined }),
   async (uri: URL, variables) => {
     const id = variables.id as string;
