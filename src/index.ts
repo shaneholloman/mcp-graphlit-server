@@ -313,6 +313,80 @@ server.tool(
 );
 
 server.tool(
+  "addContentsToCollection",
+  `Add contents to a collection.
+   Accepts a collection identifier and a list of content identifiers to add to collection.
+   Returns the collection identifier.`,
+  { 
+    id: z.string().describe("Collection identifier."),
+    contents: z.array(z.string()).describe("Content identifiers to add to collection.")
+  },
+  async ({ id, contents }) => {
+    const client = new Graphlit();
+
+    try {
+      const response = await client.addContentsToCollections(
+        contents?.map(content => ({ id: content })),
+        [{ id: id }]
+      );
+            
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: id }, null, 2)
+        }]
+      };
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "removeContentsFromCollection",
+  `Remove contents from collection.
+   Accepts a collection identifier and a list of content identifiers to remove from collection.
+   Returns the collection identifier.`,
+  { 
+    id: z.string().describe("Collection identifier."),
+    contents: z.array(z.string()).describe("Content identifiers to remove from collection.")
+  },
+  async ({ id, contents }) => {
+    const client = new Graphlit();
+
+    try {
+      const response = await client.removeContentsFromCollection(
+        contents?.map(content => ({ id: content })),
+        { id: id }
+      );
+            
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.removeContentsFromCollection?.id }, null, 2)
+        }]
+      };
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
   "deleteCollection",
   `Delete a collection. Does *not* delete the content in the collection.
    Accepts a collection identifier.
