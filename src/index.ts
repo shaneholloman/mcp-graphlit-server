@@ -829,7 +829,7 @@ server.tool(
    Accepts a SharePoint libraryId and an optional folderId to ingest files from a specific SharePoint folder.
    Libraries can be enumerated with listSharePointLibraries and library folders with listSharePointFolders.
    Accepts an optional read limit for the number of files to ingest.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     libraryId: z.string(),
     folderId: z.string().optional(),
@@ -906,7 +906,7 @@ server.tool(
   "ingestOneDriveFiles",
   `Ingests files from OneDrive folder into Graphlit knowledge base.
    Accepts an optional read limit for the number of files to ingest.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
   },
@@ -978,7 +978,7 @@ server.tool(
   "ingestGoogleDriveFiles",
   `Ingests files from Google Drive folder into Graphlit knowledge base.
    Accepts an optional read limit for the number of files to ingest.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
   },
@@ -1051,7 +1051,7 @@ server.tool(
   `Ingests files from Dropbox folder into Graphlit knowledge base.
    Accepts optional relative path to Dropbox folder (i.e. /Pictures), and an optional read limit for the number of files to ingest.
    If no path provided, ingests files from root Dropbox folder.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     path: z.string().optional(),
     readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
@@ -1127,7 +1127,7 @@ server.tool(
    Accepts optional Box folder identifier, and an optional read limit for the number of files to ingest.
    If no folder identifier provided, ingests files from root Box folder (i.e. "0").
    Folder identifier can be inferred from Box URL. https://app.box.com/folder/123456 -> folder identifier is "123456".
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     folderId: z.string().optional().default("0"),
     readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
@@ -1202,7 +1202,7 @@ server.tool(
   `Ingests files from GitHub repository into Graphlit knowledge base.
    Accepts GitHub repository owner and repository name and an optional read limit for the number of files to ingest.
    For example, for GitHub repository (https://github.com/openai/tiktoken), 'openai' is the repository owner, and 'tiktoken' is the repository name.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     repositoryName: z.string().describe("GitHub repository name."),
     repositoryOwner: z.string().describe("GitHub repository owner."),
@@ -1257,7 +1257,7 @@ server.tool(
   "ingestNotionPages",
   `Ingests pages from Notion database into Graphlit knowledge base.
     Accepts an optional read limit for the number of messages to ingest.
-    Executes asynchonously and returns the feed identifier.`,
+    Executes asynchronously and returns the feed identifier.`,
   { 
     readLimit: z.number().optional().describe("Number of pages to ingest, optional. Defaults to 100.")
   },
@@ -1312,7 +1312,7 @@ server.tool(
   "ingestMicrosoftTeamsMessages",
   `Ingests messages from Microsoft Teams channel into Graphlit knowledge base.
    Accepts Microsoft Teams team identifier and channel identifier, and an optional read limit for the number of messages to ingest.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     teamId: z.string(),
     channelId: z.string(),
@@ -1378,7 +1378,7 @@ server.tool(
   "ingestSlackMessages",
   `Ingests messages from Slack channel into Graphlit knowledge base.
     Accepts Slack channel name and an optional read limit for the number of messages to ingest.
-    Executes asynchonously and returns the feed identifier.`,
+    Executes asynchronously and returns the feed identifier.`,
   { 
     channelName: z.string(),
     readLimit: z.number().optional().describe("Number of messages to ingest, optional. Defaults to 100.")
@@ -1429,7 +1429,7 @@ server.tool(
   "ingestDiscordMessages",
   `Ingests messages from Discord channel into Graphlit knowledge base.
     Accepts Discord channel name and an optional read limit for the number of messages to ingest.
-    Executes asynchonously and returns the feed identifier.`,
+    Executes asynchronously and returns the feed identifier.`,
   { 
     channelName: z.string(),
     readLimit: z.number().optional().describe("Number of messages to ingest, optional. Defaults to 100.")
@@ -1480,7 +1480,7 @@ server.tool(
   "ingestRedditPosts",
   `Ingests posts from Reddit subreddit into Graphlit knowledge base.
     Accepts a subreddit name and an optional read limit for the number of posts to ingest.
-    Executes asynchonously and returns the feed identifier.`,
+    Executes asynchronously and returns the feed identifier.`,
   { 
     subredditName: z.string(),
     readLimit: z.number().optional().describe("Number of posts to ingest, optional. Defaults to 100.")
@@ -1522,7 +1522,7 @@ server.tool(
   "ingestGoogleEmail",
   `Ingests emails from Google Email account into Graphlit knowledge base.
    Accepts an optional read limit for the number of emails to ingest.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     readLimit: z.number().optional().describe("Number of emails to ingest, optional. Defaults to 100.")
   },
@@ -1588,7 +1588,7 @@ server.tool(
   "ingestMicrosoftEmail",
   `Ingests emails from Microsoft Email account into Graphlit knowledge base.
    Accepts an optional read limit for the number of emails to ingest.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     readLimit: z.number().optional().describe("Number of emails to ingest, optional. Defaults to 100.")
   },
@@ -1654,7 +1654,7 @@ server.tool(
   "ingestLinearIssues",
   `Ingests issues from Linear project into Graphlit knowledge base.
    Accepts Linear project name and an optional read limit for the number of issues to ingest.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     projectName: z.string(),
     readLimit: z.number().optional().describe("Number of issues to ingest, optional. Defaults to 100.")
@@ -1708,7 +1708,7 @@ server.tool(
   `Ingests issues from GitHub repository into Graphlit knowledge base.
    Accepts GitHub repository owner and repository name and an optional read limit for the number of issues to ingest.
    For example, for GitHub repository (https://github.com/openai/tiktoken), 'openai' is the repository owner, and 'tiktoken' is the repository name.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     repositoryName: z.string().describe("GitHub repository name."),
     repositoryOwner: z.string().describe("GitHub repository owner."),
@@ -1763,7 +1763,7 @@ server.tool(
   "ingestJiraIssues",
   `Ingests issues from Atlassian Jira repository into Graphlit knowledge base.
    Accepts Atlassian Jira server URL and project name, and an optional read limit for the number of issues to ingest.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     url: z.string(),
     projectName: z.string(),
@@ -1826,7 +1826,7 @@ server.tool(
   `Crawls web pages from web site into Graphlit knowledge base.
    Accepts a URL and an optional read limit for the number of pages to crawl.
    Uses sitemap.xml to discover pages to be crawled from website.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     url: z.string(),
     readLimit: z.number().optional().describe("Number of web pages to ingest, optional. Defaults to 100.")
@@ -1943,7 +1943,7 @@ server.tool(
   `Ingests posts from RSS feed into Graphlit knowledge base.
    For podcast RSS feeds, audio will be downloaded, transcribed and ingested into Graphlit knowledge base.
    Accepts RSS URL and an optional read limit for the number of posts to read.
-   Executes asynchonously and returns the feed identifier.`,
+   Executes asynchronously and returns the feed identifier.`,
   { 
     url: z.string(),
     readLimit: z.number().optional().describe("Number of issues to posts, optional. Defaults to 25.")
@@ -1985,7 +1985,7 @@ server.tool(
   "ingestUrl",
   `Ingests content from URL into Graphlit knowledge base.
    Can scrape web pages, and can ingest individual Word documents, PDFs, audio recordings, videos, images, or any other unstructured data.
-   Executes asynchonously and returns the content identifier.`,
+   Executes asynchronously and returns the content identifier.`,
   { 
     url: z.string()
   },
@@ -2019,7 +2019,8 @@ server.tool(
   "ingestText",
   `Ingests text as content into Graphlit knowledge base.
    Accepts a name for the content object, the text itself, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
-   Executes asynchonously and returns the content identifier.`,
+   Can use for storing long-term textual memories as content resources, which can be later searched or retrieved.
+   Executes *synchronously* and returns the content identifier.`,
   { 
     name: z.string(),
     text: z.string(),
@@ -2029,7 +2030,7 @@ server.tool(
     const client = new Graphlit();
 
     try {
-      const response = await client.ingestText(name, text, textType);
+      const response = await client.ingestText(name, text, textType, undefined, undefined, true);
 
       return {
         content: [{
@@ -2054,7 +2055,7 @@ server.tool(
 server.tool(
   "screenshotPage",
   `Screenshots web page from URL.
-   Executes asynchonously and returns the content identifier.`,
+   Executes asynchronously and returns the content identifier.`,
   { 
     url: z.string()
   },
