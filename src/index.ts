@@ -16,7 +16,8 @@ import {
   RerankingModelServiceTypes, 
   RetrievalStrategyTypes, 
   SharePointAuthenticationTypes, 
-  FileTypes
+  FileTypes,
+  TextTypes
 } from "graphlit-client/dist/generated/graphql-types.js";
 
 const server = new McpServer({
@@ -1996,6 +1997,42 @@ server.tool(
         content: [{
           type: "text",
           text: JSON.stringify({ id: response.ingestUri?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "ingestText",
+  `Ingests text as content into Graphlit knowledge base.
+   Accepts a name for the content object, the text itself, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
+   Executes asynchonously and returns the content identifier.`,
+  { 
+    name: z.string(),
+    text: z.string(),
+    textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown)
+  },
+  async ({ name, text, textType }) => {
+    const client = new Graphlit();
+
+    try {
+      const response = await client.ingestText(name, text, textType);
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.ingestText?.id }, null, 2)
         }]
       };
       
