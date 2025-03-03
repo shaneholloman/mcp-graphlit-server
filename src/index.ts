@@ -73,7 +73,11 @@ server.resource(
               id: response.feed?.id, 
               name: response.feed?.name,
               type: response.feed?.type,
+              readCount: response.feed?.readCount,
+              creationDate: response.feed?.creationDate,
+              lastReadDate: response.feed?.lastReadDate,
               state: response.feed?.state,
+              error: response.feed?.error
             }, null, 2),
             mimeType: 'application/json'
           }
