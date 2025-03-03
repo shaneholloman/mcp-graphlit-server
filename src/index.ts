@@ -2019,7 +2019,7 @@ server.tool(
   "ingestText",
   `Ingests text as content into Graphlit knowledge base.
    Accepts a name for the content object, the text itself, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
-   Can use for storing long-term textual memories as content resources, which can be later searched or retrieved.
+   Can use for storing long-term textual memories or the output from LLM or other tools as content resources, which can be later searched or retrieved.
    Executes *synchronously* and returns the content identifier.`,
   { 
     name: z.string(),
