@@ -17,7 +17,8 @@ import {
   RetrievalStrategyTypes, 
   SharePointAuthenticationTypes, 
   FileTypes,
-  TextTypes
+  TextTypes,
+  SearchTypes
 } from "graphlit-client/dist/generated/graphql-types.js";
 
 const server = new McpServer({
@@ -234,6 +235,7 @@ server.tool(
 
     try {
       const filter: ContentFilter = { 
+        searchType: SearchTypes.Hybrid,
         feeds: feeds?.map(feed => ({ id: feed })),
         collections: collections?.map(collection => ({ id: collection })),
         inLast: inLast, 
@@ -241,7 +243,13 @@ server.tool(
         fileTypes: fileType ? [fileType] : null
       };
 
-      const response = await client.retrieveSources(prompt, filter, undefined, { type: RetrievalStrategyTypes.Chunk, disableFallback: true }, { serviceType: RerankingModelServiceTypes.Cohere });
+      const response = await client.retrieveSources(prompt, filter, undefined, { 
+        type: RetrievalStrategyTypes.Chunk, 
+        disableFallback: true 
+      }, 
+      { 
+        serviceType: RerankingModelServiceTypes.Cohere 
+      });
       
       const sources = response.retrieveSources?.results || [];
       
