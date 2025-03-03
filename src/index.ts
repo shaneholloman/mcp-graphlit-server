@@ -211,7 +211,7 @@ server.resource(
 
 server.tool(
   "retrieveSources",
-  `Retrieve relevant content sources from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - use content resource instead.
+  `Retrieve relevant content sources from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
    Accepts a search prompt, optional recency filter (defaults to all time), and optional content type and file type filters.
    Also accepts optional feed and collection identifiers to filter content by.
    Prompt should be optimized for vector search, via text embeddings. Rewrite prompt as appropriate for higher relevance to search results.
