@@ -1904,6 +1904,7 @@ server.tool(
   `Performs web search based on search query. Format the search query as what would be entered into a Google search.
    Does *not* ingest pages into Graphlit knowledge base.
    Accepts search query as string, and optional search service type.
+   Can search for web pages, podcasts, videos, images, news, or shopping.
    Search service types: Tavily, Exa. Defaults to Tavily.
    Returns URL, title and relevant Markdown text from resulting web pages.`,
   { 
@@ -1982,7 +1983,7 @@ server.tool(
 server.tool(
   "ingestUrl",
   `Ingests content from URL into Graphlit knowledge base.
-   Can ingest individual Word documents, PDFs, audio recordings, videos, images, or any other unstructured data.
+   Can scrape web pages, and can ingest individual Word documents, PDFs, audio recordings, videos, images, or any other unstructured data.
    Executes asynchonously and returns the content identifier.`,
   { 
     url: z.string()
