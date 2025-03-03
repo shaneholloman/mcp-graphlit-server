@@ -9,6 +9,10 @@ The Model Context Protocol (MCP) Server enables integration between MCP clients 
 
 Ingest anything from Slack to Gmail to podcast feeds, in addition to web crawling, into a Graphlit project - and then retrieve relevant contents from the MCP client.
 
+Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdown upon ingestion. 
+
+Audio and video files will be transcribed upon ingestion.
+
 ## Tools
 
 ### Retrieval
