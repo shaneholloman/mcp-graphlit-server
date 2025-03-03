@@ -210,12 +210,12 @@ server.resource(
 );
 
 server.tool(
-  "retrieveSources",
-  `Retrieve relevant text chunks of content from Graphlit knowledge base.
+  "retrieveContents",
+  `Retrieve relevant contents from Graphlit knowledge base.
    Accepts a search prompt, optional recency filter (defaults to all time), and optional content type and file type filters.
    Also accepts optional feed and collection identifiers to filter content by.
    Prompt should be optimized for vector search, via text embeddings. Rewrite prompt as appropriate for higher relevance to search results.
-   Returns the ranked content sources, including content metadata (in XML) and text chunk (in Markdown).`,
+   Returns the ranked content resources. Request the content resource to get the complete Markdown text.`,
   { 
     prompt: z.string().describe("Search prompt for content retrieval."),
     inLast: z.string().optional().describe("Recency filter for content 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
