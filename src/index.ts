@@ -244,37 +244,14 @@ server.tool(
         content: sources
           .filter(source => source !== null)
           .map(source => ({
-            type: "text",
-            mimeType: "text/markdown",
-            text: source.text
-          }))
-      };
-
-      // REVIEW: Goose MCP client doesn't seem to recognize returning a resource
-      /*
-      return {
-        content: sources
-          .filter(source => source !== null)
-          .map(source => ({
             type: "resource",
             resource: {
               uri: `contents://${source.content?.id}`,
-              mimeType: "application/json",
-              text: JSON.stringify({
-                content: { id: source.content?.id },
-                type: source.type,
-                pageNumber: source.pageNumber,
-                frameNumber: source.frameNumber,
-                startTime: source.startTime,
-                endTime: source.endTime,
-                relevance: source.relevance,
-                metadata: source.metadata,
-                text: source.text
-              }, null, 2)
+              mimeType: "text/markdown",
+              text: source.text
             }
           }))
       };
-      */
     } catch (err: unknown) {
       const error = err as Error;
       return {
