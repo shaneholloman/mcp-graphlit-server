@@ -9,11 +9,73 @@ The Model Context Protocol (MCP) Server enables integration between MCP clients 
 
 Ingest anything from Slack to Gmail to podcast feeds, in addition to web crawling, into a Graphlit project - and then retrieve relevant contents from the MCP client.
 
+## Tools
+
+### Retrieval
+
+- Retrieve Sources
+
+### Ingestion
+
+- Files
+- Web Pages
+- Text
+
+### Data Connectors
+- Microsoft Outlook email
+- Google Mail
+- Notion
+- Reddit
+- Linear
+- Jira
+- GitHub Issues
+- Google Drive
+- OneDrive
+- SharePoint
+- Dropbox
+- Box
+- GitHub
+- Slack
+- Microsof Teams
+- Discord
+- Podcasts (RSS)
+
+### Web
+- Web Crawling
+- Web Search
+- Web Mapping
+
+### Operations
+
+- Create Collection
+- Add Contents to Collection
+- Remove Contents from Collection
+- Delete Collection
+- Delete Feed
+- Delete Content
+- Is Feed Done?
+- Is Content Done?
+
+### Enumerations
+
+- List Slack Channels
+- List Microsoft Teams Teams
+- List Microsoft Teams Channels
+- List SharePoint Libraries
+- List SharePoint Folders
+- List Linear Projects
+
+## Resources
+
+- Contents
+- Feeds
+- Collections (of Content)
+
 ## Prerequisites
 
 Before you begin, ensure you have the following:
 
-- Node.js installed on your system (recommended version 14.x or higher).
+- Node.js installed on your system (recommended version 18.x or higher).
 - An active account on the [Graphlit Platform](https://portal.graphlit.dev) with access to the API settings dashboard.
 
 ## Installation
