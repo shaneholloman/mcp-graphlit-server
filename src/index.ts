@@ -55,7 +55,7 @@ server.resource(
 );
 
 server.resource(
-  "Feed: Returns feed metadata.",
+  "Feed: Returns feed metadata. Accepts content resource URI, i.e. feeds://{id}, where 'id' is a feed identifier.",
   new ResourceTemplate("feeds://{id}", { list: undefined }),
   async (uri: URL, variables) => {
     const id = variables.id as string;
@@ -118,7 +118,7 @@ server.resource(
 );
 
 server.resource(
-  "Collection: Returns collection metadata and list of content resources.",
+  "Collection: Returns collection metadata and list of content resources. Accepts collection resource URI, i.e. collections://{id}, where 'id' is a collection identifier.",
   new ResourceTemplate("collections://{id}", { list: undefined }),
   async (uri: URL, variables) => {
     const id = variables.id as string;
@@ -183,7 +183,7 @@ server.resource(
 );
 
 server.resource(
-  "Content: Returns content metadata and complete Markdown text.",
+  "Content: Returns content metadata and complete Markdown text. Accepts content resource URI, i.e. contents://{id}, where 'id' is a content identifier.",
   new ResourceTemplate("contents://{id}", { list: undefined }),
   async (uri: URL, variables) => {
     const id = variables.id as string;
