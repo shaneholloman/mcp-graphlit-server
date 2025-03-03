@@ -97,7 +97,7 @@ To use the Graphlit MCP Server in Claude Desktop application, use:
         "graphlit-mcp-server": {
             "command": "npx",
             "args": [
-				"-y",
+                "-y",
                 "graphlit-mcp-server"
             ],
             "env": {
