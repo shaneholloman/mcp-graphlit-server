@@ -18,6 +18,7 @@ Audio and video files will be transcribed upon ingestion.
 ### Retrieval
 
 - Retrieve Sources
+- Visually Describe Images
 
 ### Ingestion
 
@@ -48,6 +49,7 @@ Audio and video files will be transcribed upon ingestion.
 - Web Crawling
 - Web Search
 - Web Mapping
+- Screenshot Page
 
 ### Operations
 
