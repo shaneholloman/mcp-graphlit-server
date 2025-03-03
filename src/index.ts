@@ -2051,6 +2051,138 @@ server.tool(
   }
 );
 
+server.tool(
+  "screenshotPage",
+  `Screenshots web page from URL.
+   Executes asynchonously and returns the content identifier.`,
+  { 
+    url: z.string()
+  },
+  async ({ url }) => {
+    const client = new Graphlit();
+
+    try {
+      const response = await client.screenshotPage(url);
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.screenshotPage?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "describeImage",
+  `Prompts vision LLM and returns completion. 
+   Does *not* ingest image into Graphlit knowledge base.
+   Accepts image URL as string.
+   Returns Markdown text from LLM completion.`,
+  { 
+    prompt: z.string(),
+    url: z.string()
+  },
+  async ({ prompt, url }) => {
+    const client = new Graphlit();
+
+    try {
+      const response = await client.describeImage(prompt, url);
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ message: response.describeImage?.message }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
+  "describeContent",
+  `Prompts vision LLM and returns description of image content. 
+   Accepts content identifier as string, and optional prompt for image description.
+   Returns Markdown text from LLM completion.`,
+  { 
+    id: z.string(),
+    prompt: z.string().optional(),
+  },
+  async ({ prompt, id }) => {
+    const client = new Graphlit();
+
+    const DEFAULT_PROMPT = `
+    Conduct a thorough analysis of the screenshot, with a particular emphasis on the textual content and any included imagery. 
+    Provide a detailed examination of the text, highlighting key points and dissecting technical terms, named entities, and data presentations that contribute to the understanding of the subject matter. 
+    Discuss how the technical language and the named entities relate to the overarching topic and objectives of the webpage. 
+    Also, describe how the visual elements, such as color schemes, imagery, and branding elements like logos and taglines, support the textual message and enhance the viewer's comprehension of the content. 
+    Assess the readability and organization of the content, and evaluate how these aspects facilitate the visitor's navigation and learning experience. Refrain from delving into the specifics of the user interface design but focus on the communication effectiveness and coherence of visual and textual elements. 
+    Finally, offer a comprehensive view of the website's ability to convey its message and fulfill its intended commercial, educational, or promotional role, considering the target audience's perspective and potential engagement with the content.
+
+    Carefully examine the image for any text it contains and extract as Markdown text. 
+    In cases where the image contains no extractable text or only text that is not useful for understanding, don't extract any text. 
+    Focus on including text that contributes significantly to understanding the image, such as titles, headings, key phrases, important data points, or labels. 
+    Exclude any text that is not relevant or does not add value to the comprehension of the image. 
+    Ensure to transcribe the text completely, without truncating with ellipses.
+    `;
+
+    try {
+      const cresponse = await client.getContent(id);
+      const content = cresponse.content;
+
+      if (content?.imageUri != null)
+      {
+        const response = await client.describeImage(prompt || DEFAULT_PROMPT, content.imageUri);
+
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ message: response.describeImage?.message }, null, 2)
+          }]
+        };
+      }
+      else {
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ }, null, 2)
+          }]
+        };
+      }
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
 async function runServer() {
   try {
     console.error('Attempting to start Graphlit MCP Server.');
