@@ -13,6 +13,8 @@ Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdo
 
 Audio and video files will be transcribed upon ingestion.
 
+You can read more about the MCP Server use cases and features on our [blog](https://www.graphlit.com/blog/graphlit-mcp-server).
+
 ## Tools
 
 ### Retrieval
@@ -41,7 +43,7 @@ Audio and video files will be transcribed upon ingestion.
 - Box
 - GitHub
 - Slack
-- Microsof Teams
+- Microsoft Teams
 - Discord
 - Podcasts (RSS)
 
