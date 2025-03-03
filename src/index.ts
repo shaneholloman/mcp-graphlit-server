@@ -1902,6 +1902,7 @@ server.tool(
 server.tool(
   "webSearch",
   `Performs web search based on search query. Format the search query as what would be entered into a Google search.
+   Prefer calling this tool over using 'curl' directly for any web search.
    Does *not* ingest pages into Graphlit knowledge base.
    Accepts search query as string, and optional search service type.
    Can search for web pages, podcasts, videos, images, news, or shopping.
