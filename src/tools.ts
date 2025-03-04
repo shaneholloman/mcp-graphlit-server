@@ -4,10 +4,10 @@ import mime from 'mime-types';
 import { Graphlit } from "graphlit-client";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { zodToJsonSchema } from "zod-to-json-schema";
 import { 
   ContentFilter, 
   ContentTypes, 
+  FeedFilter,
   FeedServiceTypes, 
   EmailListingTypes, 
   SearchServiceTypes, 
@@ -383,6 +383,46 @@ export function registerTools(server: McpServer) {
                 content: [{
                 type: "text",
                 text: JSON.stringify(response.deleteAllContents, null, 2)
+                }]
+            };
+            } catch (err: unknown) {
+            const error = err as Error;
+            return {
+                content: [{
+                type: "text",
+                text: `Error: ${error.message}`
+                }],
+                isError: true
+            };
+            }
+        }
+        );
+
+        server.tool(
+        "deleteFeeds",
+        `Deletes feeds from Graphlit knowledge base.
+        Accepts optional feed type filter to limit the feeds which will be deleted.
+        Also accepts optional limit of how many feeds to delete, defaults to 100.
+        Returns the feed identifiers and feed state, i.e. Deleted.`,
+        { 
+            feedType: z.nativeEnum(FeedTypes).optional().describe("Feed type filter, optional. One of: Discord, Email, Intercom, Issue, MicrosoftTeams, Notion, Reddit, Rss, Search, Site, Slack, Web, YouTube, Zendesk."),
+            limit: z.number().optional().default(100)            
+        },
+        async ({ feedType, limit }) => {
+            const client = new Graphlit();
+    
+            try {
+            const filter: FeedFilter = { 
+                types: feedType ? [feedType] : null, 
+                limit: limit
+            };                
+
+            const response = await client.deleteAllFeeds(filter);
+                    
+            return {
+                content: [{
+                type: "text",
+                text: JSON.stringify(response.deleteAllFeeds, null, 2)
                 }]
             };
             } catch (err: unknown) {

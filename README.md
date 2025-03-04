@@ -22,6 +22,10 @@ You can read more about the MCP Server use cases and features on our [blog](http
 - Retrieve Sources
 - Visually Describe Images
 
+### Extraction
+
+- Extract structured JSON from Text
+
 ### Ingestion
 
 - Files
@@ -59,8 +63,8 @@ You can read more about the MCP Server use cases and features on our [blog](http
 - Add Contents to Collection
 - Remove Contents from Collection
 - Delete Collection
-- Delete Feed
-- Delete Content
+- Delete Feed(s)
+- Delete Content(s)
 - Is Feed Done?
 - Is Content Done?
 
