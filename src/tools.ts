@@ -4,6 +4,7 @@ import mime from 'mime-types';
 import { Graphlit } from "graphlit-client";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+import { zodToJsonSchema } from "zod-to-json-schema";
 import { 
   ContentFilter, 
   ContentTypes, 
@@ -103,6 +104,105 @@ export function registerTools(server: McpServer) {
     }
     );
 
+    server.tool(
+    "extractText",
+    `Extracts JSON data from text using LLM.
+    Accepts text to be extracted, and JSON schema which describes the data which will be extracted. JSON schema needs be of type 'object' and include 'properties' and 'required' fields.
+    Optionally accepts text prompt which is provided to LLM to guide data extraction. Defaults to 'Extract data using the tools provided'.
+    Returns extracted JSON from text.`,
+    { 
+        text: z.string().describe("Text to be extracted with LLM."),
+        schema: z.string().describe("JSON schema which describes the data which will be extracted. JSON schema needs be of type 'object' and include 'properties' and 'required' fields."),
+        prompt: z.string().optional().describe("Text prompt which is provided to LLM to guide data extraction, optional.")
+    },
+    async ({ text, schema, prompt }) => {
+        const client = new Graphlit();
+
+        const DEFAULT_NAME = "extract_json"
+        const DEFAULT_PROMPT = `
+        Extract data using the tools provided.
+        `
+
+        try {           
+            const response = await client.extractText(prompt || DEFAULT_PROMPT, text, [{ name: DEFAULT_NAME, schema: schema }]);
+
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify(response.extractText ? response.extractText.filter(item => item !== null).map(item => item.value) : [], null, 2)
+              }]
+            };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "extractContent",
+    `Extracts JSON data from content using LLM. Retrieves markdown text from content before data extraction.
+    Accepts identifier of content to be extracted, and JSON schema which describes the data which will be extracted. JSON schema needs be of type 'object' and include 'properties' and 'required' fields.
+    Optionally accepts text prompt which is provided to LLM to guide data extraction. Defaults to 'Extract data using the tools provided'.
+    Returns extracted JSON from text.`,
+    { 
+        id: z.string().describe("Content identifier."),
+        schema: z.string().describe("JSON schema which describes the data which will be extracted. JSON schema needs be of type 'object' and include 'properties' and 'required' fields."),
+        prompt: z.string().optional().describe("Text prompt which is provided to LLM to guide data extraction, optional.")
+    },
+    async ({ id, schema, prompt }) => {
+        const client = new Graphlit();
+
+        const DEFAULT_NAME = "extract_json"
+        const DEFAULT_PROMPT = `
+        Extract data using the tools provided.
+        `
+
+        var text;
+
+        try {           
+            const response = await client.getContent(id);
+
+            text = response.content?.markdown;            
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+
+        try {           
+            const response = await client.extractText(prompt || DEFAULT_PROMPT, text || "", [{ name: DEFAULT_NAME, schema: schema }]);
+
+            return {
+                content: [{
+                type: "text",
+                text: JSON.stringify(response.extractText ? response.extractText.filter(item => item !== null).map(item => item.value) : [], null, 2)
+                }]
+            };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+    
     server.tool(
     "createCollection",
     `Create a collection.
@@ -313,6 +413,48 @@ export function registerTools(server: McpServer) {
         }
     }
     );
+
+    server.tool(
+        "deleteContents",
+        `Deletes contents from Graphlit knowledge base.
+        Accepts optional content type and file type filters to limit the contents which will be deleted.
+        Also accepts optional limit of how many contents to delete, defaults to 1000.
+        Returns the content identifiers and content state, i.e. Deleted.`,
+        { 
+            contentType: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."),
+            fileType: z.nativeEnum(FileTypes).optional().describe("File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video."),
+            limit: z.number().optional().default(1000)            
+        },
+        async ({ contentType, fileType, limit }) => {
+            const client = new Graphlit();
+    
+            try {
+            const filter: ContentFilter = { 
+                types: contentType ? [contentType] : null, 
+                fileTypes: fileType ? [fileType] : null,
+                limit: limit
+            };                
+
+            const response = await client.deleteAllContents(filter);
+                    
+            return {
+                content: [{
+                type: "text",
+                text: JSON.stringify(response.deleteAllContents, null, 2)
+                }]
+            };
+            } catch (err: unknown) {
+            const error = err as Error;
+            return {
+                content: [{
+                type: "text",
+                text: `Error: ${error.message}`
+                }],
+                isError: true
+            };
+            }
+        }
+        );
 
     server.tool(
     "isContentDone",
