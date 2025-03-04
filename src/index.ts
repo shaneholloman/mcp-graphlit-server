@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import fs from 'fs';
+import path from 'path';
+import mime from 'mime-types';
 import { Graphlit } from "graphlit-client";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -2073,10 +2076,6 @@ server.tool(
     filePath: z.string()
   },
   async ({ filePath }) => {
-    const fs = require('fs');
-    const path = require('path');
-    const mime = require('mime-types');
-
     const client = new Graphlit();
 
     try {

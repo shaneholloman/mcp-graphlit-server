@@ -43,6 +43,7 @@
     "graphlit-client": "^1.0.20250301002"
   },
   "devDependencies": {
+    "@types/mime-types": "^2.1.4",
     "typescript": "^5.4.5"
   }
 }
