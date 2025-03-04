@@ -2065,6 +2065,49 @@ server.tool(
 );
 
 server.tool(
+  "ingestFile",
+  `Ingests local file into Graphlit knowledge base.
+   Accepts the path to the file in the local filesystem.
+   Executes asynchronously and returns the content identifier.`,
+  { 
+    filePath: z.string()
+  },
+  async ({ filePath }) => {
+    const fs = require('fs');
+    const path = require('path');
+    const mime = require('mime-types');
+
+    const client = new Graphlit();
+
+    try {
+      const name = path.basename(filePath);
+      const mimeType = mime.lookup(filePath) || 'application/octet-stream';
+      const fileData = fs.readFileSync(filePath);
+      const base64Data = fileData.toString('base64');
+
+      const response = await client.ingestEncodedFile(name, base64Data, mimeType);
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ id: response.ingestEncodedFile?.id }, null, 2)
+        }]
+      };
+      
+    } catch (err: unknown) {
+      const error = err as Error;
+      return {
+        content: [{
+          type: "text",
+          text: `Error: ${error.message}`
+        }],
+        isError: true
+      };
+    }
+  }
+);
+
+server.tool(
   "screenshotPage",
   `Screenshots web page from URL.
    Executes asynchronously and returns the content identifier.`,
