@@ -2079,12 +2079,13 @@ server.tool(
     const client = new Graphlit();
 
     try {
-      const name = path.basename(filePath);
-      const mimeType = mime.lookup(filePath) || 'application/octet-stream';
+      const fileName = path.basename(filePath);
+      const mimeType = mime.lookup(fileName) || 'application/octet-stream';
+      
       const fileData = fs.readFileSync(filePath);
       const base64Data = fileData.toString('base64');
 
-      const response = await client.ingestEncodedFile(name, base64Data, mimeType);
+      const response = await client.ingestEncodedFile(fileName, base64Data, mimeType);
 
       return {
         content: [{
