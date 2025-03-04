@@ -146,64 +146,6 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
-    "extractContent",
-    `Extracts JSON data from content using LLM. Retrieves markdown text from content before data extraction.
-    Accepts identifier of content to be extracted, and JSON schema which describes the data which will be extracted. JSON schema needs be of type 'object' and include 'properties' and 'required' fields.
-    Optionally accepts text prompt which is provided to LLM to guide data extraction. Defaults to 'Extract data using the tools provided'.
-    Returns extracted JSON from text.`,
-    { 
-        id: z.string().describe("Content identifier."),
-        schema: z.string().describe("JSON schema which describes the data which will be extracted. JSON schema needs be of type 'object' and include 'properties' and 'required' fields."),
-        prompt: z.string().optional().describe("Text prompt which is provided to LLM to guide data extraction, optional.")
-    },
-    async ({ id, schema, prompt }) => {
-        const client = new Graphlit();
-
-        const DEFAULT_NAME = "extract_json"
-        const DEFAULT_PROMPT = `
-        Extract data using the tools provided.
-        `
-
-        var text;
-
-        try {           
-            const response = await client.getContent(id);
-
-            text = response.content?.markdown;            
-        } catch (err: unknown) {
-        const error = err as Error;
-        return {
-            content: [{
-            type: "text",
-            text: `Error: ${error.message}`
-            }],
-            isError: true
-        };
-        }
-
-        try {           
-            const response = await client.extractText(prompt || DEFAULT_PROMPT, text || "", [{ name: DEFAULT_NAME, schema: schema }]);
-
-            return {
-                content: [{
-                type: "text",
-                text: JSON.stringify(response.extractText ? response.extractText.filter(item => item !== null).map(item => item.value) : [], null, 2)
-                }]
-            };
-        } catch (err: unknown) {
-        const error = err as Error;
-        return {
-            content: [{
-            type: "text",
-            text: `Error: ${error.message}`
-            }],
-            isError: true
-        };
-        }
-    }
-    );
-    
-    server.tool(
     "createCollection",
     `Create a collection.
     Accepts a collection name, and optional list of content identifiers to add to collection.
