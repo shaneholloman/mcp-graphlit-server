@@ -15,6 +15,10 @@ Audio and video files will be transcribed upon ingestion.
 
 You can read more about the MCP Server use cases and features on our [blog](https://www.graphlit.com/blog/graphlit-mcp-server).
 
+<a href="https://glama.ai/mcp/servers/fscrivteod">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/fscrivteod/badge" alt="graphlit-mcp-server MCP server" />
+</a>
+
 ## Tools
 
 ### Retrieval
