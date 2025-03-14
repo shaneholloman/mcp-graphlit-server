@@ -194,8 +194,193 @@ export function registerResources(server: McpServer) {
           }
         }
       );
-    }
 
+      server.resource(
+        "Workflows: Returns list of workflow resources.",
+        new ResourceTemplate("workflows://", {
+          list: async (extra) => {
+            const client = new Graphlit();
+            
+            try {
+              const response = await client.queryWorkflows();
+              
+              return {
+                resources: (response.workflows?.results || [])
+                  .filter(workflow => workflow !== null)
+                  .map(workflow => ({
+                    name: workflow.name,
+                    uri: `workflows://${workflow.id}`
+                  }))
+              };
+            } catch (error) {
+              console.error("Error fetching workflow list:", error);
+              return { resources: [] };
+            }
+          }
+        }),
+        async (uri, variables) => {
+          return {
+            contents: []
+          };
+        }
+      );
+      
+      server.resource(
+        "Workflow: Returns workflow metadata. Accepts workflow resource URI, i.e. workflows://{id}, where 'id' is a workflow identifier.",
+        new ResourceTemplate("workflows://{id}", { list: undefined }),
+        async (uri: URL, variables) => {
+          const id = variables.id as string;
+          const client = new Graphlit();
+          
+          try {
+            const response = await client.getWorkflow(id);
+            return {
+              contents: [
+                {
+                  uri: uri.toString(),
+                  text: JSON.stringify({
+                    id: response.workflow?.id,
+                    name: response.workflow?.name
+                  }, null, 2),
+                  mimeType: 'application/json'
+                }
+              ]
+            };
+          } catch (error) {
+            console.error("Error fetching workflow:", error);
+            return {
+              contents: []
+            };
+          }
+        }
+      );
+
+      server.resource(
+        "Specifications: Returns list of specification resources.",
+        new ResourceTemplate("specifications://", {
+          list: async (extra) => {
+            const client = new Graphlit();
+            
+            try {
+              const response = await client.querySpecifications();
+              
+              return {
+                resources: (response.specifications?.results || [])
+                  .filter(specification => specification !== null)
+                  .map(specification => ({
+                    name: specification.name,
+                    uri: `specifications://${specification.id}`
+                  }))
+              };
+            } catch (error) {
+              console.error("Error fetching specification list:", error);
+              return { resources: [] };
+            }
+          }
+        }),
+        async (uri, variables) => {
+          return {
+            contents: []
+          };
+        }
+      );
+            
+      server.resource(
+        "Specification: Returns specification metadata. Accepts specification resource URI, i.e. specifications://{id}, where 'id' is a specification identifier.",
+        new ResourceTemplate("specifications://{id}", { list: undefined }),
+        async (uri: URL, variables) => {
+          const id = variables.id as string;
+          const client = new Graphlit();
+          
+          try {
+            const response = await client.getSpecification(id);
+            return {
+              contents: [
+                {
+                  uri: uri.toString(),
+                  text: JSON.stringify({
+                    id: response.specification?.id,
+                    name: response.specification?.name
+                  }, null, 2),
+                  mimeType: 'application/json'
+                }
+              ]
+            };
+          } catch (error) {
+            console.error("Error fetching specification:", error);
+            return {
+              contents: []
+            };
+          }
+        }
+      );
+
+      server.resource(
+        "Projects: Returns list of project resources.",
+        new ResourceTemplate("projects://", {
+          list: async (extra) => {
+            const client = new Graphlit();
+            
+            try {
+              // NOTE: only ever one project
+              const response = await client.getProject();
+              const project = response.project;
+
+              return {
+                resources: project !== undefined && project !== null ? [
+                  {
+                    name: project.name,
+                    uri: `projects://${project.id}`
+                  }
+                ] : []
+              };
+            } catch (error) {
+              console.error("Error fetching project list:", error);
+              return { resources: [] };
+            }
+          }
+        }),
+        async (uri, variables) => {
+          return {
+            contents: []
+          };
+        }
+      );
+            
+      server.resource(
+        "Project: Returns project metadata. Accepts project resource URI, i.e. projects://{id}, where 'id' is a project identifier.",
+        new ResourceTemplate("projects://{id}", { list: undefined }),
+        async (uri: URL, variables) => {
+          const id = variables.id as string;
+          const client = new Graphlit();
+          
+          try {
+            const response = await client.getProject();
+            return {
+              contents: [
+                {
+                  uri: uri.toString(),
+                  text: JSON.stringify({
+                    id: response.project?.id,
+                    name: response.project?.name,
+                    credits: response.project?.credits,
+                    workflow: response.project?.workflow,
+                    specification: response.project?.specification,
+                    quota: response.project?.quota
+                  }, null, 2),
+                  mimeType: 'application/json'
+                }
+              ]
+            };
+          } catch (error) {
+            console.error("Error fetching project:", error);
+            return {
+              contents: []
+            };
+          }
+        }
+      );
+  }
     
 function formatContent(response: GetContentQuery): string {
   const results: string[] = [];

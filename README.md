@@ -24,7 +24,7 @@ You can read more about the MCP Server use cases and features on our [blog](http
 
 ### Extraction
 
-- Extract structured JSON from Text
+- Extract Structured JSON from Text
 
 ### Ingestion
 
@@ -57,6 +57,11 @@ You can read more about the MCP Server use cases and features on our [blog](http
 - Web Mapping
 - Screenshot Page
 
+### Notifications
+- Slack
+- Email
+- Webhook
+
 ### Operations
 
 - Create Collection
@@ -79,9 +84,12 @@ You can read more about the MCP Server use cases and features on our [blog](http
 
 ## Resources
 
+- Project
 - Contents
 - Feeds
 - Collections (of Content)
+- Workflows
+- Specifications
 
 ## Prerequisites
 

@@ -19,7 +19,11 @@ import {
   SharePointAuthenticationTypes, 
   FileTypes,
   TextTypes,
-  SearchTypes
+  SearchTypes,
+  ContentPublishingServiceTypes,
+  ContentPublishingFormats,
+  ElevenLabsModels,
+  IntegrationServiceTypes
 } from "graphlit-client/dist/generated/graphql-types.js";
 
 export function registerTools(server: McpServer) {
@@ -2154,6 +2158,173 @@ export function registerTools(server: McpServer) {
             }]
             };
         }
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "publishAudio",
+    `Publishes text as audio format, and ingests into Graphlit knowledge base.
+    Accepts a name for the content object, the text itself, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
+    Optionally accepts an ElevenLabs voice identifier.
+    Executes *synchronously* and returns the content identifier.`,
+    { 
+        name: z.string(),
+        text: z.string(),
+        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown),
+        voice: z.string().optional().default("CYw3kZ02Hs0563khs1Fj"),
+    },
+    async ({ name, text, textType, voice }) => {
+        const client = new Graphlit();
+
+        const type = ContentPublishingServiceTypes.ElevenLabsAudio;
+        const format = ContentPublishingFormats.Mp3;
+        const model = ElevenLabsModels.MultilingualV2;
+
+        try {
+        const response = await client.publishText(text, textType, { type: type, format: format, elevenLabs: { model: model, voice: voice } }, name, undefined, true);
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ id: response.publishText?.id }, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "sendWebHookNotification",
+    `Sends a webhook notification to the provided URL.
+    Accepts the webhook URL.
+    Also accepts the text to be sent with the webhook, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
+    Returns true if the notification was successfully sent, or false otherwise.`,
+    { 
+        url: z.string(),
+        text: z.string(),
+        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown),
+    },
+    async ({ text, textType, url }) => {
+        const client = new Graphlit();
+
+        try {
+        const response = await client.sendNotification({ type: IntegrationServiceTypes.WebHook, uri: url }, text, textType);
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ success: response.sendNotification?.result }, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "sendSlackNotification",
+    `Sends a Slack notification to the provided Slack channel.
+    Accepts the Slack channel name.
+    Also accepts the text for the Slack message, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
+    Returns true if the notification was successfully sent, or false otherwise.`,
+    { 
+        channelName: z.string(),
+        text: z.string(),
+        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown),
+    },
+    async ({ text, textType, channelName }) => {
+        const botToken = process.env.SLACK_BOT_TOKEN;
+        if (!botToken) {
+            console.error("Please set SLACK_BOT_TOKEN environment variable.");
+            process.exit(1);
+        }
+
+        const client = new Graphlit();
+
+        try {
+        const response = await client.sendNotification({ type: IntegrationServiceTypes.Slack, slack: { token: botToken, channel: channelName } }, text, textType);
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ success: response.sendNotification?.result }, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "sendEmailNotification",
+    `Sends an email notification to the provided email address(es).
+    Accepts the email subject and a list of email 'to' addresses.
+    Email addresses should be in RFC 5322 format. i.e. Alice Wonderland <alice@wonderland.net>, or alice@wonderland.net
+    Also accepts the text for the email, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
+    Returns true if the notification was successfully sent, or false otherwise.`,
+    { 
+        subject: z.string(),
+        to: z.array(z.string()),
+        text: z.string(),
+        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown),
+    },
+    async ({ text, textType, subject, to }) => {
+        const from = process.env.FROM_EMAIL_ADDRESS;
+        if (!from) {
+            console.error("Please set FROM_EMAIL_ADDRESS environment variable.");
+            process.exit(1);
+        }
+
+        const client = new Graphlit();
+
+        try {
+        const response = await client.sendNotification({ type: IntegrationServiceTypes.Email, email: { subject, from, to } }, text, textType);
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ success: response.sendNotification?.result }, null, 2)
+            }]
+        };
+        
         } catch (err: unknown) {
         const error = err as Error;
         return {
