@@ -7,9 +7,6 @@ import { registerTools } from './tools.js';
 const DEFAULT_INSTRUCTIONS = `
 You are provided a set of tools and resources that integrate with the [Graphlit](https://www.graphlit.com) Platform.
 
-Hint: always look for matching resources before you try to call any tools.
-For example, "have i configured any graphlit workflows?", you should check for workflow resources before trying to call any other tools.
-
 Graphlit is an LLM-enabled knowledge API platform, which supports these resources:
 - project: container for ingested contents
 - contents: all ingested files, web pages, messages, etc.
@@ -18,7 +15,10 @@ Graphlit is an LLM-enabled knowledge API platform, which supports these resource
 - workflows: how content is handled during the ingestion process
 - specifications: LLM configuration presets, used by workflows
 
-Ingest anything from Slack to Gmail to podcast feeds, in addition to web crawling, into a Graphlit project - and then retrieve relevant contents from the MCP client.
+Hint: always look for matching resources before you try to call any tools.
+For example, "have i configured any graphlit workflows?", you should check for workflow resources before trying to call any other tools.
+
+With this Graphlit MCP Server, you can ingest anything from Slack, Discord, websites, Google Drive, email, Jira, Linear or GitHub into a Graphlit project - and then search and retrieve relevant knowledge within an MCP client like Cursor, Windsurf or Cline.
 
 Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdown upon ingestion. Audio and video files will be transcribed upon ingestion.
 `
