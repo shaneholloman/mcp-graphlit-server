@@ -409,6 +409,9 @@ function formatContent(response: GetContentQuery): string {
   if (content.creationDate) results.push(`**Ingestion Date:** ${content.creationDate}`);
   if (content.originalDate) results.push(`**Author Date:** ${content.originalDate}`);
 
+  if (content.imageUri) results.push(`**Image URI:** ${content.imageUri}`);
+  if (content.audioUri) results.push(`**Audio URI:** ${content.audioUri}`);
+
   // Issue details
   if (content.issue) {
     const issue = content.issue;
