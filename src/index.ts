@@ -7,6 +7,9 @@ import { registerTools } from './tools.js';
 const DEFAULT_INSTRUCTIONS = `
 You are provided a set of tools and resources that integrate with the [Graphlit](https://www.graphlit.com) Platform.
 
+Hint: always look for matching resources before you try to call any tools.
+For example, "have i configured any graphlit workflows?", you should check for workflow resources before trying to call any other tools.
+
 Graphlit is an LLM-enabled knowledge API platform, which supports these resources:
 - project: container for ingested contents
 - contents: all ingested files, web pages, messages, etc.
