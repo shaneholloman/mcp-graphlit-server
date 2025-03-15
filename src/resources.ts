@@ -348,7 +348,7 @@ export function registerResources(server: McpServer) {
       );
             
       server.resource(
-        "Project: Returns project metadata including credits used, available quota, and default workflow and specification. Accepts project resource URI, i.e. projects://{id}, where 'id' is a project identifier.",
+        "Project: Returns project metadata including credits used, available quota, and default content workflow. Accepts project resource URI, i.e. projects://{id}, where 'id' is a project identifier.",
         new ResourceTemplate("projects://{id}", { list: undefined }),
         async (uri: URL, variables) => {
           const id = variables.id as string;
@@ -365,7 +365,6 @@ export function registerResources(server: McpServer) {
                     name: response.project?.name,
                     credits: response.project?.credits,
                     workflow: response.project?.workflow,
-                    specification: response.project?.specification,
                     quota: response.project?.quota
                   }, null, 2),
                   mimeType: 'application/json'

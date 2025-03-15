@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import mime from 'mime-types';
-import { Graphlit } from "graphlit-client";
+import { Graphlit, Types } from "graphlit-client";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { 
@@ -27,6 +27,132 @@ import {
 } from "graphlit-client/dist/generated/graphql-types.js";
 
 export function registerTools(server: McpServer) {
+    server.tool(
+    "configureProject",
+    `Configures the default content workflow for the Graphlit project.
+    Accepts whether to enable high-quality document preparation using a vision LLM. Defaults to using Azure AI Document Intelligence for document preparation, if not assigned.
+    Accepts whether to enable entity extraction using LLM into the knowledge graph.
+    Optionally accepts the preferred model provider service type, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided.
+    Returns the project identifier.`,
+    { 
+        enablePreparation: z.boolean().describe("Whether to enable high-quality document preparation using vision LLM."),
+        enableExtraction: z.boolean().describe("Whether to enable entity extraction using LLM into the knowledge graph."),
+        serviceType: z.nativeEnum(Types.ModelServiceTypes).optional().default(Types.ModelServiceTypes.Anthropic).describe("Preferred model provider service type, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided.")
+    },
+    async ({ enablePreparation, enableExtraction, serviceType }) => {
+        const client = new Graphlit();
+
+        var preparationSpecificationId;
+        var extractionSpecificationId;
+        var workflowId;
+
+        switch (serviceType)
+        {
+            case Types.ModelServiceTypes.Anthropic:
+            case Types.ModelServiceTypes.Google:
+            case Types.ModelServiceTypes.OpenAi:
+                break;
+            default:
+                throw new Error(`Unsupported model service type [${serviceType}].`);
+        }
+
+        if (enablePreparation) {
+            var sresponse = await client.upsertSpecification({
+                name: "MCP Default Specification: Preparation",
+                type: Types.SpecificationTypes.Preparation,
+                serviceType: serviceType,
+                anthropic: serviceType == Types.ModelServiceTypes.Anthropic ? {
+                    model: Types.AnthropicModels.Claude_3_7Sonnet
+                } : undefined,
+                openAI: serviceType == Types.ModelServiceTypes.OpenAi ? {
+                    model: Types.OpenAiModels.Gpt4O_128K
+                } : undefined,
+                google: serviceType == Types.ModelServiceTypes.Google ? {
+                    model: Types.GoogleModels.Gemini_2_0ProExperimental
+                } : undefined,
+            });
+
+            preparationSpecificationId = sresponse.upsertSpecification?.id;
+        }
+
+        if (enableExtraction) {
+            var sresponse = await client.upsertSpecification({
+                name: "MCP Default Specification: Extraction",
+                type: Types.SpecificationTypes.Extraction,
+                serviceType: serviceType,
+                anthropic: serviceType == Types.ModelServiceTypes.Anthropic ? {
+                    model: Types.AnthropicModels.Claude_3_7Sonnet
+                } : undefined,
+                openAI: serviceType == Types.ModelServiceTypes.OpenAi ? {
+                    model: Types.OpenAiModels.Gpt4O_128K
+                } : undefined,
+                google: serviceType == Types.ModelServiceTypes.Google ? {
+                    model: Types.GoogleModels.Gemini_2_0FlashThinkingExperimental
+                } : undefined,
+            });
+
+            extractionSpecificationId = sresponse.upsertSpecification?.id;
+        }
+
+        const wresponse = await client.upsertWorkflow({ 
+            name: "MCP Default Workflow", 
+            preparation: preparationSpecificationId !== undefined ? {
+                jobs: [ {
+                    connector: {
+                        type: Types.FilePreparationServiceTypes.ModelDocument,
+                        modelDocument: {
+                            specification: { id: preparationSpecificationId } 
+                        }
+                    }
+                } ]
+            } : undefined,
+            extraction: extractionSpecificationId !== undefined ? { 
+                jobs: [ { 
+                    connector: { 
+                        type: Types.EntityExtractionServiceTypes.ModelText, 
+                        modelText: { 
+                            specification: { id: extractionSpecificationId } 
+                        } 
+                    }
+                }, { 
+                    connector: { 
+                        type: Types.EntityExtractionServiceTypes.ModelImage, 
+                        modelImage: { 
+                            specification: { id: extractionSpecificationId } 
+                        } 
+                    }
+                } ]
+            } : undefined
+        });
+
+        workflowId = wresponse.upsertWorkflow?.id;
+
+        try {
+        const response = await client.updateProject({ 
+            workflow: workflowId !== undefined ? { id: workflowId } : undefined
+
+        });
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ id: response.updateProject?.id }, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
     server.tool(
     "retrieveSources",
     `Retrieve relevant content sources from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
@@ -1852,9 +1978,9 @@ export function registerTools(server: McpServer) {
     Prefer calling this tool over using 'curl' directly for any web search.
     Does *not* ingest pages into Graphlit knowledge base.
     Accepts search query as string, and optional search service type.
-    Can search for web pages, podcasts, videos, images, news, or shopping.
-    Search service types: Tavily, Exa. Defaults to Tavily.
-    Returns URL, title and relevant Markdown text from resulting web pages.`,
+    Can search for web pages or podcast episodes. Podcast episodes will be ingested as audio files and automatically transcribed.
+    Search service types: Tavily (web pages), Exa (web pages) and Podscan (podcast episodes). Defaults to Tavily.
+    Returns URL, title and relevant Markdown text from resulting web pages or podcast episode transcripts.`,
     { 
         search: z.string(),
         searchService: z.nativeEnum(SearchServiceTypes).optional().default(SearchServiceTypes.Tavily)
