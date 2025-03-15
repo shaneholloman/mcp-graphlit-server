@@ -8,7 +8,7 @@ const DEFAULT_INSTRUCTIONS = `
 You are provided a set of tools and resources that integrate with the [Graphlit](https://www.graphlit.com) Platform.
 
 Graphlit is an LLM-enabled knowledge API platform, which supports these resources:
-- project: container for ingested contents
+- project: container for ingested contents, which can be configured with a default workflow
 - contents: all ingested files, web pages, messages, etc.
 - feeds: data connectors which ingest contents
 - collections: named groups of contents
@@ -21,6 +21,8 @@ For example, "have i configured any graphlit workflows?", you should check for w
 With this Graphlit MCP Server, you can ingest anything from Slack, Discord, websites, Google Drive, email, Jira, Linear or GitHub into a Graphlit project - and then search and retrieve relevant knowledge within an MCP client like Cursor, Windsurf or Cline.
 
 Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdown upon ingestion. Audio and video files will be transcribed upon ingestion.
+
+Only call the 'configureProject' tool when the user explicitly asks to configure their Graphlit project defaults.
 `
 
 export const server = new McpServer({

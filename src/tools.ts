@@ -29,7 +29,7 @@ import {
 export function registerTools(server: McpServer) {
     server.tool(
     "configureProject",
-    `Configures the default content workflow for the Graphlit project.
+    `Configures the default content workflow for the Graphlit project. Only needed if user asks to configure the default workflow.
     Accepts whether to enable high-quality document preparation using a vision LLM. Defaults to using Azure AI Document Intelligence for document preparation, if not assigned.
     Accepts whether to enable entity extraction using LLM into the knowledge graph.
     Optionally accepts the preferred model provider service type, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided.
