@@ -13,6 +13,8 @@ Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdo
 
 Audio and video files will be transcribed upon ingestion.
 
+Web crawling and web search are available as MCP tools, with no need to integrate Firecrawl, Exa, etc. separately.
+
 You can read more about the MCP Server use cases and features on our [blog](https://www.graphlit.com/blog/graphlit-mcp-server).
 
 <a href="https://glama.ai/mcp/servers/fscrivteod">
@@ -57,7 +59,7 @@ You can read more about the MCP Server use cases and features on our [blog](http
 
 ### Web
 - Web Crawling
-- Web Search
+- Web Search (including Podcast Search)
 - Web Mapping
 - Screenshot Page
 
