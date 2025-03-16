@@ -408,7 +408,11 @@ function formatContent(response: GetContentQuery): string {
   }
 
   // Optional metadata
-  if (content.uri) results.push(`**URI:** ${content.uri}`);
+  
+  //
+  // REVIEW: Not sure if source URI is useful for MCP client
+  //
+  //if (content.uri) results.push(`**URI:** ${content.uri}`);
 
   if (content.masterUri) results.push(`**Downloadable Original:** ${content.masterUri}`);
   if (content.imageUri) results.push(`**Downloadable Image:** ${content.imageUri}`);
