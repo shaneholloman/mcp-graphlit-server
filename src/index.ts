@@ -22,6 +22,8 @@ With this Graphlit MCP Server, you can ingest anything from Slack, Discord, webs
 
 Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdown upon ingestion. Audio and video files will be transcribed upon ingestion.
 
+You can use the 'fetchUrl' tool to download the data from any URL as base64-encoded data. This will commonly be used for downloading images or other files, rather than web pages.
+
 Only call the 'configureProject' tool when the user explicitly asks to configure their Graphlit project defaults.
 `
 

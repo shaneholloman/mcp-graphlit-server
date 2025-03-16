@@ -235,6 +235,47 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
+    "fetchUrl",
+    `Fetches data from URL without ingesting into Graphlit knowledge base.
+    Executes *synchronously* and returns Base64-encoded data and MIME type.`,
+    { 
+        url: z.string()
+    },
+    async ({ url }) => {
+        const client = new Graphlit();
+
+        try {
+        const fetchResponse = await fetch(url);
+        if (!fetchResponse.ok) {
+            throw new Error(`Failed to fetch data from ${url}: ${fetchResponse.statusText}`);
+        }
+        const arrayBuffer = await fetchResponse.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+    
+        const data = buffer.toString('base64');
+        const mimeType = fetchResponse.headers.get('content-type') || 'application/octet-stream';
+    
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ data: data, mimeType: mimeType }, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
     "retrieveImages",
     `Retrieve similar images from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
     Accepts image as Base64-encoded data and MIME type. Image will be used for similarity search using image embeddings.

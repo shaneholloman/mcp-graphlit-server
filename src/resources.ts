@@ -180,33 +180,46 @@ export function registerResources(server: McpServer) {
             const response = await client.getContent(id);
 
             if (response.content?.fileType == FileTypes.Image) {
-              const uri = response.content?.imageUri;
+              const imageUri = response.content?.uri;
         
-              const fetchResponse = await fetch(uri);
-              if (!fetchResponse.ok) {
-                  throw new Error(`Failed to fetch image from ${uri}: ${fetchResponse.statusText}`);
+              if (imageUri) {
+                const fetchResponse = await fetch(imageUri);
+                if (!fetchResponse.ok) {
+                    throw new Error(`Failed to fetch image from ${imageUri}: ${fetchResponse.statusText}`);
+                }
+  
+                const arrayBuffer = await fetchResponse.arrayBuffer();
+                const buffer = Buffer.from(arrayBuffer);
+        
+                const data = buffer.toString('base64');
+                const mimeType = fetchResponse.headers.get('content-type') || 'application/octet-stream';
+  
+                return {
+                  contents: [
+                    {
+                      uri: uri.toString(),
+                      text: formatContent(response),
+                      mimeType: 'text/markdown'
+                    },
+                    {
+                      uri: uri.toString(),
+                      blob: data,
+                      mimeType: mimeType
+                    }
+                  ]
+                };
               }
-
-              const arrayBuffer = await fetchResponse.arrayBuffer();
-              const buffer = Buffer.from(arrayBuffer);
-      
-              const data = buffer.toString('base64');
-              const mimeType = fetchResponse.headers.get('content-type') || 'application/octet-stream';
-
-              return {
-                contents: [
-                  {
-                    uri: uri.toString(),
-                    text: formatContent(response),
-                    mimeType: 'text/markdown'
-                  },
-                  {
-                    uri: uri.toString(),
-                    blob: data,
-                    mimeType: mimeType
-                  }
-                ]
-              };
+              else {
+                return {
+                  contents: [
+                    {
+                      uri: uri.toString(),
+                      text: formatContent(response),
+                      mimeType: 'text/markdown'
+                    }
+                  ]
+                };
+              }
               }
               else {
                 return {
