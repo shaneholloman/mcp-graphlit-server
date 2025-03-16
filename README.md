@@ -25,7 +25,8 @@ You can read more about the MCP Server use cases and features on our [blog](http
 
 ### Retrieval
 
-- Retrieve Sources
+- Retrieve Relevant Sources
+- Retrieve Similar Images
 - Visually Describe Images
 
 ### Extraction
@@ -70,6 +71,7 @@ You can read more about the MCP Server use cases and features on our [blog](http
 
 ### Operations
 
+- Configure Project
 - Create Collection
 - Add Contents to Collection
 - Remove Contents from Collection
