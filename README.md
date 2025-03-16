@@ -63,7 +63,6 @@ You can read more about the MCP Server use cases and features on our [blog](http
 - Web Search (including Podcast Search)
 - Web Mapping
 - Screenshot Page
-- Fetch URL
 
 ### Notifications
 - Slack

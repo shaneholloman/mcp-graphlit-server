@@ -234,17 +234,25 @@ export function registerTools(server: McpServer) {
     }
     );
 
+    //
+    // REVIEW: MCP clients don't handle Base64-encoded data very well,
+    // will often exceed the LLM context window to return from the tool
+    // so, we only can support similar images by URL
     server.tool(
-    "fetchUrl",
-    `Fetches data from URL without ingesting into Graphlit knowledge base.
-    Executes *synchronously* and returns Base64-encoded data and MIME type.`,
+    "retrieveImages",
+    `Retrieve similar images from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
+    Accepts image URL. Image will be used for similarity search using image embeddings.
+    Also accepts optional recency filter (defaults to all time), and optional feed and collection identifiers to filter images by.
+    Returns the ranked images, including their content resource URI to retrieve the complete Markdown text.`,
     { 
-        url: z.string()
+        url: z.string().describe("URL of image which will be used for similarity search using image embeddings."),
+        inLast: z.string().optional().describe("Recency filter for image 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
+        feeds: z.array(z.string()).optional().describe("Feed identifiers to filter images by, optional."),
+        collections: z.array(z.string()).optional().describe("Collection identifiers to filter images by, optional.")
     },
-    async ({ url }) => {
+    async ({ url, inLast, feeds, collections }) => {
         const client = new Graphlit();
 
-        try {
         const fetchResponse = await fetch(url);
         if (!fetchResponse.ok) {
             throw new Error(`Failed to fetch data from ${url}: ${fetchResponse.statusText}`);
@@ -254,42 +262,6 @@ export function registerTools(server: McpServer) {
     
         const data = buffer.toString('base64');
         const mimeType = fetchResponse.headers.get('content-type') || 'application/octet-stream';
-    
-        return {
-            content: [{
-            type: "text",
-            text: JSON.stringify({ data: data, mimeType: mimeType }, null, 2)
-            }]
-        };
-        
-        } catch (err: unknown) {
-        const error = err as Error;
-        return {
-            content: [{
-            type: "text",
-            text: `Error: ${error.message}`
-            }],
-            isError: true
-        };
-        }
-    }
-    );
-
-    server.tool(
-    "retrieveImages",
-    `Retrieve similar images from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
-    Accepts image as Base64-encoded data and MIME type. Image will be used for similarity search using image embeddings.
-    Also accepts optional recency filter (defaults to all time), and optional feed and collection identifiers to filter images by.
-    Returns the ranked images, including their content resource URI to retrieve the complete Markdown text.`,
-    { 
-        data: z.string().describe("Base64-encoded string for image which will be used for similarity search using image embeddings."),
-        mimeType: z.string().describe("MIME type for image will be used for similarity search using image embeddings."),
-        inLast: z.string().optional().describe("Recency filter for image 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
-        feeds: z.array(z.string()).optional().describe("Feed identifiers to filter images by, optional."),
-        collections: z.array(z.string()).optional().describe("Collection identifiers to filter images by, optional.")
-    },
-    async ({ data, mimeType, inLast, feeds, collections }) => {
-        const client = new Graphlit();
 
         try {
         const filter: ContentFilter = { 
@@ -2267,7 +2239,7 @@ export function registerTools(server: McpServer) {
     server.tool(
     "screenshotPage",
     `Screenshots web page from URL.
-    Executes *synchronously* and returns the Base64-encoded image and MIME type.`,
+    Executes asynchronously and returns the content identifier.`,
     { 
         url: z.string()
     },
@@ -2275,30 +2247,13 @@ export function registerTools(server: McpServer) {
         const client = new Graphlit();
 
         try {
-        const response = await client.screenshotPage(url, undefined, true);
+        const response = await client.screenshotPage(url);
        
-        const content = response.screenshotPage?.uri;
-
-        const fetchResponse = await fetch(content.uri);
-        if (!fetchResponse.ok) {
-            throw new Error(`Failed to fetch image from ${content.uri}: ${fetchResponse.statusText}`);
-        }
-        const arrayBuffer = await fetchResponse.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
- 
-        const data = buffer.toString('base64');
-        const mimeType = fetchResponse.headers.get('content-type') || 'application/octet-stream';
-                
         return {
             content: [
             {
                 type: "text",
                 text: JSON.stringify({ id: response.screenshotPage?.id }, null, 2)
-            },
-            {
-                type: "image",
-                data: data,
-                mimeType: mimeType
             }]
         };
         
