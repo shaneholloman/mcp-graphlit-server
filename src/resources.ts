@@ -170,7 +170,7 @@ export function registerResources(server: McpServer) {
       );
       
       server.resource(
-        "Content: Returns content metadata and complete Markdown text or Base64-encoded image data. Accepts content resource URI, i.e. contents://{id}, where 'id' is a content identifier.",
+        "Content: Returns content metadata and complete Markdown text. Accepts content resource URI, i.e. contents://{id}, where 'id' is a content identifier.",
         new ResourceTemplate("contents://{id}", { list: undefined }),
         async (uri: URL, variables) => {
           const id = variables.id as string;
@@ -179,59 +179,17 @@ export function registerResources(server: McpServer) {
           try {
             const response = await client.getContent(id);
 
-            if (response.content?.fileType == FileTypes.Image) {
-              const imageUri = response.content?.uri;
-        
-              if (imageUri) {
-                const fetchResponse = await fetch(imageUri);
-                if (!fetchResponse.ok) {
-                    throw new Error(`Failed to fetch image from ${imageUri}: ${fetchResponse.statusText}`);
+            const content = response.content;
+            
+            return {
+              contents: [
+                {
+                  uri: uri.toString(),
+                  text: formatContent(response),
+                  mimeType: 'text/markdown'
                 }
-  
-                const arrayBuffer = await fetchResponse.arrayBuffer();
-                const buffer = Buffer.from(arrayBuffer);
-        
-                const data = buffer.toString('base64');
-                const mimeType = fetchResponse.headers.get('content-type') || 'application/octet-stream';
-  
-                return {
-                  contents: [
-                    {
-                      uri: uri.toString(),
-                      text: formatContent(response),
-                      mimeType: 'text/markdown'
-                    },
-                    {
-                      uri: uri.toString(),
-                      blob: data,
-                      mimeType: mimeType
-                    }
-                  ]
-                };
-              }
-              else {
-                return {
-                  contents: [
-                    {
-                      uri: uri.toString(),
-                      text: formatContent(response),
-                      mimeType: 'text/markdown'
-                    }
-                  ]
-                };
-              }
-              }
-              else {
-                return {
-                  contents: [
-                    {
-                      uri: uri.toString(),
-                      text: formatContent(response),
-                      mimeType: 'text/markdown'
-                    }
-                  ]
-                };    
-              }
+              ]
+            };    
           } catch (error) {
             console.error("Error fetching content:", error);
             return {
@@ -451,11 +409,13 @@ function formatContent(response: GetContentQuery): string {
 
   // Optional metadata
   if (content.uri) results.push(`**URI:** ${content.uri}`);
+
+  if (content.masterUri) results.push(`**Downloadable Original:** ${content.masterUri}`);
+  if (content.imageUri) results.push(`**Downloadable Image:** ${content.imageUri}`);
+  if (content.audioUri) results.push(`**Downloadable Audio:** ${content.audioUri}`);
+
   if (content.creationDate) results.push(`**Ingestion Date:** ${content.creationDate}`);
   if (content.originalDate) results.push(`**Author Date:** ${content.originalDate}`);
-
-  if (content.imageUri) results.push(`**Image URI:** ${content.imageUri}`);
-  if (content.audioUri) results.push(`**Audio URI:** ${content.audioUri}`);
 
   // Issue details
   if (content.issue) {
