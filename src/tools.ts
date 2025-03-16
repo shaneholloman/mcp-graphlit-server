@@ -199,28 +199,13 @@ export function registerTools(server: McpServer) {
                 mimeType: "application/json",
                 text: JSON.stringify({ 
                 id: source.content?.id, 
+                relevance: source.relevance,
                 resourceUri: `contents://${source.content?.id}`, 
                 text: source.text, 
                 mimeType: "text/markdown"
                 }, null, 2)
             }))
         };
-
-        // REVIEW: Goose doesn't seem to handle resources properly
-        /*
-        return {
-            content: sources
-            .filter(source => source !== null)
-            .map(source => ({
-                type: "resource",
-                resource: {
-                uri: `contents://${source.content?.id}`,
-                mimeType: "text/markdown",
-                text: source.text
-                }
-            }))
-        };
-        */
         } catch (err: unknown) {
         const error = err as Error;
         return {
@@ -286,6 +271,7 @@ export function registerTools(server: McpServer) {
                 mimeType: "application/json",
                 text: JSON.stringify({ 
                     id: content.id, 
+                    relevance: content.relevance,
                     resourceUri: `contents://${content.id}`, 
                     uri: content.imageUri, 
                     mimeType: content.mimeType
