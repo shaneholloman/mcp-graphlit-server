@@ -2439,6 +2439,7 @@ export function registerTools(server: McpServer) {
     `Sends a Slack notification to the provided Slack channel.
     Accepts the Slack channel name.
     Also accepts the text for the Slack message, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
+    Hint: In Slack Markdown, images are displayed by simply putting the URL in angle brackets like <https://example.com/image.jpg> instead of using the traditional Markdown image syntax ![alt text](url). 
     Returns true if the notification was successfully sent, or false otherwise.`,
     { 
         channelName: z.string(),
