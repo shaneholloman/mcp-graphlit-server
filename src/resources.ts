@@ -2,6 +2,7 @@ import { Graphlit } from "graphlit-client";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { 
     ContentTypes, 
+    FileTypes, 
     GetContentQuery, 
 } from "graphlit-client/dist/generated/graphql-types.js";
   
@@ -169,7 +170,7 @@ export function registerResources(server: McpServer) {
       );
       
       server.resource(
-        "Content: Returns content metadata and complete Markdown text. Accepts content resource URI, i.e. contents://{id}, where 'id' is a content identifier.",
+        "Content: Returns content metadata and complete Markdown text or Base64-encoded image data. Accepts content resource URI, i.e. contents://{id}, where 'id' is a content identifier.",
         new ResourceTemplate("contents://{id}", { list: undefined }),
         async (uri: URL, variables) => {
           const id = variables.id as string;
@@ -177,15 +178,47 @@ export function registerResources(server: McpServer) {
           
           try {
             const response = await client.getContent(id);
-            return {
-              contents: [
-                {
-                  uri: uri.toString(),
-                  text: formatContent(response),
-                  mimeType: 'text/markdown'
-                }
-              ]
-            };
+
+            if (response.content?.fileType == FileTypes.Image) {
+              const uri = response.content?.imageUri;
+        
+              const fetchResponse = await fetch(uri);
+              if (!fetchResponse.ok) {
+                  throw new Error(`Failed to fetch image from ${uri}: ${fetchResponse.statusText}`);
+              }
+
+              const arrayBuffer = await fetchResponse.arrayBuffer();
+              const buffer = Buffer.from(arrayBuffer);
+      
+              const data = buffer.toString('base64');
+              const mimeType = fetchResponse.headers.get('content-type') || 'application/octet-stream';
+
+              return {
+                contents: [
+                  {
+                    uri: uri.toString(),
+                    text: formatContent(response),
+                    mimeType: 'text/markdown'
+                  },
+                  {
+                    uri: uri.toString(),
+                    blob: data,
+                    mimeType: mimeType
+                  }
+                ]
+              };
+              }
+              else {
+                return {
+                  contents: [
+                    {
+                      uri: uri.toString(),
+                      text: formatContent(response),
+                      mimeType: 'text/markdown'
+                    }
+                  ]
+                };    
+              }
           } catch (error) {
             console.error("Error fetching content:", error);
             return {
