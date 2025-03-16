@@ -15,14 +15,16 @@ Graphlit is an LLM-enabled knowledge API platform, which supports these resource
 - workflows: how content is handled during the ingestion process
 - specifications: LLM configuration presets, used by workflows
 
-Hint: always look for matching resources before you try to call any tools.
-For example, "have i configured any graphlit workflows?", you should check for workflow resources before trying to call any other tools.
-
 With this Graphlit MCP Server, you can ingest anything from Slack, Discord, websites, Google Drive, email, Jira, Linear or GitHub into a Graphlit project - and then search and retrieve relevant knowledge within an MCP client like Cursor, Windsurf or Cline.
 
 Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdown upon ingestion. Audio and video files will be transcribed upon ingestion.
 
-Only call the 'configureProject' tool when the user explicitly asks to configure their Graphlit project defaults.
+Hints:
+1. Always look for matching resources before you try to call any tools.
+For example, "have i configured any graphlit workflows?", you should check for workflow resources before trying to call any other tools.
+2. Prioritize accessing content directly through collection IDs or content IDs when the content has already been organized
+3. Avoid redundant searches with 'retrieveSources' for content that's already been cataloged into a collection
+4. Only call the 'configureProject' tool when the user explicitly asks to configure their Graphlit project defaults.
 `
 
 export const server = new McpServer({
