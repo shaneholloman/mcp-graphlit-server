@@ -19,12 +19,11 @@ With this Graphlit MCP Server, you can ingest anything from Slack, Discord, webs
 
 Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdown upon ingestion. Audio and video files will be transcribed upon ingestion.
 
-Hints:
+## Best Practices:
 1. Always look for matching resources before you try to call any tools.
 For example, "have i configured any graphlit workflows?", you should check for workflow resources before trying to call any other tools.
-2. Prioritize accessing content directly through collection IDs or content IDs when the content has already been organized
-3. Avoid redundant searches with 'retrieveSources' for content that's already been cataloged into a collection
-4. Only call the 'configureProject' tool when the user explicitly asks to configure their Graphlit project defaults.
+2. Don't use 'retrieveSources' to locate contents, when you have already added the contents into a collection. In that case, first retrieve the collection resource, which contains the content resources.
+3. Only call the 'configureProject' tool when the user explicitly asks to configure their Graphlit project defaults.
 `
 
 export const server = new McpServer({
