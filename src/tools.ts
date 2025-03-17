@@ -2499,14 +2499,14 @@ export function registerTools(server: McpServer) {
         name: z.string(),
         text: z.string(),
         textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown),
-        voice: z.string().optional().default("CYw3kZ02Hs0563khs1Fj"),
+        voice: z.string().optional().default("HqW11As4VRPkApNPkAZp"),
     },
     async ({ name, text, textType, voice }) => {
         const client = new Graphlit();
 
         const type = ContentPublishingServiceTypes.ElevenLabsAudio;
         const format = ContentPublishingFormats.Mp3;
-        const model = ElevenLabsModels.MultilingualV2;
+        const model = ElevenLabsModels.FlashV2_5;
 
         try {
         const response = await client.publishText(text, textType, { type: type, format: format, elevenLabs: { model: model, voice: voice } }, name, undefined, true);
