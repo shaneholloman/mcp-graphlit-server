@@ -25,9 +25,11 @@ You can read more about the MCP Server use cases and features on our [blog](http
 
 ### Retrieval
 
+- Query Contents
+- Query Collections
 - Retrieve Relevant Sources
 - Retrieve Similar Images
-- Visually Describe Images
+- Visually Describe Image
 
 ### Extraction
 

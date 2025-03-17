@@ -5,6 +5,7 @@ import { Graphlit, Types } from "graphlit-client";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { 
+  CollectionFilter,
   ContentFilter, 
   ContentTypes, 
   FeedFilter,
@@ -219,34 +220,52 @@ export function registerTools(server: McpServer) {
     }
     );
 
+    const PointFilter = z.object({
+        latitude: z.number().min(-90).max(90)
+            .describe("The latitude, must be between -90 and 90."),
+        longitude: z.number().min(-180).max(180)
+            .describe("The longitude, must be between -180 and 180."),
+        distance: z.number().optional()
+            .describe("The distance radius (in meters)."),
+    });
+
     //
     // REVIEW: MCP clients don't handle Base64-encoded data very well,
     // will often exceed the LLM context window to return from the tool
     // so, we only can support similar images by URL
     server.tool(
     "retrieveImages",
-    `Retrieve similar images from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
+    `Retrieve images from Graphlit knowledge base. Provides image-specific retrieval when image similarity search is desired.
+    Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
     Accepts image URL. Image will be used for similarity search using image embeddings.
+    Accepts optional geo-location filter for search by latitude, longitude and optional distance radius. Images taken with GPS enabled are searchable by geo-location.
     Also accepts optional recency filter (defaults to all time), and optional feed and collection identifiers to filter images by.
-    Returns the ranked images, including their content resource URI to retrieve the complete Markdown text.`,
+    Returns the matching images, including their content resource URI to retrieve the complete Markdown text.`,
     { 
         url: z.string().describe("URL of image which will be used for similarity search using image embeddings."),
         inLast: z.string().optional().describe("Recency filter for image 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
         feeds: z.array(z.string()).optional().describe("Feed identifiers to filter images by, optional."),
-        collections: z.array(z.string()).optional().describe("Collection identifiers to filter images by, optional.")
+        collections: z.array(z.string()).optional().describe("Collection identifiers to filter images by, optional."),
+        location: PointFilter.optional().describe("Geo-location filter for search by latitude, longitude and optional distance radius."),
+        limit: z.number().optional().default(100).describe("Limit the number of images to be returned. Defaults to 100.")
     },
-    async ({ url, inLast, feeds, collections }) => {
+    async ({ url, inLast, feeds, collections, location, limit }) => {
         const client = new Graphlit();
 
-        const fetchResponse = await fetch(url);
-        if (!fetchResponse.ok) {
-            throw new Error(`Failed to fetch data from ${url}: ${fetchResponse.statusText}`);
+        var data;
+        var mimeType;
+
+        if (url) {
+            const fetchResponse = await fetch(url);
+            if (!fetchResponse.ok) {
+                throw new Error(`Failed to fetch data from ${url}: ${fetchResponse.statusText}`);
+            }
+            const arrayBuffer = await fetchResponse.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+        
+            data = buffer.toString('base64');
+            mimeType = fetchResponse.headers.get('content-type') || 'application/octet-stream';
         }
-        const arrayBuffer = await fetchResponse.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
-    
-        const data = buffer.toString('base64');
-        const mimeType = fetchResponse.headers.get('content-type') || 'application/octet-stream';
 
         try {
         const filter: ContentFilter = { 
@@ -255,9 +274,74 @@ export function registerTools(server: McpServer) {
             searchType: SearchTypes.Vector,
             feeds: feeds?.map(feed => ({ id: feed })),
             collections: collections?.map(collection => ({ id: collection })),
+            location: location,
             inLast: inLast, 
             types: [ContentTypes.File], 
-            fileTypes: [FileTypes.Image]
+            fileTypes: [FileTypes.Image],
+            limit: limit
+        };
+        const response = await client.queryContents(filter);
+        
+        const contents = response.contents?.results || [];
+        
+        return {
+            content: contents
+            .filter(content => content !== null)
+            .map(content => ({
+                type: "text",
+                mimeType: "application/json",
+                text: JSON.stringify({ 
+                    id: content.id, 
+                    relevance: content.relevance,
+                    resourceUri: `contents://${content.id}`, 
+                    uri: content.imageUri, 
+                    mimeType: content.mimeType
+                }, null, 2)
+            }))
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "queryContents",
+    `Query contents from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
+    Accepts optional content name, content type and file type for metadata filtering.
+    Accepts optional recency filter (defaults to all time), and optional feed and collection identifiers to filter images by.
+    Accepts optional geo-location filter for search by latitude, longitude and optional distance radius. Images and videos taken with GPS enabled are searchable by geo-location.
+    Returns the matching contents, including their content resource URI to retrieve the complete Markdown text.`,
+    { 
+        name: z.string().optional().describe("Textual match on content name."),
+        type: z.nativeEnum(ContentTypes).optional().describe("Filter by content type."),
+        fileType: z.nativeEnum(FileTypes).optional().describe("Filter by file type."),
+        inLast: z.string().optional().describe("Recency filter for image 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
+        feeds: z.array(z.string()).optional().describe("Feed identifiers to filter images by, optional."),
+        collections: z.array(z.string()).optional().describe("Collection identifiers to filter images by, optional."),
+        location: PointFilter.optional().describe("Geo-location filter for search by latitude, longitude and optional distance radius."),
+        limit: z.number().optional().default(100).describe("Limit the number of contents to be returned. Defaults to 100.")
+    },
+    async ({ name, type, fileType, inLast, feeds, collections, location, limit }) => {
+        const client = new Graphlit();
+
+        try {
+        const filter: ContentFilter = { 
+            name: name,
+            types: type !== undefined ? [ type ] : undefined,
+            fileTypes: fileType !== undefined ? [ fileType ] : undefined,
+            feeds: feeds?.map(feed => ({ id: feed })),
+            collections: collections?.map(collection => ({ id: collection })),
+            location: location,
+            inLast: inLast,
+            limit: limit
         };
         const response = await client.queryContents(filter);
         
@@ -462,6 +546,53 @@ export function registerTools(server: McpServer) {
             type: "text",
             text: JSON.stringify(response.deleteCollection, null, 2)
             }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "queryCollections",
+    `Query collections from Graphlit knowledge base. Do *not* use for retrieving collection by collection identifier - retrieve collection resource instead, with URI 'collections://{id}'.
+    Accepts optional collection name for metadata filtering.
+    Returns the matching collections, including their collection resource URI to retrieve the collection contents.`,
+    { 
+        name: z.string().optional().describe("Textual match on collection name."),
+        limit: z.number().optional().default(100).describe("Limit the number of collections to be returned. Defaults to 100.")
+    },
+    async ({ name, limit }) => {
+        const client = new Graphlit();
+
+        try {
+        const filter: CollectionFilter = { 
+            name: name,
+            limit: limit
+        };
+        const response = await client.queryCollections(filter);
+        
+        const collections = response.collections?.results || [];
+        
+        return {
+            content: collections
+            .filter(collection => collection !== null)
+            .map(collection => ({
+                type: "text",
+                mimeType: "application/json",
+                text: JSON.stringify({ 
+                    id: collection.id, 
+                    relevance: collection.relevance,
+                    resourceUri: `collections://${collection.id}`
+                }, null, 2)
+            }))
         };
         } catch (err: unknown) {
         const error = err as Error;
@@ -694,7 +825,7 @@ export function registerTools(server: McpServer) {
     server.tool(
     "listMicrosoftTeamsTeams",
     `Lists available Microsoft Teams teams.
-        Returns a list of Microsoft Teams teams, where the team identifier can be used with listMicrosoftTeamsChannels to enumerate Microsoft Teams channels.`,
+    Returns a list of Microsoft Teams teams, where the team identifier can be used with listMicrosoftTeamsChannels to enumerate Microsoft Teams channels.`,
     { 
     },
     async ({ }) => {
