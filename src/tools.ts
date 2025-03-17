@@ -2493,6 +2493,7 @@ export function registerTools(server: McpServer) {
     `Publishes text as audio format, and ingests into Graphlit knowledge base.
     Accepts a name for the content object, the text itself, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
     Optionally accepts an ElevenLabs voice identifier.
+    You *must* retrieve the content resource to get the downloadable audio URL for this published audio.
     Executes *synchronously* and returns the content identifier.`,
     { 
         name: z.string(),

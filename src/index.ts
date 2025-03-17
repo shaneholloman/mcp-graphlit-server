@@ -24,6 +24,7 @@ Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdo
 For example, "have i configured any graphlit workflows?", you should check for workflow resources before trying to call any other tools.
 2. Don't use 'retrieveSources' to locate contents, when you have already added the contents into a collection. In that case, first retrieve the collection resource, which contains the content resources.
 3. Only call the 'configureProject' tool when the user explicitly asks to configure their Graphlit project defaults.
+4. Never infer, guess at or hallucinate any URLs. Always retrieve the latest content resources in order to get downloadable URLs.
 `
 
 export const server = new McpServer({
