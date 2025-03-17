@@ -488,11 +488,41 @@ function formatContent(response: GetContentQuery): string {
     if (image.model) results.push(`**Model:** ${image.model}`);
   }
 
+  // Collections
+  if (content.collections) {
+    results.push(...content.collections
+      .filter(collection => collection !== null)
+      .slice(0, 100)
+      .map(collection => `**Collection [${collection.name}]:** collections://${collection.id}`));
+  }
+
+  // Parent Content
+  if (content.parent) {
+    results.push(`**Parent Content:** contents://${content.parent.id}`);
+  }
+
+  // Child Content(s)
+  if (content.children) {
+    results.push(...content.children
+      .filter(child => child !== null)
+      .slice(0, 100)
+      .map(child => `**Child Content:** contents://${child.id}`));
+  }
+
   // Links
   if (content.links && content.type === ContentTypes.Page) {
     results.push(...content.links
       .slice(0, 100)
       .map(link => `**${link.linkType} Link:** ${link.uri}`));
+  }
+
+  // Observations
+  if (content.observations) {
+    results.push(...content.observations
+      .filter(observation => observation !== null)
+      .filter(observation => observation.observable !== null)
+      .slice(0, 100)
+      .map(observation => `**${observation.type}:** ${observation.type.toLowerCase()}s://${observation.observable.id}`));
   }
 
   // Content
