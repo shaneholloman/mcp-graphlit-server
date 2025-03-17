@@ -293,6 +293,7 @@ export function registerTools(server: McpServer) {
                 text: JSON.stringify({ 
                     id: content.id, 
                     relevance: content.relevance,
+                    fileName: content.fileName,                    
                     resourceUri: `contents://${content.id}`, 
                     uri: content.imageUri, 
                     mimeType: content.mimeType
@@ -356,6 +357,7 @@ export function registerTools(server: McpServer) {
                 text: JSON.stringify({ 
                     id: content.id, 
                     relevance: content.relevance,
+                    fileName: content.fileName,
                     resourceUri: `contents://${content.id}`, 
                     uri: content.imageUri, 
                     mimeType: content.mimeType
@@ -2388,7 +2390,7 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
-    "describeImage",
+    "describeImageUrl",
     `Prompts vision LLM and returns completion. 
     Does *not* ingest image into Graphlit knowledge base.
     Accepts image URL as string.
@@ -2424,7 +2426,7 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
-    "describeContent",
+    "describeImageContent",
     `Prompts vision LLM and returns description of image content. 
     Accepts content identifier as string, and optional prompt for image description.
     Returns Markdown text from LLM completion.`,
