@@ -512,7 +512,7 @@ function formatContent(response: GetContentQuery): string {
   // Links
   if (content.links && content.type === ContentTypes.Page) {
     results.push(...content.links
-      .slice(0, 100)
+      .slice(0, 1000)
       .map(link => `**${link.linkType} Link:** ${link.uri}`));
   }
 
