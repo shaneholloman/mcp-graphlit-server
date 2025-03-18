@@ -155,6 +155,72 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
+    "deleteSpecification",
+    `Delete a specification.
+    Accepts a specification identifier.
+    Returns the specification identifier and specification state, i.e. Deleted.`,
+    { 
+        id: z.string().describe("Specification identifier."),
+    },
+    async ({ id}) => {
+        const client = new Graphlit();
+
+        try {
+        const response = await client.deleteSpecification(id);
+                
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteSpecification, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "deleteWorkflow",
+    `Delete a workflow.
+    Accepts a workflow identifier.
+    Returns the workflow identifier and workflow state, i.e. Deleted.`,
+    { 
+        id: z.string().describe("Workflow identifier."),
+    },
+    async ({ id}) => {
+        const client = new Graphlit();
+
+        try {
+        const response = await client.deleteWorkflow(id);
+                
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteWorkflow, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+    
+    server.tool(
     "retrieveSources",
     `Retrieve relevant content sources from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
     Accepts a search prompt, optional recency filter (defaults to all time), and optional content type and file type filters.
