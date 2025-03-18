@@ -685,7 +685,7 @@ export function registerTools(server: McpServer) {
         { 
             contentType: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."),
             fileType: z.nativeEnum(FileTypes).optional().describe("File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video."),
-            limit: z.number().optional().default(1000)            
+            limit: z.number().optional().default(1000).describe("Limit the number of contents to be deleted. Defaults to 1000.")
         },
         async ({ contentType, fileType, limit }) => {
             const client = new Graphlit();
@@ -726,7 +726,7 @@ export function registerTools(server: McpServer) {
         Returns the feed identifiers and feed state, i.e. Deleted.`,
         { 
             feedType: z.nativeEnum(FeedTypes).optional().describe("Feed type filter, optional. One of: Discord, Email, Intercom, Issue, MicrosoftTeams, Notion, Reddit, Rss, Search, Site, Slack, Web, YouTube, Zendesk."),
-            limit: z.number().optional().default(100)            
+            limit: z.number().optional().default(100).describe("Limit the number of feeds to be deleted. Defaults to 100.")
         },
         async ({ feedType, limit }) => {
             const client = new Graphlit();
@@ -884,7 +884,7 @@ export function registerTools(server: McpServer) {
     `Lists available Microsoft Teams channels.
         Returns a list of Microsoft Teams channels, where the channel identifier can be used with ingestMicrosoftTeamsMessages to ingest messages into Graphlit knowledge base.`,
     { 
-        teamId: z.string()
+        teamId: z.string().describe("Microsoft Teams team identifier.")
     },
     async ({ teamId }) => {
         const client = new Graphlit();
@@ -1033,9 +1033,9 @@ export function registerTools(server: McpServer) {
     server.tool(
     "listSharePointFolders",
     `Lists available SharePoint folders.
-        Returns a list of SharePoint folders, which can be used with ingestSharePointFiles to ingest files into Graphlit knowledge base.`,
+    Returns a list of SharePoint folders, which can be used with ingestSharePointFiles to ingest files into Graphlit knowledge base.`,
     { 
-        libraryId: z.string()
+        libraryId: z.string().describe("SharePoint library identifier.")
     },
     async ({ libraryId }) => {
         const client = new Graphlit();
@@ -1094,8 +1094,8 @@ export function registerTools(server: McpServer) {
     Accepts an optional read limit for the number of files to ingest.
     Executes asynchronously and returns the feed identifier.`,
     { 
-        libraryId: z.string(),
-        folderId: z.string().optional(),
+        libraryId: z.string().describe("SharePoint library identifier."),
+        folderId: z.string().optional().describe("SharePoint folder identifier, optional."),
         readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
     },
     async ({ libraryId, folderId, readLimit }) => {
@@ -1316,7 +1316,7 @@ export function registerTools(server: McpServer) {
     If no path provided, ingests files from root Dropbox folder.
     Executes asynchronously and returns the feed identifier.`,
     { 
-        path: z.string().optional(),
+        path: z.string().optional().describe("Relative path to Dropbox folder, optional."),
         readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
     },
     async ({ path, readLimit }) => {
@@ -1392,7 +1392,7 @@ export function registerTools(server: McpServer) {
     Folder identifier can be inferred from Box URL. https://app.box.com/folder/123456 -> folder identifier is "123456".
     Executes asynchronously and returns the feed identifier.`,
     { 
-        folderId: z.string().optional().default("0"),
+        folderId: z.string().optional().default("0").describe("Box folder identifier, optional. Defaults to root folder."),
         readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
     },
     async ({ folderId, readLimit }) => {
@@ -1577,8 +1577,8 @@ export function registerTools(server: McpServer) {
     Accepts Microsoft Teams team identifier and channel identifier, and an optional read limit for the number of messages to ingest.
     Executes asynchronously and returns the feed identifier.`,
     { 
-        teamId: z.string(),
-        channelId: z.string(),
+        teamId: z.string().describe("Microsoft Teams team identifier."),
+        channelId: z.string().describe("Microsoft Teams channel identifier."),
         readLimit: z.number().optional().describe("Number of messages to ingest, optional. Defaults to 100.")
     },
     async ({ teamId, channelId, readLimit }) => {
@@ -1643,7 +1643,7 @@ export function registerTools(server: McpServer) {
         Accepts Slack channel name and an optional read limit for the number of messages to ingest.
         Executes asynchronously and returns the feed identifier.`,
     { 
-        channelName: z.string(),
+        channelName: z.string().describe("Slack channel name."),
         readLimit: z.number().optional().describe("Number of messages to ingest, optional. Defaults to 100.")
     },
     async ({ channelName, readLimit }) => {
@@ -1694,7 +1694,7 @@ export function registerTools(server: McpServer) {
         Accepts Discord channel name and an optional read limit for the number of messages to ingest.
         Executes asynchronously and returns the feed identifier.`,
     { 
-        channelName: z.string(),
+        channelName: z.string().describe("Discord channel name."),
         readLimit: z.number().optional().describe("Number of messages to ingest, optional. Defaults to 100.")
     },
     async ({ channelName, readLimit }) => {
@@ -1745,7 +1745,7 @@ export function registerTools(server: McpServer) {
         Accepts a subreddit name and an optional read limit for the number of posts to ingest.
         Executes asynchronously and returns the feed identifier.`,
     { 
-        subredditName: z.string(),
+        subredditName: z.string().describe("Subreddit name."),
         readLimit: z.number().optional().describe("Number of posts to ingest, optional. Defaults to 100.")
     },
     async ({ subredditName, readLimit }) => {
@@ -1919,7 +1919,7 @@ export function registerTools(server: McpServer) {
     Accepts Linear project name and an optional read limit for the number of issues to ingest.
     Executes asynchronously and returns the feed identifier.`,
     { 
-        projectName: z.string(),
+        projectName: z.string().describe("Linear project name."),
         readLimit: z.number().optional().describe("Number of issues to ingest, optional. Defaults to 100.")
     },
     async ({ projectName, readLimit }) => {
@@ -2028,8 +2028,8 @@ export function registerTools(server: McpServer) {
     Accepts Atlassian Jira server URL and project name, and an optional read limit for the number of issues to ingest.
     Executes asynchronously and returns the feed identifier.`,
     { 
-        url: z.string(),
-        projectName: z.string(),
+        url: z.string().describe("Atlassian Jira server URL."),
+        projectName: z.string().describe("Atlassian Jira project name."),
         readLimit: z.number().optional().describe("Number of issues to ingest, optional. Defaults to 100.")
     },
     async ({ url, projectName, readLimit }) => {
@@ -2091,7 +2091,7 @@ export function registerTools(server: McpServer) {
     Uses sitemap.xml to discover pages to be crawled from website.
     Executes asynchronously and returns the feed identifier.`,
     { 
-        url: z.string(),
+        url: z.string().describe("Web site URL."),
         readLimit: z.number().optional().describe("Number of web pages to ingest, optional. Defaults to 100.")
     },
     async ({ url, readLimit }) => {
@@ -2131,10 +2131,10 @@ export function registerTools(server: McpServer) {
     "webMap",
     `Enumerates the web pages at or beneath the provided URL using web sitemap. 
     Does *not* ingest web pages into Graphlit knowledge base.
-    Accepts web page URL as string.
+    Accepts web site URL as string.
     Returns list of mapped URIs from web site.`,
     { 
-        url: z.string()
+        url: z.string().describe("Web site URL.")
     },
     async ({ url }) => {
         const client = new Graphlit();
@@ -2172,8 +2172,8 @@ export function registerTools(server: McpServer) {
     Search service types: Tavily (web pages), Exa (web pages) and Podscan (podcast episodes). Defaults to Tavily.
     Returns URL, title and relevant Markdown text from resulting web pages or podcast episode transcripts.`,
     { 
-        search: z.string(),
-        searchService: z.nativeEnum(SearchServiceTypes).optional().default(SearchServiceTypes.Tavily)
+        search: z.string().describe("Search query."),
+        searchService: z.nativeEnum(SearchServiceTypes).optional().default(SearchServiceTypes.Tavily).describe("Search service type (Tavily, Exa, Podscan). Defaults to Tavily.")
     },
     async ({ search, searchService }) => {
         const client = new Graphlit();
@@ -2208,7 +2208,7 @@ export function registerTools(server: McpServer) {
     Accepts RSS URL and an optional read limit for the number of posts to read.
     Executes asynchronously and returns the feed identifier.`,
     { 
-        url: z.string(),
+        url: z.string().describe("RSS URL."),
         readLimit: z.number().optional().describe("Number of issues to posts, optional. Defaults to 25.")
     },
     async ({ url, readLimit }) => {
@@ -2250,7 +2250,7 @@ export function registerTools(server: McpServer) {
     Can scrape web pages, and can ingest individual Word documents, PDFs, audio recordings, videos, images, or any other unstructured data.
     Executes asynchronously and returns the content identifier.`,
     { 
-        url: z.string()
+        url: z.string().describe("URL to ingest content from.")
     },
     async ({ url }) => {
         const client = new Graphlit();
@@ -2282,18 +2282,20 @@ export function registerTools(server: McpServer) {
     "ingestText",
     `Ingests text as content into Graphlit knowledge base.
     Accepts a name for the content object, the text itself, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
+    Optionally accepts an identifier for an existing content object. Will overwrite existing content, if provided.
     Can use for storing long-term textual memories or the output from LLM or other tools as content resources, which can be later searched or retrieved.
     Executes *synchronously* and returns the content identifier.`,
     { 
-        name: z.string(),
-        text: z.string(),
-        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown)
+        name: z.string().describe("Name for the content object."),
+        text: z.string().describe("Text content to ingest."),
+        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown).describe("Text type (Plain, Markdown, Html). Defaults to Markdown."),
+        id: z.string().optional().describe("Optional identifier for the content object. Will overwrite existing content, if provided.")
     },
-    async ({ name, text, textType }) => {
+    async ({ name, text, textType, id }) => {
         const client = new Graphlit();
 
         try {
-        const response = await client.ingestText(name, text, textType, undefined, undefined, true);
+        const response = await client.ingestText(name, text, textType, undefined, id, true);
 
         return {
             content: [{
@@ -2319,9 +2321,10 @@ export function registerTools(server: McpServer) {
     "ingestFile",
     `Ingests local file into Graphlit knowledge base.
     Accepts the path to the file in the local filesystem.
+    Can use for storing *large* long-term textual memories or the output from LLM or other tools as content resources, which can be later searched or retrieved.
     Executes asynchronously and returns the content identifier.`,
     { 
-        filePath: z.string()
+        filePath: z.string().describe("Path to the file in the local filesystem.")
     },
     async ({ filePath }) => {
         const client = new Graphlit();
