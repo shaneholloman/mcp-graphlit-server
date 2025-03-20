@@ -110,6 +110,35 @@ Before you begin, ensure you have the following:
 
 ## Installation
 
+### Installing via Cline
+
+To install graphlit-mcp-server in Cline application, Cline should use NPX:
+
+```bash
+npx -y graphlit-mcp-server
+```
+
+Your cline_mcp_settings.json file should be configured similar to:
+
+```
+{
+    "mcpServers": {
+        "graphlit-mcp-server": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "graphlit-mcp-server"
+            ],
+            "env": {
+                "GRAPHLIT_ORGANIZATION_ID": "your-organization-id",
+                "GRAPHLIT_ENVIRONMENT_ID": "your-environment-id",
+                "GRAPHLIT_JWT_SECRET": "your-jwt-secret",
+            }
+        }
+    }
+}
+```
+
 ### Installing via Smithery
 
 To install graphlit-mcp-server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@graphlit/graphlit-mcp-server):
@@ -119,6 +148,7 @@ npx -y @smithery/cli install @graphlit/graphlit-mcp-server --client claude
 ```
 
 ### Installing manually for Claude Desktop
+
 To use the Graphlit MCP Server in Claude Desktop application, use:
 
 ```
@@ -178,7 +208,6 @@ To install the Graphlit MCP Server, use npx:
 ```bash
 npx install graphlit-mcp-server
 ```
-
 
 ## Configuration
 
