@@ -110,15 +110,73 @@ Before you begin, ensure you have the following:
 
 ## Installation
 
+### Installing via Windsurf
+
+To install graphlit-mcp-server in Windsurf IDE application, Cline should use NPX:
+
+```bash
+npx -y graphlit-mcp-server
+```
+
+Your mcp_config.json file should be configured similar to:
+
+```
+{
+    "mcpServers": {
+        "graphlit-mcp-server": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "graphlit-mcp-server"
+            ],
+            "env": {
+                "GRAPHLIT_ORGANIZATION_ID": "your-organization-id",
+                "GRAPHLIT_ENVIRONMENT_ID": "your-environment-id",
+                "GRAPHLIT_JWT_SECRET": "your-jwt-secret",
+            }
+        }
+    }
+}
+```
+
 ### Installing via Cline
 
-To install graphlit-mcp-server in Cline application, Cline should use NPX:
+To install graphlit-mcp-server in Cline IDE application, Cline should use NPX:
 
 ```bash
 npx -y graphlit-mcp-server
 ```
 
 Your cline_mcp_settings.json file should be configured similar to:
+
+```
+{
+    "mcpServers": {
+        "graphlit-mcp-server": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "graphlit-mcp-server"
+            ],
+            "env": {
+                "GRAPHLIT_ORGANIZATION_ID": "your-organization-id",
+                "GRAPHLIT_ENVIRONMENT_ID": "your-environment-id",
+                "GRAPHLIT_JWT_SECRET": "your-jwt-secret",
+            }
+        }
+    }
+}
+```
+
+### Installing via Cursor
+
+To install graphlit-mcp-server in Cursor IDE application, Cline should use NPX:
+
+```bash
+npx -y graphlit-mcp-server
+```
+
+Your mcp.json file should be configured similar to:
 
 ```
 {
