@@ -155,72 +155,6 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
-    "deleteSpecification",
-    `Delete a specification.
-    Accepts a specification identifier.
-    Returns the specification identifier and specification state, i.e. Deleted.`,
-    { 
-        id: z.string().describe("Specification identifier."),
-    },
-    async ({ id}) => {
-        const client = new Graphlit();
-
-        try {
-        const response = await client.deleteSpecification(id);
-                
-        return {
-            content: [{
-            type: "text",
-            text: JSON.stringify(response.deleteSpecification, null, 2)
-            }]
-        };
-        } catch (err: unknown) {
-        const error = err as Error;
-        return {
-            content: [{
-            type: "text",
-            text: `Error: ${error.message}`
-            }],
-            isError: true
-        };
-        }
-    }
-    );
-
-    server.tool(
-    "deleteWorkflow",
-    `Delete a workflow.
-    Accepts a workflow identifier.
-    Returns the workflow identifier and workflow state, i.e. Deleted.`,
-    { 
-        id: z.string().describe("Workflow identifier."),
-    },
-    async ({ id}) => {
-        const client = new Graphlit();
-
-        try {
-        const response = await client.deleteWorkflow(id);
-                
-        return {
-            content: [{
-            type: "text",
-            text: JSON.stringify(response.deleteWorkflow, null, 2)
-            }]
-        };
-        } catch (err: unknown) {
-        const error = err as Error;
-        return {
-            content: [{
-            type: "text",
-            text: `Error: ${error.message}`
-            }],
-            isError: true
-        };
-        }
-    }
-    );
-    
-    server.tool(
     "retrieveSources",
     `Retrieve relevant content sources from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
     Accepts a search prompt, optional recency filter (defaults to all time), and optional content type and file type filters.
@@ -596,39 +530,6 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
-    "deleteCollection",
-    `Delete a collection. Does *not* delete the content in the collection.
-    Accepts a collection identifier.
-    Returns the collection identifier and collection state, i.e. Deleted.`,
-    { 
-        id: z.string().describe("Collection identifier."),
-    },
-    async ({ id}) => {
-        const client = new Graphlit();
-
-        try {
-        const response = await client.deleteCollection(id);
-                
-        return {
-            content: [{
-            type: "text",
-            text: JSON.stringify(response.deleteCollection, null, 2)
-            }]
-        };
-        } catch (err: unknown) {
-        const error = err as Error;
-        return {
-            content: [{
-            type: "text",
-            text: `Error: ${error.message}`
-            }],
-            isError: true
-        };
-        }
-    }
-    );
-
-    server.tool(
     "queryCollections",
     `Query collections from Graphlit knowledge base. Do *not* use for retrieving collection by collection identifier - retrieve collection resource instead, with URI 'collections://{id}'.
     Accepts optional collection name for metadata filtering.
@@ -661,73 +562,6 @@ export function registerTools(server: McpServer) {
                     resourceUri: `collections://${collection.id}`
                 }, null, 2)
             }))
-        };
-        } catch (err: unknown) {
-        const error = err as Error;
-        return {
-            content: [{
-            type: "text",
-            text: `Error: ${error.message}`
-            }],
-            isError: true
-        };
-        }
-    }
-    );
-
-    server.tool(
-    "deleteFeed",
-    `Delete a feed and all of its ingested content.
-    Accepts a feed identifier which was returned from one of the ingestion tools, like ingestGoogleDriveFiles.
-    Content deletion will happen asynchronously.
-    Returns the feed identifier and feed state, i.e. Deleted.`,
-    { 
-        id: z.string().describe("Feed identifier."),
-    },
-    async ({ id}) => {
-        const client = new Graphlit();
-
-        try {
-        const response = await client.deleteFeed(id);
-                
-        return {
-            content: [{
-            type: "text",
-            text: JSON.stringify(response.deleteFeed, null, 2)
-            }]
-        };
-        } catch (err: unknown) {
-        const error = err as Error;
-        return {
-            content: [{
-            type: "text",
-            text: `Error: ${error.message}`
-            }],
-            isError: true
-        };
-        }
-    }
-    );
-
-    server.tool(
-    "deleteContent",
-    `Delete content.
-    Accepts a content identifier.
-    Returns the content identifier and content state, i.e. Deleted.`,
-    { 
-        id: z.string().describe("Content identifier."),
-    },
-    async ({ id}) => {
-        const client = new Graphlit();
-
-        try {
-        const response = await client.deleteContent(id);
-                
-        return {
-            content: [{
-            type: "text",
-            text: JSON.stringify(response.deleteContent, null, 2)
-            }]
         };
         } catch (err: unknown) {
         const error = err as Error;
@@ -2427,7 +2261,7 @@ export function registerTools(server: McpServer) {
     server.tool(
     "screenshotPage",
     `Screenshots web page from URL.
-    Executes asynchronously and returns the content identifier.`,
+    Executes *synchronously* and returns the content identifier.`,
     { 
         url: z.string()
     },
@@ -2435,7 +2269,7 @@ export function registerTools(server: McpServer) {
         const client = new Graphlit();
 
         try {
-        const response = await client.screenshotPage(url);
+        const response = await client.screenshotPage(url, undefined, true);
        
         return {
             content: [
