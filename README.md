@@ -108,6 +108,16 @@ Before you begin, ensure you have the following:
 - Node.js installed on your system (recommended version 18.x or higher).
 - An active account on the [Graphlit Platform](https://portal.graphlit.dev) with access to the API settings dashboard.
 
+## Configuration
+
+The Graphlit MCP Server supports environment variables to be set for authentication and configuration:
+
+- `GRAPHLIT_ENVIRONMENT_ID`: Your environment ID.
+- `GRAPHLIT_ORGANIZATION_ID`: Your organization ID.
+- `GRAPHLIT_JWT_SECRET`: Your JWT secret for signing the JWT token.
+
+You can find these values in the API settings dashboard on the [Graphlit Platform](https://portal.graphlit.dev).
+
 ## Installation
 
 ### Installing via Windsurf
@@ -205,9 +215,9 @@ To install graphlit-mcp-server for Claude Desktop automatically via [Smithery](h
 npx -y @smithery/cli install @graphlit/graphlit-mcp-server --client claude
 ```
 
-### Installing manually for Claude Desktop
+### Installing manually
 
-To use the Graphlit MCP Server in Claude Desktop application, use:
+To use the Graphlit MCP Server in any MCP client application, use:
 
 ```
 {
@@ -228,7 +238,8 @@ To use the Graphlit MCP Server in Claude Desktop application, use:
 }
 ```
 
-Optionally, you can configure the credentials for data connectors, such as Slack, Google Email and Notion.
+Optionally, you can configure the credentials for data connectors, such as Slack, Google Email and Notion. 
+Only GRAPHLIT_ORGANIZATION_ID, GRAPHLIT_ENVIRONMENT_ID and GRAPHLIT_JWT_SECRET are required.
 
 ```
 {
@@ -259,23 +270,6 @@ Optionally, you can configure the credentials for data connectors, such as Slack
     }
 }
 ```
-
-### Installing manually via terminal
-To install the Graphlit MCP Server, use npx:
-
-```bash
-npx install graphlit-mcp-server
-```
-
-## Configuration
-
-The Graphlit MCP Server supports environment variables to be set for authentication and configuration:
-
-- `GRAPHLIT_ENVIRONMENT_ID`: Your environment ID.
-- `GRAPHLIT_ORGANIZATION_ID`: Your organization ID.
-- `GRAPHLIT_JWT_SECRET`: Your JWT secret for signing the JWT token.
-
-You can find these values in the API settings dashboard on the [Graphlit Platform](https://portal.graphlit.dev).
 
 ## Support
 
