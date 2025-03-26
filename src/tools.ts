@@ -157,13 +157,13 @@ export function registerTools(server: McpServer) {
     server.tool(
     "retrieveSources",
     `Retrieve relevant content sources from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
-    Accepts a search prompt, optional recency filter (defaults to all time), and optional content type and file type filters.
+    Accepts a search prompt, optional ingestion recency filter (defaults to null, meaning all time), and optional content type and file type filters.
     Also accepts optional feed and collection identifiers to filter content by.
     Prompt should be optimized for vector search, via text embeddings. Rewrite prompt as appropriate for higher relevance to search results.
     Returns the ranked content sources, including their content resource URI to retrieve the complete Markdown text.`,
     { 
         prompt: z.string().describe("Search prompt for content retrieval."),
-        inLast: z.string().optional().describe("Recency filter for content 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
+        inLast: z.string().optional().describe("Recency filter for content ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
         contentType: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."),
         fileType: z.nativeEnum(FileTypes).optional().describe("File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video."),
         feeds: z.array(z.string()).optional().describe("Feed identifiers to filter content by, optional."),
@@ -177,7 +177,7 @@ export function registerTools(server: McpServer) {
             searchType: SearchTypes.Hybrid,
             feeds: feeds?.map(feed => ({ id: feed })),
             collections: collections?.map(collection => ({ id: collection })),
-            inLast: inLast, 
+            createdInLast: inLast, 
             types: contentType ? [contentType] : null, 
             fileTypes: fileType ? [fileType] : null
         };
@@ -239,11 +239,11 @@ export function registerTools(server: McpServer) {
     Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
     Accepts image URL. Image will be used for similarity search using image embeddings.
     Accepts optional geo-location filter for search by latitude, longitude and optional distance radius. Images taken with GPS enabled are searchable by geo-location.
-    Also accepts optional recency filter (defaults to all time), and optional feed and collection identifiers to filter images by.
+    Also accepts optional recency filter (defaults to null, meaning all time), and optional feed and collection identifiers to filter images by.
     Returns the matching images, including their content resource URI to retrieve the complete Markdown text.`,
     { 
         url: z.string().describe("URL of image which will be used for similarity search using image embeddings."),
-        inLast: z.string().optional().describe("Recency filter for image 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
+        inLast: z.string().optional().describe("Recency filter for images ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
         feeds: z.array(z.string()).optional().describe("Feed identifiers to filter images by, optional."),
         collections: z.array(z.string()).optional().describe("Collection identifiers to filter images by, optional."),
         location: PointFilter.optional().describe("Geo-location filter for search by latitude, longitude and optional distance radius."),
@@ -275,7 +275,7 @@ export function registerTools(server: McpServer) {
             feeds: feeds?.map(feed => ({ id: feed })),
             collections: collections?.map(collection => ({ id: collection })),
             location: location,
-            inLast: inLast, 
+            createdInLast: inLast, 
             types: [ContentTypes.File], 
             fileTypes: [FileTypes.Image],
             limit: limit
@@ -317,16 +317,16 @@ export function registerTools(server: McpServer) {
     "queryContents",
     `Query contents from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
     Accepts optional content name, content type and file type for metadata filtering.
-    Accepts optional recency filter (defaults to all time), and optional feed and collection identifiers to filter images by.
+    Accepts optional recency filter (defaults to null, meaning all time), and optional feed and collection identifiers to filter images by.
     Accepts optional geo-location filter for search by latitude, longitude and optional distance radius. Images and videos taken with GPS enabled are searchable by geo-location.
     Returns the matching contents, including their content resource URI to retrieve the complete Markdown text.`,
     { 
         name: z.string().optional().describe("Textual match on content name."),
         type: z.nativeEnum(ContentTypes).optional().describe("Filter by content type."),
         fileType: z.nativeEnum(FileTypes).optional().describe("Filter by file type."),
-        inLast: z.string().optional().describe("Recency filter for image 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
-        feeds: z.array(z.string()).optional().describe("Feed identifiers to filter images by, optional."),
-        collections: z.array(z.string()).optional().describe("Collection identifiers to filter images by, optional."),
+        inLast: z.string().optional().describe("Recency filter for content ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
+        feeds: z.array(z.string()).optional().describe("Feed identifiers to filter contents by, optional."),
+        collections: z.array(z.string()).optional().describe("Collection identifiers to filter contents by, optional."),
         location: PointFilter.optional().describe("Geo-location filter for search by latitude, longitude and optional distance radius."),
         limit: z.number().optional().default(100).describe("Limit the number of contents to be returned. Defaults to 100.")
     },
@@ -341,7 +341,7 @@ export function registerTools(server: McpServer) {
             feeds: feeds?.map(feed => ({ id: feed })),
             collections: collections?.map(collection => ({ id: collection })),
             location: location,
-            inLast: inLast,
+            createdInLast: inLast,
             limit: limit
         };
         const response = await client.queryContents(filter);
