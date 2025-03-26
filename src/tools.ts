@@ -157,12 +157,12 @@ export function registerTools(server: McpServer) {
     server.tool(
     "retrieveSources",
     `Retrieve relevant content sources from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
-    Accepts a search prompt, optional ingestion recency filter (defaults to null, meaning all time), and optional content type and file type filters.
+    Accepts an LLM user prompt for content retrieval. For best retrieval quality, provide only key words or phrases from the user prompt, which will be used to create text embeddings for a vector search query.
+    Accepts an optional ingestion recency filter (defaults to null, meaning all time), and optional content type and file type filters.
     Also accepts optional feed and collection identifiers to filter content by.
-    Prompt should be optimized for vector search, via text embeddings. Rewrite prompt as appropriate for higher relevance to search results.
     Returns the ranked content sources, including their content resource URI to retrieve the complete Markdown text.`,
     { 
-        prompt: z.string().describe("Search prompt for content retrieval."),
+        prompt: z.string().describe("LLM user prompt for content retrieval."),
         inLast: z.string().optional().describe("Recency filter for content ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
         contentType: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."),
         fileType: z.nativeEnum(FileTypes).optional().describe("File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video."),
