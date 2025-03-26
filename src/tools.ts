@@ -158,6 +158,7 @@ export function registerTools(server: McpServer) {
     "retrieveSources",
     `Retrieve relevant content sources from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
     Accepts an LLM user prompt for content retrieval. For best retrieval quality, provide only key words or phrases from the user prompt, which will be used to create text embeddings for a vector search query.
+    Only use when there is a valid LLM user prompt for content retrieval, otherwise use queryContents. For example 'recent content' is not a useful user prompt, since it doesn't reference the text in the content.
     Accepts an optional ingestion recency filter (defaults to null, meaning all time), and optional content type and file type filters.
     Also accepts optional feed and collection identifiers to filter content by.
     Returns the ranked content sources, including their content resource URI to retrieve the complete Markdown text.`,
