@@ -39,6 +39,10 @@ You can read more about the MCP Server use cases and features on our [blog](http
 
 - Files
 - Web Pages
+- Messages
+- Posts
+- Emails
+- Issues
 - Text
 
 ### Data Connectors
@@ -58,6 +62,7 @@ You can read more about the MCP Server use cases and features on our [blog](http
 - Slack
 - Microsoft Teams
 - Discord
+- Twitter/X
 - Podcasts (RSS)
 
 ### Web
@@ -256,6 +261,7 @@ Only GRAPHLIT_ORGANIZATION_ID, GRAPHLIT_ENVIRONMENT_ID and GRAPHLIT_JWT_SECRET a
                 "GRAPHLIT_JWT_SECRET": "your-jwt-secret",
                 "SLACK_BOT_TOKEN": "your-slack-bot-token",
                 "DISCORD_BOT_TOKEN": "your-discord-bot-token",
+                "TWITTER_TOKEN": "your-twitter-token",
                 "GOOGLE_EMAIL_REFRESH_TOKEN": "your-google-refresh-token",
                 "GOOGLE_EMAIL_CLIENT_ID": "your-google-client-id",
                 "GOOGLE_EMAIL_CLIENT_SECRET": "your-google-client-secret",
