@@ -1644,10 +1644,10 @@ export function registerTools(server: McpServer) {
     server.tool(
     "ingestTwitterPosts",
     `Ingests posts from Twitter/X into Graphlit knowledge base.
-     Accepts Twitter/X user name, without a leading '@' symbol, and an optional read limit for the number of posts to ingest.
+     Accepts Twitter/X user name, without the leading @ symbol, and an optional read limit for the number of posts to ingest.
      Executes asynchronously and returns the feed identifier.`,
     { 
-        userName: z.string().describe("Twitter/X user name, without a leading '@' symbol."),
+        userName: z.string().describe("Twitter/X user name, without the leading @ symbol, i.e. 'graphlit'."),
         readLimit: z.number().optional().describe("Number of posts to ingest, optional. Defaults to 100.")
     },
     async ({ userName, readLimit }) => {
