@@ -2051,310 +2051,170 @@ export function registerTools(server: McpServer) {
     },
     async ({ url, fullVersion, maxPages }) => {
         const client = new Graphlit();
-
+        let normalizedUrl = "";
+    
         try {
-            // Normalize URL to ensure consistent formatting
-            const normalizedUrl = url.trim().replace(/\/$/, '');
-            if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
-                throw new Error("URL must start with http:// or https://");
+        // Normalize URL to ensure consistent formatting
+        normalizedUrl = url.trim().replace(/\/$/, '');
+        if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+            throw new Error("URL must start with http:// or https://");
+        }
+    
+        // Step 1: Get pages from the website
+        const mapResponse = await client.mapWeb(normalizedUrl);
+        let pages = mapResponse.mapWeb?.results || [];
+    
+        // If no pages are found, process the main URL directly
+        if (pages.length === 0) {
+            console.warn(`No pages found at URL: ${normalizedUrl}. Using the main URL as a fallback.`);
+            pages = [{ uri: normalizedUrl, title: normalizedUrl }];
+        }
+    
+        // Limit the number of pages to process
+        if (pages.length > maxPages) {
+            console.warn(`Limiting processing to ${maxPages} pages out of ${pages.length} found.`);
+            pages = pages.slice(0, maxPages);
+        }
+    
+        // Prepare file header
+        const fileName = fullVersion ? "llms-full.txt" : "llms.txt";
+        let fileHeader = `# ${normalizedUrl} - ${fileName}\n`;
+        fileHeader += `Generated on ${new Date().toISOString()}\n`;
+        fileHeader += `This file follows the llms.txt standard: https://llmstxt.org/\n\n`;
+    
+        // Step 2: Process all pages concurrently, skipping any that throw errors
+        const pagePromises = pages.map(async (page, index) => {
+            if (!page.uri) {
+            console.warn("Skipping page with missing URI:", page);
+            return null;
             }
-
-            // Step 1: Use webMap to get all pages from the website
-            const mapResponse = await client.mapWeb(normalizedUrl);
-            let pages = mapResponse.mapWeb?.results || [];
-            
-            // Handle case where no pages are found
-            if (pages.length === 0) {
-                console.warn(`No pages found at URL: ${normalizedUrl}. Attempting to process the main URL directly.`);
-                // Try to process the main URL directly as a fallback
-                pages = [{ uri: normalizedUrl, title: normalizedUrl }];
-            }
-
-            // Limit the number of pages to process
-            if (pages.length > maxPages) {
-                console.warn(`Limiting processing to ${maxPages} pages out of ${pages.length} total pages found.`);
-                pages = pages.slice(0, maxPages);
-            }
-
-            // Step 2: Fetch content from each page concurrently
-            const fileName = fullVersion ? "llms-full.txt" : "llms.txt";
-            
-            // Add header to the file
-            let fileHeader = `# ${normalizedUrl} - ${fileName}\n`;
-            fileHeader += `Generated on ${new Date().toISOString()}\n`;
-            fileHeader += `This file follows the llms.txt standard: https://llmstxt.org/\n\n`;
-            
-            // Process pages in batches to avoid overwhelming the system
-            const batchSize = 10;
-            const batches: Array<typeof pages> = [];
-            
-            for (let i = 0; i < pages.length; i += batchSize) {
-                batches.push(pages.slice(i, i + batchSize));
-            }
-            
-            let allPageResults: Array<{uri: string, content: string, order: number}> = [];
-            
-            // Process each batch sequentially
-            for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-                const batch = batches[batchIndex];
-                console.log(`Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} pages)`);
-                
-                // Process pages in this batch concurrently
-                const batchPromises = batch.map(async (page, batchItemIndex) => {
-                    const globalIndex = batchIndex * batchSize + batchItemIndex;
-                    try {
-                        // Ingest the page to get its content
-                        const ingestResponse = await client.ingestUri(page.uri).catch(error => {
-                            console.warn(`Failed to ingest URI ${page.uri}: ${error.message}`);
-                            return { ingestUri: { id: null } };
-                        });
-                        
-                        const contentId = ingestResponse.ingestUri?.id;
-                        
-                        if (!contentId) {
-                            return {
-                                uri: page.uri,
-                                content: `\n\n# ${page.uri}\n\nError: Could not ingest this page.\n\n`,
-                                order: globalIndex
-                            };
-                        }
-                        
-                        // Wait for content to be processed with timeout
-                        let isDone = false;
-                        let elapsedTime = 0;
-                        const maxWaitTime = 60000; // 60 seconds in milliseconds
-                        const pollingInterval = 5000; // 5 seconds in milliseconds
-                        
-                        while (!isDone && elapsedTime < maxWaitTime) {
-                            try {
-                                const doneResponse = await client.isContentDone(contentId);
-                                isDone = doneResponse.isContentDone?.result || false;
-                                
-                                if (!isDone) {
-                                    // Wait before checking again
-                                    await new Promise(resolve => setTimeout(resolve, pollingInterval));
-                                    elapsedTime += pollingInterval;
-                                }
-                            } catch (checkError: unknown) {
-                                const error = checkError as Error;
-                                console.warn(`Error checking if content is done for ${page.uri}: ${error.message}`);
-                                // Continue the loop despite the error
-                                await new Promise(resolve => setTimeout(resolve, pollingInterval));
-                                elapsedTime += pollingInterval;
-                            }
-                        }
-                        
-                        if (!isDone) {
-                            console.warn(`Processing timed out for ${page.uri} after ${maxWaitTime/1000} seconds`);
-                            return {
-                                uri: page.uri,
-                                content: `\n\n# ${page.uri}\n\nError: Processing timed out after ${maxWaitTime/1000} seconds.\n\n`,
-                                order: globalIndex
-                            };
-                        }
-                        
-                        // Get the content
-                        let content;
-                        try {
-                            const contentResponse = await client.getContent(contentId);
-                            content = contentResponse.content;
-                        } catch (contentError: unknown) {
-                            const error = contentError as Error;
-                            console.warn(`Error retrieving content for ${page.uri}: ${error.message}`);
-                            return {
-                                uri: page.uri,
-                                content: `\n\n# ${page.uri}\n\nError: Could not retrieve content: ${error.message}\n\n`,
-                                order: globalIndex
-                            };
-                        }
-                        
-                        if (!content || !content.markdown) {
-                            return {
-                                uri: page.uri,
-                                content: `\n\n# ${page.uri}\n\nNo content available.\n\n`,
-                                order: globalIndex
-                            };
-                        }
-                        
-                        // Format content based on version
-                        let formattedContent = `\n\n# ${page.uri}\n\n`;
-                        if (fullVersion) {
-                            // For llms-full.txt, include all content
-                            formattedContent += content.markdown + "\n\n";
-                        } else {
-                            // For llms.txt, include a summary or truncated version
-                            // Ensure we don't cut in the middle of a word or markdown element
-                            const maxLength = 500;
-                            let truncated = content.markdown;
-                            
-                            if (truncated.length > maxLength) {
-                                truncated = truncated.substring(0, maxLength);
-                                // Find the last complete sentence or paragraph
-                                const lastPeriod = truncated.lastIndexOf('.');
-                                const lastNewline = truncated.lastIndexOf('\n');
-                                const cutPoint = Math.max(lastPeriod, lastNewline);
-                                
-                                if (cutPoint > maxLength / 2) {
-                                    truncated = truncated.substring(0, cutPoint + 1);
-                                }
-                                
-                                formattedContent += truncated + "...\n\n";
-                            } else {
-                                formattedContent += truncated + "\n\n";
-                            }
-                        }
-                        
-                        return {
-                            uri: page.uri,
-                            content: formattedContent,
-                            order: globalIndex
-                        };
-                        
-                    } catch (pageError: unknown) {
-                        // Log error but continue with other pages
-                        const error = pageError as Error;
-                        console.error(`Error processing page ${page.uri}:`, error);
-                        return {
-                            uri: page.uri,
-                            content: `\n\n# ${page.uri}\n\nError: Could not process this page: ${error.message}\n\n`,
-                            order: globalIndex
-                        };
-                    }
-                });
-                
-                // Process this batch with a timeout
-                const batchTimeout = 180000; // 3 minutes per batch
-                const batchTimeoutPromise = new Promise(resolve => {
-                    setTimeout(() => {
-                        console.warn(`Batch ${batchIndex + 1} timeout reached`);
-                        resolve([]);
-                    }, batchTimeout);
-                });
-                
-                const batchResults = await Promise.race([
-                    Promise.all(batchPromises),
-                    batchTimeoutPromise
-                ]) as Array<{uri: string, content: string, order: number}>;
-                
-                // Add results from this batch to our collection
-                if (Array.isArray(batchResults) && batchResults.length > 0) {
-                    allPageResults = allPageResults.concat(batchResults);
-                }
-                
-                // Small delay between batches to avoid overwhelming the system
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
-            
-            // Check if we got any results
-            if (allPageResults.length === 0 && pages.length > 0) {
-                return {
-                    content: [{
-                        type: "text",
-                        text: `Error: No pages could be processed successfully. No ${fileName} file could be generated.`
-                    }],
-                    isError: true
-                };
-            }
-            
-            // Sort results by original order and combine content
-            const sortedResults = allPageResults.sort((a, b) => a.order - b.order);
-            const allContent = fileHeader + sortedResults.map(result => result.content).join('');
-
-            // Add a summary of processing results
-            const successCount = allPageResults.filter(r => !r.content.includes("Error:")).length;
-            const totalCount = pages.length;
-            const summaryContent = allContent + `\n\n# Processing Summary\n\nSuccessfully processed ${successCount} out of ${totalCount} pages.\n`;
-
-            // Step 3: Create a new content item with the compiled text
+    
             try {
-                const ingestResponse = await client.ingestText(
-                    fileName, 
-                    summaryContent, 
-                    TextTypes.Markdown, 
-                    undefined, 
-                    undefined, 
-                    true
-                );
-
-                return {
-                    content: [{
-                        type: "text",
-                        text: JSON.stringify({ 
-                            id: ingestResponse.ingestText?.id,
-                            successCount,
-                            totalCount,
-                            message: `Successfully generated ${fileName} with ${successCount}/${totalCount} pages processed.`
-                        }, null, 2)
-                    }]
-                };
-            } catch (ingestError: unknown) {
-                const error = ingestError as Error;
-                console.error("Error ingesting final text:", error);
-                
-                // Check if the error is related to content size
-                if (error.message.includes("size") || summaryContent.length > 1000000) {
-                    // Try to ingest a truncated version
-                    try {
-                        const truncatedContent = fileHeader + 
-                            `\n\n# Content Truncated\n\nThe original content was too large to process (${summaryContent.length} characters).\n` +
-                            `\n\n# Processing Summary\n\nAttempted to process ${totalCount} pages. ${successCount} were successful.\n`;
-                        
-                        const fallbackResponse = await client.ingestText(
-                            `${fileName} (truncated)`, 
-                            truncatedContent, 
-                            TextTypes.Markdown, 
-                            undefined, 
-                            undefined, 
-                            true
-                        );
-                        
-                        return {
-                            content: [{
-                                type: "text",
-                                text: JSON.stringify({ 
-                                    id: fallbackResponse.ingestText?.id,
-                                    successCount,
-                                    totalCount,
-                                    message: `Generated truncated ${fileName} due to size limits. Original content was ${summaryContent.length} characters.`
-                                }, null, 2)
-                            }]
-                        };
-                    } catch (fallbackError: unknown) {
-                        const fbError = fallbackError as Error;
-                        return {
-                            content: [{
-                                type: "text",
-                                text: `Error: Failed to generate even truncated content: ${fbError.message}`
-                            }],
-                            isError: true
-                        };
-                    }
+            // Ingest the page to get its content ID
+            const ingestResponse = await client.ingestUri(page.uri);
+            const contentId = ingestResponse.ingestUri?.id;
+            if (!contentId) return null;
+    
+            // Wait (up to 60 seconds) for content processing
+            let isDone = false;
+            let elapsedTime = 0;
+            const maxWaitTime = 60000; // 60 seconds
+            const pollingInterval = 5000; // 5 seconds
+    
+            while (!isDone && elapsedTime < maxWaitTime) {
+                const doneResponse = await client.isContentDone(contentId);
+                isDone = doneResponse.isContentDone?.result || false;
+                if (!isDone) {
+                await new Promise(resolve => setTimeout(resolve, pollingInterval));
+                elapsedTime += pollingInterval;
                 }
-                
-                // Return the original error if not size-related
-                return {
-                    content: [{
-                        type: "text",
-                        text: `Error ingesting final text: ${error.message}. Generated content length: ${summaryContent.length} characters.`
-                    }],
-                    isError: true
-                };
             }
-        } catch (err: unknown) {
-            const error = err as Error;
-            console.error("Error in generateLlmsText:", error);
-            
+            if (!isDone) return null;
+    
+            // Get the content
+            const contentResponse = await client.getContent(contentId);
+            const content = contentResponse.content;
+            if (!content || !content.markdown) return null;
+    
+            // Format content based on version
+            let formattedContent = `\n\n# ${page.uri}\n\n`;
+            if (fullVersion) {
+                formattedContent += content.markdown + "\n\n";
+            } else {
+                const maxLength = 500;
+                let truncated = content.markdown;
+                if (truncated.length > maxLength) {
+                truncated = truncated.substring(0, maxLength);
+                const lastPeriod = truncated.lastIndexOf('.');
+                const lastNewline = truncated.lastIndexOf('\n');
+                const cutPoint = Math.max(lastPeriod, lastNewline);
+                if (cutPoint > maxLength / 2) {
+                    truncated = truncated.substring(0, cutPoint + 1);
+                }
+                formattedContent += truncated + "...\n\n";
+                } else {
+                formattedContent += truncated + "\n\n";
+                }
+            }
+    
+            return { order: index, content: formattedContent };
+            } catch (err: unknown) {
+            // On any error, simply skip this page
+            console.error(`Error processing page ${page.uri}:`, (err as Error).message);
+            return null;
+            }
+        });
+    
+        // Await all page processing promises and filter out any null results
+        const pageResults = await Promise.all(pagePromises);
+        const successfulResults = pageResults.filter(result => result !== null) as Array<{ order: number, content: string }>;
+    
+        if (successfulResults.length === 0) {
             return {
-                content: [{
-                    type: "text",
-                    text: `Error: ${error.message}`
-                }],
-                isError: true
+            content: [{
+                type: "text",
+                text: `Error: No pages could be processed successfully. No ${fileName} file could be generated.`
+            }],
+            isError: true
             };
+        }
+    
+        // Sort results by their original order and combine content
+        const sortedResults = successfulResults.sort((a, b) => a.order - b.order);
+        const allContent = fileHeader + sortedResults.map(result => result.content).join('');
+    
+        // Append a processing summary
+        const successCount = successfulResults.length;
+        const totalCount = pages.length;
+        const summaryContent = allContent + `\n\n# Processing Summary\n\nSuccessfully processed ${successCount} out of ${totalCount} pages.\n`;
+    
+        // Step 3: Ingest the compiled text
+        try {
+            const ingestResponse = await client.ingestText(
+            fileName, 
+            summaryContent, 
+            TextTypes.Markdown, 
+            undefined, 
+            undefined, 
+            true
+            );
+    
+            return {
+            content: [{
+                type: "text",
+                text: JSON.stringify({ 
+                id: ingestResponse.ingestText?.id,
+                successCount,
+                totalCount,
+                message: `Successfully generated ${fileName} with ${successCount}/${totalCount} pages processed.`
+                }, null, 2)
+            }]
+            };
+        } catch (ingestError: unknown) {
+            const error = ingestError as Error;
+            console.error("Error ingesting final text:", error);
+            return {
+            content: [{
+                type: "text",
+                text: `Error ingesting final text: ${error.message}`
+            }],
+            isError: true
+            };
+        }
+        } catch (err: unknown) {
+        const error = err as Error;
+        console.error("Error in generateLlmsText:", error);
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
         }
     }
     );
-
+      
     server.tool(
     "webCrawl",
     `Crawls web pages from web site into Graphlit knowledge base.
