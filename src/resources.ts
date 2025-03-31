@@ -2,7 +2,8 @@ import { Graphlit } from "graphlit-client";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { 
     ContentTypes, 
-    FileTypes, 
+    ContentFilter, 
+    EntityState,
     GetContentQuery, 
 } from "graphlit-client/dist/generated/graphql-types.js";
   
@@ -143,8 +144,12 @@ export function registerResources(server: McpServer) {
           list: async (extra) => {
             const client = new Graphlit();
             
+            const filter: ContentFilter = { 
+              states: [EntityState.Finished], // filter on finished contents only
+            };
+
             try {
-              const response = await client.queryContents();
+              const response = await client.queryContents(filter);
               
               return {
                 resources: (response.contents?.results || [])

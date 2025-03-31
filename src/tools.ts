@@ -156,6 +156,41 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
+    "askGraphlit",
+    `Ask questions about the Graphlit API or SDKs. Can create code samples for any API call.
+    Accepts an LLM user prompt for code generation.
+    Returns the LLM prompt completion in Markdown format.`,
+    { 
+        prompt: z.string().describe("LLM user prompt for code generation.")
+    },
+    async ({ prompt }) => {
+        const client = new Graphlit();
+
+        try {
+        const response = await client.askGraphlit(prompt);
+        
+        const message = response.askGraphlit?.message;
+        
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(message, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
     "retrieveSources",
     `Retrieve relevant content sources from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
     Accepts an LLM user prompt for content retrieval. For best retrieval quality, provide only key words or phrases from the user prompt, which will be used to create text embeddings for a vector search query.
