@@ -32,12 +32,12 @@ export function registerTools(server: McpServer) {
     server.tool(
     "configureProject",
     `Configures the default content workflow for the Graphlit project. Only needed if user asks to configure the default workflow.
-    Accepts whether to enable high-quality document preparation using a vision LLM. Defaults to using Azure AI Document Intelligence for document preparation, if not assigned.
+    Accepts whether to enable high-quality document and web page preparation using a vision LLM. Defaults to using Azure AI Document Intelligence for document preparation, if not assigned.
     Accepts whether to enable entity extraction using LLM into the knowledge graph.
     Optionally accepts the preferred model provider service type, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided.
     Returns the project identifier.`,
     { 
-        enablePreparation: z.boolean().describe("Whether to enable high-quality document preparation using vision LLM."),
+        enablePreparation: z.boolean().describe("Whether to enable high-quality document and web page preparation using vision LLM."),
         enableExtraction: z.boolean().describe("Whether to enable entity extraction using LLM into the knowledge graph."),
         serviceType: z.nativeEnum(Types.ModelServiceTypes).optional().default(Types.ModelServiceTypes.Anthropic).describe("Preferred model provider service type, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided.")
     },
@@ -70,7 +70,7 @@ export function registerTools(server: McpServer) {
                     model: Types.OpenAiModels.Gpt4O_128K
                 } : undefined,
                 google: serviceType == Types.ModelServiceTypes.Google ? {
-                    model: Types.GoogleModels.Gemini_2_0ProExperimental
+                    model: Types.GoogleModels.Gemini_2_5ProExperimental
                 } : undefined,
             });
 
@@ -89,7 +89,7 @@ export function registerTools(server: McpServer) {
                     model: Types.OpenAiModels.Gpt4O_128K
                 } : undefined,
                 google: serviceType == Types.ModelServiceTypes.Google ? {
-                    model: Types.GoogleModels.Gemini_2_0FlashThinkingExperimental
+                    model: Types.GoogleModels.Gemini_2_5ProExperimental
                 } : undefined,
             });
 
@@ -190,6 +190,187 @@ export function registerTools(server: McpServer) {
     }
     );
 
+    server.tool(
+    "generateLlmsText",
+    `Generates llms.txt or llms-full.txt from a website URL. More information can be found at https://llmstxt.org/.
+    Maps pages of the provided website, then extracts Markdown from each page.
+    Accepts a website URL and a boolean flag to determine whether to generate llms.txt (false) or llms-full.txt (true).
+    Optionally accepts a maximum number of pages to process. Defaults to 100.
+    Executes *synchronously* and returns the content identifier.`,
+    { 
+        url: z.string().describe("Website URL to generate llms.txt or llms-full.txt from."),
+        fullVersion: z.boolean().optional().default(false).describe("Whether to generate llms-full.txt (true) or llms.txt (false). Defaults to false (llms.txt)."),
+        maxPages: z.number().optional().default(100).describe("Maximum number of pages to process. Defaults to 100.")
+    },
+    async ({ url, fullVersion, maxPages }) => {
+        const client = new Graphlit();
+        let normalizedUrl = "";
+    
+        try {
+        // Normalize URL to ensure consistent formatting
+        normalizedUrl = url.trim().replace(/\/$/, '');
+        if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+            throw new Error("URL must start with http:// or https://");
+        }
+    
+        // Step 1: Get pages from the website
+        const mapResponse = await client.mapWeb(normalizedUrl);
+        let pages = mapResponse.mapWeb?.results || [];
+    
+        // If no pages are found, process the main URL directly
+        if (pages.length === 0) {
+            console.warn(`No pages found at URL: ${normalizedUrl}. Using the main URL as a fallback.`);
+            pages = [{ uri: normalizedUrl, title: normalizedUrl }];
+        }
+    
+        // Limit the number of pages to process
+        if (pages.length > maxPages) {
+            console.warn(`Limiting processing to ${maxPages} pages out of ${pages.length} found.`);
+            pages = pages.slice(0, maxPages);
+        }
+    
+        // Prepare file header
+        const fileName = fullVersion ? "llms-full.txt" : "llms.txt";
+        let fileHeader = `# ${normalizedUrl} - ${fileName}\n`;
+        fileHeader += `Generated on ${new Date().toISOString()}\n`;
+        fileHeader += `This file follows the llms.txt standard: https://llmstxt.org/\n\n`;
+    
+        // Step 2: Process all pages concurrently, skipping any that throw errors
+        const pagePromises = pages.map(async (page, index) => {
+            if (!page.uri) {
+            console.warn("Skipping page with missing URI:", page);
+            return null;
+            }
+    
+            try {
+            // Ingest the page to get its content ID
+            const ingestResponse = await client.ingestUri(page.uri);
+            const contentId = ingestResponse.ingestUri?.id;
+            if (!contentId) return null;
+    
+            // Wait (up to 60 seconds) for content processing
+            let isDone = false;
+            let elapsedTime = 0;
+            const maxWaitTime = 60000; // 60 seconds
+            const pollingInterval = 5000; // 5 seconds
+    
+            while (!isDone && elapsedTime < maxWaitTime) {
+                const doneResponse = await client.isContentDone(contentId);
+                isDone = doneResponse.isContentDone?.result || false;
+                if (!isDone) {
+                await new Promise(resolve => setTimeout(resolve, pollingInterval));
+                elapsedTime += pollingInterval;
+                }
+            }
+            if (!isDone) return null;
+    
+            // Get the content
+            const contentResponse = await client.getContent(contentId);
+            const content = contentResponse.content;
+            if (!content?.id || !content.markdown) return null;
+    
+            // Format content based on version
+            let formattedContent = `\n\n# ${page.uri}\n\n`;
+            if (fullVersion) {
+                formattedContent += content.markdown + "\n\n";
+            } else {
+                const maxLength = 500;
+                let truncated = content.markdown;
+                if (truncated.length > maxLength) {
+                truncated = truncated.substring(0, maxLength);
+                const lastPeriod = truncated.lastIndexOf('.');
+                const lastNewline = truncated.lastIndexOf('\n');
+                const cutPoint = Math.max(lastPeriod, lastNewline);
+                if (cutPoint > maxLength / 2) {
+                    truncated = truncated.substring(0, cutPoint + 1);
+                }
+                formattedContent += truncated + "...\n\n";
+                } else {
+                formattedContent += truncated + "\n\n";
+                }
+            }
+
+            // Delete content after retrieving markdown
+            await client.deleteContent(contentId);
+
+            return { order: index, content: formattedContent };
+            } catch (err: unknown) {
+            // On any error, simply skip this page
+            console.error(`Error processing page ${page.uri}:`, (err as Error).message);
+            return null;
+            }
+        });
+    
+        // Await all page processing promises and filter out any null results
+        const pageResults = await Promise.all(pagePromises);
+        const successfulResults = pageResults.filter(result => result !== null) as Array<{ order: number, content: string }>;
+    
+        if (successfulResults.length === 0) {
+            return {
+            content: [{
+                type: "text",
+                text: `Error: No pages could be processed successfully. No ${fileName} file could be generated.`
+            }],
+            isError: true
+            };
+        }
+    
+        // Sort results by their original order and combine content
+        const sortedResults = successfulResults.sort((a, b) => a.order - b.order);
+        const allContent = fileHeader + sortedResults.map(result => result.content).join('');
+    
+        // Append a processing summary
+        const successCount = successfulResults.length;
+        const totalCount = pages.length;
+        const summaryContent = allContent + `\n\n# Processing Summary\n\nSuccessfully processed ${successCount} out of ${totalCount} pages.\n`;
+    
+        // Step 3: Ingest the compiled text
+        try {
+            const ingestResponse = await client.ingestText(
+            fileName, 
+            summaryContent, 
+            TextTypes.Markdown, 
+            undefined, 
+            undefined, 
+            true
+            );
+    
+            return {
+            content: [{
+                type: "text",
+                text: JSON.stringify({ 
+                id: ingestResponse.ingestText?.id,
+                successCount,
+                totalCount,
+                message: `Successfully generated ${fileName} with ${successCount}/${totalCount} pages processed.`
+                }, null, 2)
+            }]
+            };
+        } catch (ingestError: unknown) {
+            const error = ingestError as Error;
+            console.error("Error ingesting final text:", error);
+            return {
+            content: [{
+                type: "text",
+                text: `Error ingesting final text: ${error.message}`
+            }],
+            isError: true
+            };
+        }
+        } catch (err: unknown) {
+        const error = err as Error;
+        console.error("Error in generateLlmsText:", error);
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+            
     server.tool(
     "retrieveSources",
     `Retrieve relevant content sources from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
