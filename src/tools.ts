@@ -761,6 +761,7 @@ export function registerTools(server: McpServer) {
     }
     );
 
+    /*
     server.tool(
     "listMicrosoftTeamsTeams",
     `Lists available Microsoft Teams teams.
@@ -871,6 +872,7 @@ export function registerTools(server: McpServer) {
         }
     }
     );
+    */
 
     server.tool(
     "listSlackChannels",
