@@ -220,7 +220,7 @@ export function registerTools(server: McpServer) {
         // If no pages are found, process the main URL directly
         if (pages.length === 0) {
             console.warn(`No pages found at URL: ${normalizedUrl}. Using the main URL as a fallback.`);
-            pages = [{ uri: normalizedUrl, title: normalizedUrl }];
+            pages = [normalizedUrl];
         }
     
         // Limit the number of pages to process
@@ -237,14 +237,14 @@ export function registerTools(server: McpServer) {
     
         // Step 2: Process all pages concurrently, skipping any that throw errors
         const pagePromises = pages.map(async (page, index) => {
-            if (!page.uri) {
-                console.warn("Skipping page with missing URI:", page);
+            if (!page) {
+                console.warn("Skipping page with missing URI.");
                 return null;
             }
     
             try {
                 // Ingest the page to get its content ID
-                const ingestResponse = await client.ingestUri(page.uri);
+                const ingestResponse = await client.ingestUri(page);
                 const contentId = ingestResponse.ingestUri?.id;
                 if (!contentId) return null;
         
@@ -270,7 +270,7 @@ export function registerTools(server: McpServer) {
                 if (!content?.id || !content.markdown) return null;
         
                 // Format content based on version
-                let formattedContent = `\n\n# ${page.uri}\n\n`;
+                let formattedContent = `\n\n# ${page}\n\n`;
                 if (fullVersion) {
                     formattedContent += content.markdown + "\n\n";
                 } else {
@@ -296,7 +296,7 @@ export function registerTools(server: McpServer) {
                 return { order: index, content: formattedContent };
             } catch (err: unknown) {
                 // On any error, simply skip this page
-                console.error(`Error processing page ${page.uri}:`, (err as Error).message);
+                console.error(`Error processing page ${page}:`, (err as Error).message);
                 return null;
             }
         });
@@ -309,7 +309,7 @@ export function registerTools(server: McpServer) {
             return {
             content: [{
                 type: "text",
-                text: `Error: No pages could be processed successfully. No ${fileName} file could be generated. Mapped ${pages.length} pages, ${pagePromises.length} page promises, ${pageResults.length} page results.`
+                text: `Error: No pages could be processed successfully. No ${fileName} file could be generated.`
             }],
             isError: true
             };
