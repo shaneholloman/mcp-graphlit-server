@@ -634,7 +634,7 @@ export function registerTools(server: McpServer) {
                 limit: limit
             };                
 
-            const response = await client.deleteAllContents(filter);
+            const response = await client.deleteAllContents(filter, true);
                     
             return {
                 content: [{
@@ -674,7 +674,7 @@ export function registerTools(server: McpServer) {
                 limit: limit
             };                
 
-            const response = await client.deleteAllFeeds(filter);
+            const response = await client.deleteAllFeeds(filter, true);
                     
             return {
                 content: [{
