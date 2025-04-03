@@ -15,7 +15,7 @@ Graphlit is an LLM-enabled knowledge API platform, which supports these resource
 - workflows: how content is handled during the ingestion process
 - specifications: LLM configuration presets, used by workflows
 
-With this Graphlit MCP Server, you can ingest anything from Slack, Discord, websites, Google Drive, email, Jira, Linear or GitHub into a Graphlit project - and then search and retrieve relevant knowledge within an MCP client like Cursor, Windsurf or Cline.
+With this Graphlit MCP Server, you can ingest anything from Slack, Discord, websites, Notion, Google Drive, email, Jira, Linear or GitHub into a Graphlit project - and then search and retrieve relevant knowledge within an MCP client like Cursor, Windsurf or Cline.
 
 Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdown upon ingestion. Audio and video files will be transcribed upon ingestion.
 

@@ -62,10 +62,22 @@ startCommand:
         type: string
         default: ""
         description: Notion API Key (optional)
-      notionDatabaseId:
+      twitterConsumerApiKey:
         type: string
         default: ""
-        description: Notion Database ID (optional)
+        description: Twitter Consumer API Key (optional)        
+      twitterConsumerApiSecret:
+        type: string
+        default: ""
+        description: Twitter Consumer API Secret (optional)        
+      twitterAccessTokenKey:
+        type: string
+        default: ""
+        description: Twitter Access Token Key (optional)        
+      twitterAccessTokenSecret:
+        type: string
+        default: ""
+        description: Twitter Access Token Secret (optional)        
   commandFunction:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-
@@ -86,7 +98,10 @@ startCommand:
         JIRA_EMAIL: config.jiraEmail || '',
         JIRA_TOKEN: config.jiraToken || '',
         NOTION_API_KEY: config.notionApiKey || '',
-        NOTION_DATABASE_ID: config.notionDatabaseId || ''
+        TWITTER_CONSUMER_API_KEY: config.twitterConsumerApiKey || '',
+        TWITTER_CONSUMER_API_SECRET: config.twitterConsumerApiSecret || '',
+        TWITTER_ACCESS_TOKEN_KEY: config.twitterAccessTokenKey || '',
+        TWITTER_ACCESS_TOKEN_SECRET: config.twitterAccessTokenSecret || '',
       }
     })
   exampleConfig:
@@ -102,5 +117,8 @@ startCommand:
     githubPersonalAccessToken: example-github-pat
     jiraEmail: example-jira-email
     jiraToken: example-jira-token
-    notionApiKey: example-notion-api-key
-    notionDatabaseId: example-notion-database-id
+    notionApiKey: example-notion-api-key,
+    twitterConsumerApiKey: example-twitter-consumer-api-key
+    twitterConsumerApiSecret: example-twitter-consumer-api-secret
+    twitterAccessTokenKey: example-twitter-access-token-key
+    twitterAccessTokenSecret: example-twitter-access-token-secret

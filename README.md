@@ -75,6 +75,7 @@ You can read more about the MCP Server use cases and features on our [blog](http
 - Slack
 - Email
 - Webhook
+- Twitter/X
 
 ### Operations
 
@@ -96,6 +97,7 @@ You can read more about the MCP Server use cases and features on our [blog](http
 - List SharePoint Libraries
 - List SharePoint Folders
 - List Linear Projects
+- List Notion Databases
 
 ## Resources
 
@@ -269,8 +271,7 @@ Only GRAPHLIT_ORGANIZATION_ID, GRAPHLIT_ENVIRONMENT_ID and GRAPHLIT_JWT_SECRET a
                 "GITHUB_PERSONAL_ACCESS_TOKEN": "your-github-pat",
                 "JIRA_EMAIL": "your-jira-email",
                 "JIRA_TOKEN": "your-jira-token",
-                "NOTION_API_KEY": "your-notion-api-key",
-                "NOTION_DATABASE_ID": "your-notion-database-id"
+                "NOTION_API_KEY": "your-notion-api-key"
             }
         }
     }

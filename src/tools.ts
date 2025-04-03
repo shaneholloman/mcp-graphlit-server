@@ -28,6 +28,7 @@ import {
   TwitterListingTypes
 } from "graphlit-client/dist/generated/graphql-types.js";
 
+// NOTE: have to keep to 49 tools, otherwise MCP will not load in Windsurf
 export function registerTools(server: McpServer) {
     server.tool(
     "configureProject",
@@ -566,6 +567,7 @@ export function registerTools(server: McpServer) {
     }
     );
 
+    /*
     server.tool(
     "queryCollections",
     `Query collections from Graphlit knowledge base. Do *not* use for retrieving collection by collection identifier - retrieve collection resource instead, with URI 'collections://{id}'.
@@ -612,88 +614,89 @@ export function registerTools(server: McpServer) {
         }
     }
     );
+    */
 
     server.tool(
-        "deleteContents",
-        `Deletes contents from Graphlit knowledge base.
-        Accepts optional content type and file type filters to limit the contents which will be deleted.
-        Also accepts optional limit of how many contents to delete, defaults to 1000.
-        Returns the content identifiers and content state, i.e. Deleted.`,
-        { 
-            contentType: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."),
-            fileType: z.nativeEnum(FileTypes).optional().describe("File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video."),
-            limit: z.number().optional().default(1000).describe("Limit the number of contents to be deleted. Defaults to 1000.")
-        },
-        async ({ contentType, fileType, limit }) => {
-            const client = new Graphlit();
-    
-            try {
-            const filter: ContentFilter = { 
-                types: contentType ? [contentType] : null, 
-                fileTypes: fileType ? [fileType] : null,
-                limit: limit
-            };                
+    "deleteContents",
+    `Deletes contents from Graphlit knowledge base.
+    Accepts optional content type and file type filters to limit the contents which will be deleted.
+    Also accepts optional limit of how many contents to delete, defaults to 1000.
+    Returns the content identifiers and content state, i.e. Deleted.`,
+    { 
+        contentType: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."),
+        fileType: z.nativeEnum(FileTypes).optional().describe("File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video."),
+        limit: z.number().optional().default(1000).describe("Limit the number of contents to be deleted. Defaults to 1000.")
+    },
+    async ({ contentType, fileType, limit }) => {
+        const client = new Graphlit();
 
-            const response = await client.deleteAllContents(filter, true);
-                    
-            return {
-                content: [{
-                type: "text",
-                text: JSON.stringify(response.deleteAllContents, null, 2)
-                }]
-            };
-            } catch (err: unknown) {
-            const error = err as Error;
-            return {
-                content: [{
-                type: "text",
-                text: `Error: ${error.message}`
-                }],
-                isError: true
-            };
-            }
+        try {
+        const filter: ContentFilter = { 
+            types: contentType ? [contentType] : null, 
+            fileTypes: fileType ? [fileType] : null,
+            limit: limit
+        };                
+
+        const response = await client.deleteAllContents(filter, true);
+                
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteAllContents, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
         }
-        );
+    }
+    );
 
-        server.tool(
-        "deleteFeeds",
-        `Deletes feeds from Graphlit knowledge base.
-        Accepts optional feed type filter to limit the feeds which will be deleted.
-        Also accepts optional limit of how many feeds to delete, defaults to 100.
-        Returns the feed identifiers and feed state, i.e. Deleted.`,
-        { 
-            feedType: z.nativeEnum(FeedTypes).optional().describe("Feed type filter, optional. One of: Discord, Email, Intercom, Issue, MicrosoftTeams, Notion, Reddit, Rss, Search, Site, Slack, Web, YouTube, Zendesk."),
-            limit: z.number().optional().default(100).describe("Limit the number of feeds to be deleted. Defaults to 100.")
-        },
-        async ({ feedType, limit }) => {
-            const client = new Graphlit();
-    
-            try {
-            const filter: FeedFilter = { 
-                types: feedType ? [feedType] : null, 
-                limit: limit
-            };                
+    server.tool(
+    "deleteFeeds",
+    `Deletes feeds from Graphlit knowledge base.
+    Accepts optional feed type filter to limit the feeds which will be deleted.
+    Also accepts optional limit of how many feeds to delete, defaults to 100.
+    Returns the feed identifiers and feed state, i.e. Deleted.`,
+    { 
+        feedType: z.nativeEnum(FeedTypes).optional().describe("Feed type filter, optional. One of: Discord, Email, Intercom, Issue, MicrosoftTeams, Notion, Reddit, Rss, Search, Site, Slack, Web, YouTube, Zendesk."),
+        limit: z.number().optional().default(100).describe("Limit the number of feeds to be deleted. Defaults to 100.")
+    },
+    async ({ feedType, limit }) => {
+        const client = new Graphlit();
 
-            const response = await client.deleteAllFeeds(filter, true);
-                    
-            return {
-                content: [{
-                type: "text",
-                text: JSON.stringify(response.deleteAllFeeds, null, 2)
-                }]
-            };
-            } catch (err: unknown) {
-            const error = err as Error;
-            return {
-                content: [{
-                type: "text",
-                text: `Error: ${error.message}`
-                }],
-                isError: true
-            };
-            }
+        try {
+        const filter: FeedFilter = { 
+            types: feedType ? [feedType] : null, 
+            limit: limit
+        };                
+
+        const response = await client.deleteAllFeeds(filter, true);
+                
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteAllFeeds, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
         }
-        );
+    }
+    );
 
     server.tool(
     "isContentDone",
@@ -875,9 +878,89 @@ export function registerTools(server: McpServer) {
     */
 
     server.tool(
+    "listNotionDatabases",
+    `Lists available Notion databases.
+    Returns a list of Notion databases, where the database identifier can be used with ingestNotionPages to ingest pages into Graphlit knowledge base.`,
+    { 
+    },
+    async ({ }) => {
+        const client = new Graphlit();
+
+        try {
+        const token = process.env.NOTION_API_KEY;
+        if (!token) {
+            console.error("Please set NOTION_API_KEY environment variable.");
+            process.exit(1);
+        }
+    
+        const response = await client.queryNotionDatabases({
+            token: token
+        });
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.notionDatabases?.results, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "listLinearProjects",
+    `Lists available Linear projects.
+    Returns a list of Linear projects, where the project name can be used with ingestLinearIssues to ingest issues into Graphlit knowledge base.`,
+    { 
+    },
+    async ({ }) => {
+        const client = new Graphlit();
+
+        try {
+        const apiKey = process.env.LINEAR_API_KEY;
+        if (!apiKey) {
+            console.error("Please set LINEAR_API_KEY environment variable.");
+            process.exit(1);
+        }
+
+        const response = await client.queryLinearProjects({
+            key: apiKey
+        });
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.linearProjects?.results, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
     "listSlackChannels",
     `Lists available Slack channels.
-        Returns a list of Slack channels, where the channel name can be used with ingestSlackMessages to ingest messages into Graphlit knowledge base.`,
+    Returns a list of Slack channels, where the channel name can be used with ingestSlackMessages to ingest messages into Graphlit knowledge base.`,
     { 
     },
     async ({ }) => {
@@ -1458,24 +1541,21 @@ export function registerTools(server: McpServer) {
     server.tool(
     "ingestNotionPages",
     `Ingests pages from Notion database into Graphlit knowledge base.
-        Accepts an optional read limit for the number of messages to ingest.
-        Executes asynchronously and returns the feed identifier.`,
+    Accepts Notion database identifier and an optional read limit for the number of pages to ingest.
+    You can list the available Notion database identifiers with listNotionDatabases.
+    Or, for a Notion URL, https://www.notion.so/Example/Engineering-Wiki-114abc10cb38487e91ec906fc6c6f350, 'Engineering-Wiki-114abc10cb38487e91ec906fc6c6f350' is an example of a Notion database identifier.
+    Executes asynchronously and returns the feed identifier.`,
     { 
+        databaseId: z.string().describe("Notion database identifier."),
         readLimit: z.number().optional().describe("Number of pages to ingest, optional. Defaults to 100.")
     },
-    async ({ readLimit }) => {
+    async ({ databaseId, readLimit }) => {
         const client = new Graphlit();
 
         try {
         const token = process.env.NOTION_API_KEY;
         if (!token) {
             console.error("Please set NOTION_API_KEY environment variable.");
-            process.exit(1);
-        }
-
-        const databaseId = process.env.NOTION_DATABASE_ID;
-        if (!databaseId) {
-            console.error("Please set NOTION_DATABASE_ID environment variable.");
             process.exit(1);
         }
 
@@ -2418,6 +2498,7 @@ export function registerTools(server: McpServer) {
     }
     );
 
+    /*
     server.tool(
     "describeImageContent",
     `Prompts vision LLM and returns description of image content. 
@@ -2480,6 +2561,7 @@ export function registerTools(server: McpServer) {
         }
     }
     );
+    */
 
     server.tool(
     "publishAudio",
@@ -2584,6 +2666,70 @@ export function registerTools(server: McpServer) {
 
         try {
         const response = await client.sendNotification({ type: IntegrationServiceTypes.Slack, slack: { token: botToken, channel: channelName } }, text, textType);
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ success: response.sendNotification?.result }, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "sendTwitterNotification",
+    `Posts a tweet from the configured user account.
+    Accepts the plain text for the tweet.
+    Returns true if the notification was successfully sent, or false otherwise.`,
+    { 
+        text: z.string()
+    },
+    async ({ text }) => {
+        const consumerKey = process.env.TWITTER_CONSUMER_API_KEY;
+        if (!consumerKey) {
+            console.error("Please set TWITTER_CONSUMER_API_KEY environment variable.");
+            process.exit(1);
+        }
+
+        const consumerSecret = process.env.TWITTER_CONSUMER_API_SECRET;
+        if (!consumerSecret) {
+            console.error("Please set TWITTER_CONSUMER_API_SECRET environment variable.");
+            process.exit(1);
+        }
+
+        const accessTokenKey = process.env.TWITTER_ACCESS_TOKEN_KEY;
+        if (!accessTokenKey) {
+            console.error("Please set TWITTER_ACCESS_TOKEN_KEY environment variable.");
+            process.exit(1);
+        }
+
+        const accessTokenSecret = process.env.TWITTER_ACCESS_TOKEN_SECRET;
+        if (!accessTokenSecret) {
+            console.error("Please set TWITTER_ACCESS_TOKEN_SECRET environment variable.");
+            process.exit(1);
+        }
+
+        const client = new Graphlit();
+
+        try {
+        const response = await client.sendNotification({ type: IntegrationServiceTypes.Twitter, 
+            twitter: { 
+                consumerKey: consumerKey, 
+                consumerSecret: consumerSecret,
+                accessTokenKey: accessTokenKey,
+                accessTokenSecret: accessTokenSecret,
+            } }, text, TextTypes.Plain);
 
         return {
             content: [{
