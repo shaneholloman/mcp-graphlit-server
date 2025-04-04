@@ -2692,6 +2692,8 @@ export function registerTools(server: McpServer) {
     "sendTwitterNotification",
     `Posts a tweet from the configured user account.
     Accepts the plain text for the tweet.
+    Tweet text rules: allowed - plain text, @mentions, #hashtags, URLs (auto-shortened), line breaks (\n).  
+    Not allowed - markdown, HTML tags, rich text, or custom styles.
     Returns true if the notification was successfully sent, or false otherwise.`,
     { 
         text: z.string()
