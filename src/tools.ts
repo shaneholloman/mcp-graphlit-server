@@ -1998,8 +1998,8 @@ export function registerTools(server: McpServer) {
     server.tool(
     "ingestTwitterSearch",
     `Searches for recent posts from Twitter/X, and ingests them into Graphlit knowledge base.
-        Accepts Twitter/X user name, without the leading @ symbol, and an optional read limit for the number of posts to ingest.
-        Executes asynchronously and returns the feed identifier.`,
+    Accepts search query, and an optional read limit for the number of posts to ingest.
+    Executes asynchronously and returns the feed identifier.`,
     { 
         query: z.string().describe("Search query"),
         readLimit: z.number().optional().describe("Number of posts to ingest, optional. Defaults to 100.")
@@ -2471,24 +2471,24 @@ export function registerTools(server: McpServer) {
 
     server.tool(
     "webSearch",
-    `Performs web or podcast search based on search query. Format the search query as what would be entered into a Google search.
-    Can search for web pages or podcasts/podcast episodes. 
+    `Performs web or podcast search based on search query. Can search for web pages or podcasts/podcast episodes. 
+    Format the search query as what would be entered into a Google search. You can use site filtering in the search query, like 'site:twitter.com'.    
     Accepts search query as string, and optional search service type.    
     Prefer calling this tool over using 'curl' directly for any web search.
     *Only* use Podscan search service type to search for podcasts or podcast episodes.
-    Does *not* ingest pages into Graphlit knowledge base. *Does* ingest podcast episodes as transcribed audio files into Graphlit knowledge base.
-    When searching for podcasts or podcast episodes, the search query text doesn't need to include the term 'podcast' or 'episode' - that is implied because you are using Podscan.
-    Search service types: Tavily (web pages), Exa (web pages) and Podscan (podcast episodes). Defaults to Tavily.
+    Does *not* ingest pages into Graphlit knowledge base. *Does* ingest podcast episodes as transcribed audio files into Graphlit knowledge base.    
+    When searching for podcasts or podcast episodes, *don't* include the term 'podcast' or 'episode' in the search query - that would be redundant.
+    Search service types: Tavily (web pages), Exa (web pages) and Podscan (podcast episodes). Defaults to Exa.
     Returns URL, title and relevant Markdown text from resulting web pages or podcast episode transcripts.`,
     { 
-        search: z.string().describe("Search query."),
-        searchService: z.nativeEnum(SearchServiceTypes).optional().default(SearchServiceTypes.Tavily).describe("Search service type (Tavily, Exa, Podscan). Defaults to Tavily.")
+        query: z.string().describe("Search query."),
+        searchService: z.nativeEnum(SearchServiceTypes).optional().default(SearchServiceTypes.Exa).describe("Search service type (Tavily, Exa, Podscan). Defaults to Exa.")
     },
-    async ({ search, searchService }) => {
+    async ({ query, searchService }) => {
         const client = new Graphlit();
 
         try {
-        const response = await client.searchWeb(search, searchService);
+        const response = await client.searchWeb(query, searchService);
 
         return {
             content: [{
