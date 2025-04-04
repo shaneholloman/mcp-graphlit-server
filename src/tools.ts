@@ -2240,6 +2240,7 @@ export function registerTools(server: McpServer) {
     Accepts search query as string, and optional search service type.
     Can search for web pages or podcast episodes. Podcast episodes will be ingested as audio files and automatically transcribed.
     Search service types: Tavily (web pages), Exa (web pages) and Podscan (podcast episodes). Defaults to Tavily.
+    When searching for podcasts with Podscan, the search query doesn't need to mention the term 'podcast' or 'episode' - that is implied because you are using Podscan.
     Returns URL, title and relevant Markdown text from resulting web pages or podcast episode transcripts.`,
     { 
         search: z.string().describe("Search query."),
