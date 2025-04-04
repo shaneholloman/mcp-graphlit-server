@@ -2237,8 +2237,9 @@ export function registerTools(server: McpServer) {
     `Performs web search based on search query. Format the search query as what would be entered into a Google search.
     Prefer calling this tool over using 'curl' directly for any web search.
     Accepts search query as string, and optional search service type.    
-    Can search for web pages or podcast episodes. Does *not* ingest pages into Graphlit knowledge base. *Does* ingest podcast episodes as transcribed audio files into Graphlit knowledge base.
-    When searching for podcasts, the search query text doesn't need to mention the term 'podcast' or 'episode' - that is implied because you are using Podscan.
+    Can search for web pages or podcasts/podcast episodes. *Only* use Podscan search service type to search for podcasts or podcast episodes.
+    Does *not* ingest pages into Graphlit knowledge base. *Does* ingest podcast episodes as transcribed audio files into Graphlit knowledge base.
+    When searching for podcasts or podcast episodes, the search query text doesn't need to include the term 'podcast' or 'episode' - that is implied because you are using Podscan.
     Search service types: Tavily (web pages), Exa (web pages) and Podscan (podcast episodes). Defaults to Tavily.
     Returns URL, title and relevant Markdown text from resulting web pages or podcast episode transcripts.`,
     { 
