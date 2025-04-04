@@ -567,38 +567,171 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
-    "queryCollections",
-    `Query collections from Graphlit knowledge base. Do *not* use for retrieving collection by collection identifier - retrieve collection resource instead, with URI 'collections://{id}'.
-    Accepts optional collection name for metadata filtering.
-    Returns the matching collections, including their collection resource URI to retrieve the collection contents.`,
+    "deleteContent",
+    `Deletes content from Graphlit knowledge base.
+    Accepts content identifier.
+    Returns the content identifier and content state, i.e. Deleted.`,
     { 
-        name: z.string().optional().describe("Textual match on collection name."),
-        limit: z.number().optional().default(100).describe("Limit the number of collections to be returned. Defaults to 100.")
+        id: z.string().describe("Content identifier."),
     },
-    async ({ name, limit }) => {
+    async ({ id }) => {
+        const client = new Graphlit();
+
+        try {
+        const response = await client.deleteContent(id);
+                
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteContent, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "deleteCollection",
+    `Deletes collection from Graphlit knowledge base.
+    Does *not* delete the contents in the collection, only the collection itself.
+    Accepts collection identifier.
+    Returns the collection identifier and collection state, i.e. Deleted.`,
+    { 
+        id: z.string().describe("Collection identifier."),
+    },
+    async ({ id }) => {
+        const client = new Graphlit();
+
+        try {
+        const response = await client.deleteCollection(id);
+                
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteCollection, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "deleteFeed",
+    `Deletes feed from Graphlit knowledge base.
+    *Does* delete the contents in the feed, in addition to the feed itself.
+    Accepts feed identifier.
+    Returns the feed identifier and feed state, i.e. Deleted.`,
+    { 
+        id: z.string().describe("Feed identifier."),
+    },
+    async ({ id }) => {
+        const client = new Graphlit();
+
+        try {
+        const response = await client.deleteFeed(id);
+                
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteFeed, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "deleteFeeds",
+    `Deletes feeds from Graphlit knowledge base.
+    *Does* delete the contents in the feed, in addition to the feed itself.
+    Accepts optional feed type filter to limit the feeds which will be deleted.
+    Also accepts optional limit of how many feeds to delete, defaults to 100.
+    Returns the feed identifiers and feed state, i.e. Deleted.`,
+    { 
+        feedType: z.nativeEnum(FeedTypes).optional().describe("Feed type filter, optional. One of: Discord, Email, Intercom, Issue, MicrosoftTeams, Notion, Reddit, Rss, Search, Site, Slack, Web, YouTube, Zendesk."),
+        limit: z.number().optional().default(100).describe("Limit the number of feeds to be deleted. Defaults to 100.")
+    },
+    async ({ feedType, limit }) => {
+        const client = new Graphlit();
+
+        try {
+        const filter: FeedFilter = { 
+            types: feedType ? [feedType] : null, 
+            limit: limit
+        };                
+
+        const response = await client.deleteAllFeeds(filter, true);
+                
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteAllFeeds, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "deleteCollections",
+    `Deletes collections from Graphlit knowledge base.
+    Does *not* delete the contents in the collections, only the collections themselves.
+    Accepts optional limit of how many collections to delete, defaults to 100.
+    Returns the collection identifiers and collection state, i.e. Deleted.`,
+    { 
+        limit: z.number().optional().default(100).describe("Limit the number of collections to be deleted. Defaults to 100.")
+    },
+    async ({ limit }) => {
         const client = new Graphlit();
 
         try {
         const filter: CollectionFilter = { 
-            name: name,
             limit: limit
-        };
-        const response = await client.queryCollections(filter);
-        
-        const collections = response.collections?.results || [];
-        
+        };                
+
+        const response = await client.deleteAllCollections(filter, true);
+                
         return {
-            content: collections
-            .filter(collection => collection !== null)
-            .map(collection => ({
-                type: "text",
-                mimeType: "application/json",
-                text: JSON.stringify({ 
-                    id: collection.id, 
-                    relevance: collection.relevance,
-                    resourceUri: `collections://${collection.id}`
-                }, null, 2)
-            }))
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteAllCollections, null, 2)
+            }]
         };
         } catch (err: unknown) {
         const error = err as Error;
@@ -681,6 +814,90 @@ export function registerTools(server: McpServer) {
             type: "text",
             text: JSON.stringify(response.deleteAllFeeds, null, 2)
             }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "deleteCollections",
+    `Deletes collections from Graphlit knowledge base.
+    Accepts optional limit of how many collections to delete, defaults to 100.
+    Returns the collection identifiers and collection state, i.e. Deleted.`,
+    { 
+        limit: z.number().optional().default(100).describe("Limit the number of collections to be deleted. Defaults to 100.")
+    },
+    async ({ limit }) => {
+        const client = new Graphlit();
+
+        try {
+        const filter: CollectionFilter = { 
+            limit: limit
+        };                
+
+        const response = await client.deleteAllCollections(filter, true);
+                
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteAllCollections, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+    
+    server.tool(
+    "queryCollections",
+    `Query collections from Graphlit knowledge base. Do *not* use for retrieving collection by collection identifier - retrieve collection resource instead, with URI 'collections://{id}'.
+    Accepts optional collection name for metadata filtering.
+    Returns the matching collections, including their collection resource URI to retrieve the collection contents.`,
+    { 
+        name: z.string().optional().describe("Textual match on collection name."),
+        limit: z.number().optional().default(100).describe("Limit the number of collections to be returned. Defaults to 100.")
+    },
+    async ({ name, limit }) => {
+        const client = new Graphlit();
+
+        try {
+        const filter: CollectionFilter = { 
+            name: name,
+            limit: limit
+        };
+        const response = await client.queryCollections(filter);
+        
+        const collections = response.collections?.results || [];
+        
+        return {
+            content: collections
+            .filter(collection => collection !== null)
+            .map(collection => ({
+                type: "text",
+                mimeType: "application/json",
+                text: JSON.stringify({ 
+                    id: collection.id, 
+                    relevance: collection.relevance,
+                    resourceUri: `collections://${collection.id}`
+                }, null, 2)
+            }))
         };
         } catch (err: unknown) {
         const error = err as Error;
