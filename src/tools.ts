@@ -351,70 +351,6 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
-    "queryContents",
-    `Query contents from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
-    Accepts optional content name, content type and file type for metadata filtering.
-    Accepts optional recency filter (defaults to null, meaning all time), and optional feed and collection identifiers to filter images by.
-    Accepts optional geo-location filter for search by latitude, longitude and optional distance radius. Images and videos taken with GPS enabled are searchable by geo-location.
-    Returns the matching contents, including their content resource URI to retrieve the complete Markdown text.`,
-    { 
-        name: z.string().optional().describe("Textual match on content name."),
-        type: z.nativeEnum(ContentTypes).optional().describe("Filter by content type."),
-        fileType: z.nativeEnum(FileTypes).optional().describe("Filter by file type."),
-        inLast: z.string().optional().describe("Recency filter for content ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
-        feeds: z.array(z.string()).optional().describe("Feed identifiers to filter contents by, optional."),
-        collections: z.array(z.string()).optional().describe("Collection identifiers to filter contents by, optional."),
-        location: PointFilter.optional().describe("Geo-location filter for search by latitude, longitude and optional distance radius."),
-        limit: z.number().optional().default(100).describe("Limit the number of contents to be returned. Defaults to 100.")
-    },
-    async ({ name, type, fileType, inLast, feeds, collections, location, limit }) => {
-        const client = new Graphlit();
-
-        try {
-        const filter: ContentFilter = { 
-            name: name,
-            types: type !== undefined ? [ type ] : undefined,
-            fileTypes: fileType !== undefined ? [ fileType ] : undefined,
-            feeds: feeds?.map(feed => ({ id: feed })),
-            collections: collections?.map(collection => ({ id: collection })),
-            location: location,
-            createdInLast: inLast,
-            limit: limit
-        };
-        const response = await client.queryContents(filter);
-        
-        const contents = response.contents?.results || [];
-        
-        return {
-            content: contents
-            .filter(content => content !== null)
-            .map(content => ({
-                type: "text",
-                mimeType: "application/json",
-                text: JSON.stringify({ 
-                    id: content.id, 
-                    relevance: content.relevance,
-                    fileName: content.fileName,
-                    resourceUri: `contents://${content.id}`, 
-                    uri: content.imageUri, 
-                    mimeType: content.mimeType
-                }, null, 2)
-            }))
-        };
-        } catch (err: unknown) {
-        const error = err as Error;
-        return {
-            content: [{
-            type: "text",
-            text: `Error: ${error.message}`
-            }],
-            isError: true
-        };
-        }
-    }
-    );
-
-    server.tool(
     "extractText",
     `Extracts JSON data from text using LLM.
     Accepts text to be extracted, and JSON schema which describes the data which will be extracted. JSON schema needs be of type 'object' and include 'properties' and 'required' fields.
@@ -789,6 +725,70 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
+    "queryContents",
+    `Query contents from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
+    Accepts optional content name, content type and file type for metadata filtering.
+    Accepts optional recency filter (defaults to null, meaning all time), and optional feed and collection identifiers to filter images by.
+    Accepts optional geo-location filter for search by latitude, longitude and optional distance radius. Images and videos taken with GPS enabled are searchable by geo-location.
+    Returns the matching contents, including their content resource URI to retrieve the complete Markdown text.`,
+    { 
+        name: z.string().optional().describe("Textual match on content name."),
+        type: z.nativeEnum(ContentTypes).optional().describe("Filter by content type."),
+        fileType: z.nativeEnum(FileTypes).optional().describe("Filter by file type."),
+        inLast: z.string().optional().describe("Recency filter for content ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
+        feeds: z.array(z.string()).optional().describe("Feed identifiers to filter contents by, optional."),
+        collections: z.array(z.string()).optional().describe("Collection identifiers to filter contents by, optional."),
+        location: PointFilter.optional().describe("Geo-location filter for search by latitude, longitude and optional distance radius."),
+        limit: z.number().optional().default(100).describe("Limit the number of contents to be returned. Defaults to 100.")
+    },
+    async ({ name, type, fileType, inLast, feeds, collections, location, limit }) => {
+        const client = new Graphlit();
+
+        try {
+        const filter: ContentFilter = { 
+            name: name,
+            types: type !== undefined ? [ type ] : undefined,
+            fileTypes: fileType !== undefined ? [ fileType ] : undefined,
+            feeds: feeds?.map(feed => ({ id: feed })),
+            collections: collections?.map(collection => ({ id: collection })),
+            location: location,
+            createdInLast: inLast,
+            limit: limit
+        };
+        const response = await client.queryContents(filter);
+        
+        const contents = response.contents?.results || [];
+        
+        return {
+            content: contents
+            .filter(content => content !== null)
+            .map(content => ({
+                type: "text",
+                mimeType: "application/json",
+                text: JSON.stringify({ 
+                    id: content.id, 
+                    relevance: content.relevance,
+                    fileName: content.fileName,
+                    resourceUri: `contents://${content.id}`, 
+                    uri: content.imageUri, 
+                    mimeType: content.mimeType
+                }, null, 2)
+            }))
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+    
+    server.tool(
     "queryCollections",
     `Query collections from Graphlit knowledge base. Do *not* use for retrieving collection by collection identifier - retrieve collection resource instead, with URI 'collections://{id}'.
     Accepts optional collection name for metadata filtering.
@@ -819,6 +819,55 @@ export function registerTools(server: McpServer) {
                     id: collection.id, 
                     relevance: collection.relevance,
                     resourceUri: `collections://${collection.id}`
+                }, null, 2)
+            }))
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "queryFeeds",
+    `Query feeds from Graphlit knowledge base. Do *not* use for retrieving feed by feed identifier - retrieve feed resource instead, with URI 'feeds://{id}'.
+    Accepts optional feed name and feed type for metadata filtering.
+    Returns the matching feeds, including their feed resource URI to retrieve the feed contents.`,
+    { 
+        name: z.string().optional().describe("Textual match on feed name."),
+        type: z.nativeEnum(FeedTypes).optional().describe("Filter by feed type."),
+        limit: z.number().optional().default(100).describe("Limit the number of feeds to be returned. Defaults to 100.")
+    },
+    async ({ name, type, limit }) => {
+        const client = new Graphlit();
+
+        try {
+        const filter: FeedFilter = { 
+            name: name,
+            types: type !== undefined ? [ type ] : undefined,
+            limit: limit
+        };
+        const response = await client.queryFeeds(filter);
+        
+        const feeds = response.feeds?.results || [];
+        
+        return {
+            content: feeds
+            .filter(feed => feed !== null)
+            .map(feed => ({
+                type: "text",
+                mimeType: "application/json",
+                text: JSON.stringify({ 
+                    id: feed.id, 
+                    relevance: feed.relevance,
+                    resourceUri: `feeds://${feed.id}`
                 }, null, 2)
             }))
         };
