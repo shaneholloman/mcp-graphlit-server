@@ -32,13 +32,13 @@ export function registerTools(server: McpServer) {
     server.tool(
     "configureProject",
     `Configures the default content workflow for the Graphlit project. Only needed if user asks to configure the default workflow.
-    Accepts whether to enable high-quality document and web page preparation using a vision LLM. Defaults to using Azure AI Document Intelligence for document preparation, if not assigned.
-    Accepts whether to enable entity extraction using LLM into the knowledge graph.
+    Optionally accepts whether to enable high-quality document and web page preparation using a vision LLM. Defaults to using Azure AI Document Intelligence for document preparation, if not assigned.
+    Optionally accepts whether to enable entity extraction using LLM into the knowledge graph. Defaults to no entity extraction, if not assigned.
     Optionally accepts the preferred model provider service type, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided.
     Returns the project identifier.`,
     { 
-        enablePreparation: z.boolean().describe("Whether to enable high-quality document and web page preparation using vision LLM."),
-        enableExtraction: z.boolean().describe("Whether to enable entity extraction using LLM into the knowledge graph."),
+        enablePreparation: z.boolean().optional().default(false).describe("Whether to enable high-quality document and web page preparation using vision LLM. Defaults to False."),
+        enableExtraction: z.boolean().optional().default(false).describe("Whether to enable entity extraction using LLM into the knowledge graph. Defaults to False."),
         serviceType: z.nativeEnum(Types.ModelServiceTypes).optional().default(Types.ModelServiceTypes.Anthropic).describe("Preferred model provider service type, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided.")
     },
     async ({ enablePreparation, enableExtraction, serviceType }) => {
