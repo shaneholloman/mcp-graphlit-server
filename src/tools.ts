@@ -28,7 +28,6 @@ import {
   TwitterListingTypes
 } from "graphlit-client/dist/generated/graphql-types.js";
 
-// NOTE: have to keep to 49 tools, otherwise MCP will not load in Windsurf
 export function registerTools(server: McpServer) {
     server.tool(
     "configureProject",
@@ -567,7 +566,6 @@ export function registerTools(server: McpServer) {
     }
     );
 
-    /*
     server.tool(
     "queryCollections",
     `Query collections from Graphlit knowledge base. Do *not* use for retrieving collection by collection identifier - retrieve collection resource instead, with URI 'collections://{id}'.
@@ -614,7 +612,6 @@ export function registerTools(server: McpServer) {
         }
     }
     );
-    */
 
     server.tool(
     "deleteContents",
@@ -1760,7 +1757,7 @@ export function registerTools(server: McpServer) {
 
     server.tool(
     "ingestTwitterPosts",
-    `Ingests posts from Twitter/X into Graphlit knowledge base.
+    `Ingests posts by user from Twitter/X into Graphlit knowledge base.
      Accepts Twitter/X user name, without the leading @ symbol, and an optional read limit for the number of posts to ingest.
      Executes asynchronously and returns the feed identifier.`,
     { 
@@ -1783,6 +1780,57 @@ export function registerTools(server: McpServer) {
             twitter: {
                 type: TwitterListingTypes.Posts,
                 userName: userName,
+                token: token,
+                includeAttachments: true,
+                readLimit: readLimit || 100
+            }
+        });
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ id: response.createFeed?.id }, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "ingestTwitterSearch",
+    `Searches for recent posts from Twitter/X, and ingests them into Graphlit knowledge base.
+        Accepts Twitter/X user name, without the leading @ symbol, and an optional read limit for the number of posts to ingest.
+        Executes asynchronously and returns the feed identifier.`,
+    { 
+        query: z.string().describe("Search query"),
+        readLimit: z.number().optional().describe("Number of posts to ingest, optional. Defaults to 100.")
+    },
+    async ({ query, readLimit }) => {
+        const client = new Graphlit();
+
+        try {
+        const token = process.env.TWITTER_TOKEN;
+        if (!token) {
+            console.error("Please set TWITTER_TOKEN environment variable.");
+            process.exit(1);
+        }
+
+        const response = await client.createFeed({
+            name: `Twitter [${query}]`,
+            type: FeedTypes.Twitter,
+            twitter: {
+                type: TwitterListingTypes.RecentSearch,
+                query: query,
                 token: token,
                 includeAttachments: true,
                 readLimit: readLimit || 100
@@ -2500,7 +2548,6 @@ export function registerTools(server: McpServer) {
     }
     );
 
-    /*
     server.tool(
     "describeImageContent",
     `Prompts vision LLM and returns description of image content. 
@@ -2563,7 +2610,6 @@ export function registerTools(server: McpServer) {
         }
     }
     );
-    */
 
     server.tool(
     "publishAudio",
