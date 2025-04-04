@@ -7,7 +7,7 @@
 
 The Model Context Protocol (MCP) Server enables integration between MCP clients and the Graphlit service. This document outlines the setup process and provides a basic example of using the client.
 
-Ingest anything from Slack, Discord, websites, Google Drive, email, Jira, Linear or GitHub into a Graphlit project - and then search and retrieve relevant knowledge within an MCP client like Cursor, Windsurf or Cline.
+Ingest anything from Slack, Discord, websites, Google Drive, email, Jira, Linear or GitHub into a Graphlit project - and then search and retrieve relevant knowledge within an MCP client like Cursor, Windsurf, Goose or Cline.
 
 Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdown upon ingestion. 
 
@@ -16,6 +16,8 @@ Audio and video files will be transcribed upon ingestion.
 Web crawling and web search are built-in as MCP tools, with no need to integrate other tools like Firecrawl, Exa, etc. separately.
 
 You can read more about the MCP Server use cases and features on our [blog](https://www.graphlit.com/blog/graphlit-mcp-server).
+
+For any questions on using the MCP Server, please join our [Discord](https://discord.gg/ygFmfjy3Qx) community.
 
 <a href="https://glama.ai/mcp/servers/fscrivteod">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/fscrivteod/badge" alt="graphlit-mcp-server MCP server" />
@@ -27,6 +29,7 @@ You can read more about the MCP Server use cases and features on our [blog](http
 
 - Query Contents
 - Query Collections
+- Query Feeds
 - Retrieve Relevant Sources
 - Retrieve Similar Images
 - Visually Describe Image
@@ -83,7 +86,7 @@ You can read more about the MCP Server use cases and features on our [blog](http
 - Create Collection
 - Add Contents to Collection
 - Remove Contents from Collection
-- Delete Collection
+- Delete Collection(s)
 - Delete Feed(s)
 - Delete Content(s)
 - Is Feed Done?
