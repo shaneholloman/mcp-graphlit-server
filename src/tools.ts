@@ -5,6 +5,7 @@ import { Graphlit, Types } from "graphlit-client";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { 
+  ConversationFilter,
   CollectionFilter,
   ContentFilter, 
   ContentTypes, 
@@ -615,6 +616,39 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
+    "deleteConversation",
+    `Deletes conversation from Graphlit knowledge base.
+    Accepts conversation identifier.
+    Returns the conversation identifier and content state, i.e. Deleted.`,
+    { 
+        id: z.string().describe("Conversation identifier."),
+    },
+    async ({ id }) => {
+        const client = new Graphlit();
+
+        try {
+        const response = await client.deleteConversation(id);
+                
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteConversation, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
     "deleteCollection",
     `Deletes collection from Graphlit knowledge base.
     Does *not* delete the contents in the collection, only the collection itself.
@@ -762,6 +796,43 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
+    "deleteConversations",
+    `Deletes conversations from Graphlit knowledge base.
+    Accepts optional limit of how many conversations to delete, defaults to 100.
+    Returns the conversation identifiers and conversation state, i.e. Deleted.`,
+    { 
+        limit: z.number().optional().default(100).describe("Limit the number of conversations to be deleted. Defaults to 100.")
+    },
+    async ({ limit }) => {
+        const client = new Graphlit();
+
+        try {
+        const filter: ConversationFilter = { 
+            limit: limit
+        };                
+
+        const response = await client.deleteAllConversations(filter, true);
+                
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.deleteAllConversations, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+    
+    server.tool(
     "deleteContents",
     `Deletes contents from Graphlit knowledge base.
     Accepts optional content type and file type filters to limit the contents which will be deleted.
@@ -807,11 +878,13 @@ export function registerTools(server: McpServer) {
     "queryContents",
     `Query contents from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
     Accepts optional content name, content type and file type for metadata filtering.
+    Accepts optional hybrid vector search query.
     Accepts optional recency filter (defaults to null, meaning all time), and optional feed and collection identifiers to filter images by.
     Accepts optional geo-location filter for search by latitude, longitude and optional distance radius. Images and videos taken with GPS enabled are searchable by geo-location.
     Returns the matching contents, including their content resource URI to retrieve the complete Markdown text.`,
     { 
         name: z.string().optional().describe("Textual match on content name."),
+        query: z.string().optional().describe("Search query."),
         type: z.nativeEnum(ContentTypes).optional().describe("Filter by content type."),
         fileType: z.nativeEnum(FileTypes).optional().describe("Filter by file type."),
         inLast: z.string().optional().describe("Recency filter for content ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
@@ -820,12 +893,14 @@ export function registerTools(server: McpServer) {
         location: PointFilter.optional().describe("Geo-location filter for search by latitude, longitude and optional distance radius."),
         limit: z.number().optional().default(100).describe("Limit the number of contents to be returned. Defaults to 100.")
     },
-    async ({ name, type, fileType, inLast, feeds, collections, location, limit }) => {
+    async ({ name, query, type, fileType, inLast, feeds, collections, location, limit }) => {
         const client = new Graphlit();
 
         try {
         const filter: ContentFilter = { 
             name: name,
+            search: query,
+            searchType: SearchTypes.Hybrid,
             types: type !== undefined ? [ type ] : undefined,
             fileTypes: fileType !== undefined ? [ fileType ] : undefined,
             feeds: feeds?.map(feed => ({ id: feed })),
@@ -947,6 +1022,57 @@ export function registerTools(server: McpServer) {
                     id: feed.id, 
                     relevance: feed.relevance,
                     resourceUri: `feeds://${feed.id}`
+                }, null, 2)
+            }))
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "queryConversations",
+    `Query conversations from Graphlit knowledge base. Do *not* use for retrieving conversation by conversation identifier - retrieve conversation resource instead, with URI 'conversations://{id}'.
+    Accepts optional hybrid vector search query.
+    Accepts optional recency filter (defaults to null, meaning all time).
+    Returns the matching conversations, including their conversation resource URI to retrieve the complete conversation message history.`,
+    { 
+        query: z.string().optional().describe("Search query."),
+        inLast: z.string().optional().describe("Recency filter for conversations created 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
+        limit: z.number().optional().default(100).describe("Limit the number of conversations to be returned. Defaults to 100.")
+    },
+    async ({ query, inLast, limit }) => {
+        const client = new Graphlit();
+
+        try {
+        const filter: ConversationFilter = { 
+            search: query,
+            searchType: SearchTypes.Hybrid,
+            createdInLast: inLast,
+            limit: limit
+        };
+        const response = await client.queryConversations(filter);
+        
+        const conversations = response.conversations?.results || [];
+        
+        return {
+            content: conversations
+            .filter(conversation => conversation !== null)
+            .map(conversation => ({
+                type: "text",
+                mimeType: "application/json",
+                text: JSON.stringify({ 
+                    id: conversation.id, 
+                    relevance: conversation.relevance,
+                    resourceUri: `conversations://${conversation.id}`
                 }, null, 2)
             }))
         };

@@ -31,6 +31,7 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 - Query Contents
 - Query Collections
 - Query Feeds
+- Query Conversations
 - Retrieve Relevant Sources
 - Retrieve Similar Images
 - Visually Describe Image
@@ -97,6 +98,7 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 - Delete Collection(s)
 - Delete Feed(s)
 - Delete Content(s)
+- Delete Conversation(s)
 - Is Feed Done?
 - Is Content Done?
 
