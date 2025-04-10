@@ -195,47 +195,7 @@ export function registerTools(server: McpServer) {
         }
     }
     );
-
-    server.tool(
-    "promptConversation",
-    `Prompts an LLM conversation against your entire Graphlit knowledge base. 
-    Similar to 'retrieveSources' but without content filtering, and uses LLM to complete the user prompt with the configured LLM.
-    Accepts an LLM user prompt and optional conversation identifier. Will either create a new conversation or continue an existing one.
-    Will use the default specification for LLM conversations, which is optionally configured with the configureProject tool.
-    Returns the conversation identifier, completed LLM message, and any citations from the LLM response.`,
-    { 
-        prompt: z.string().describe("User prompt."),
-        conversationId: z.string().optional().describe("Conversation identifier, optional."),
-    },
-    async ({ prompt, conversationId }) => {
-        const client = new Graphlit();
-
-        try {
-        const response = await client.promptConversation(prompt, conversationId);
-
-        return {
-            content: [{
-            type: "text",
-            text: JSON.stringify({ 
-                id: response.promptConversation?.conversation?.id, 
-                message: response.promptConversation?.message?.message, 
-                citations: response.promptConversation?.message?.citations,
-            }, null, 2)
-            }]
-        };
-        } catch (err: unknown) {
-        const error = err as Error;
-        return {
-            content: [{
-            type: "text",
-            text: `Error: ${error.message}`
-            }],
-            isError: true
-        };
-        }
-    }
-    );
-
+    
     server.tool(
     "askGraphlit",
     `Ask questions about the Graphlit API or SDKs. Can create code samples for any API call.
@@ -272,10 +232,54 @@ export function registerTools(server: McpServer) {
     );
  
     server.tool(
+    "promptConversation",
+    `Prompts an LLM conversation about your entire Graphlit knowledge base. 
+    Uses hybrid vector search based on user prompt for locating relevant content sources. Uses LLM to complete the user prompt with the configured LLM.
+    Maintains conversation history between 'user' and LLM 'assistant'. 
+    Prefer 'promptConversation' when the user intends to start or continue an ongoing conversation about the entire Graphlit knowledge base.
+    Similar to 'retrieveSources' but does not perform content metadata filtering.
+    Accepts an LLM user prompt and optional conversation identifier. Will either create a new conversation or continue an existing one.
+    Will use the default specification for LLM conversations, which is optionally configured with the 'configureProject' tool.
+    Returns the conversation identifier, completed LLM message, and any citations from the LLM response.`,
+    { 
+        prompt: z.string().describe("User prompt."),
+        conversationId: z.string().optional().describe("Conversation identifier, optional."),
+    },
+    async ({ prompt, conversationId }) => {
+        const client = new Graphlit();
+
+        try {
+        const response = await client.promptConversation(prompt, conversationId);
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ 
+                id: response.promptConversation?.conversation?.id, 
+                message: response.promptConversation?.message?.message, 
+                citations: response.promptConversation?.message?.citations,
+            }, null, 2)
+            }]
+        };
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
     "retrieveSources",
     `Retrieve relevant content sources from Graphlit knowledge base. Do *not* use for retrieving content by content identifier - retrieve content resource instead, with URI 'contents://{id}'.
     Accepts an LLM user prompt for content retrieval. For best retrieval quality, provide only key words or phrases from the user prompt, which will be used to create text embeddings for a vector search query.
-    Only use when there is a valid LLM user prompt for content retrieval, otherwise use queryContents. For example 'recent content' is not a useful user prompt, since it doesn't reference the text in the content.
+    Only use when there is a valid LLM user prompt for content retrieval, otherwise use 'queryContents'. For example 'recent content' is not a useful user prompt, since it doesn't reference the text in the content.
+    Only use for 'one shot' retrieval of content sources, i.e. when the user is not interested in having a conversation about the content.
     Accepts an optional ingestion recency filter (defaults to null, meaning all time), and optional content type and file type filters.
     Also accepts optional feed and collection identifiers to filter content by.
     Returns the ranked content sources, including their content resource URI to retrieve the complete Markdown text.`,
