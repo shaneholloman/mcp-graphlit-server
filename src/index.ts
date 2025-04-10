@@ -7,7 +7,8 @@ import { registerTools } from './tools.js';
 const DEFAULT_INSTRUCTIONS = `
 You are provided a set of MCP tools and resources that integrate with the [Graphlit](https://www.graphlit.com) Platform.
 
-There may be environment variables which are required to be configured in order to use each of the Graphlit MCP tools. These are described in the description for each tool.
+To use each of the Graphlit MCP tools, there may be environment variables which are required to be configured in your MCP client. These are described in the description for each tool.
+These must be configured in the MCP client YAML or JSON configuration file before you can use the tools. *Do not* set these directly in your Terminal or shell environment.
 
 Graphlit is an LLM-enabled knowledge API platform, which supports these resources:
 - project: container for ingested contents, which can be configured with a default workflow
