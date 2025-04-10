@@ -1165,6 +1165,7 @@ export function registerTools(server: McpServer) {
     server.tool(
     "listMicrosoftTeamsTeams",
     `Lists available Microsoft Teams teams.
+    Requires environment variables to be configured: MICROSOFT_TEAMS_CLIENT_ID, MICROSOFT_TEAMS_CLIENT_SECRET, MICROSOFT_TEAMS_REFRESH_TOKEN.
     Returns a list of Microsoft Teams teams, where the team identifier can be used with listMicrosoftTeamsChannels to enumerate Microsoft Teams channels.`,
     { 
     },
@@ -1220,7 +1221,8 @@ export function registerTools(server: McpServer) {
     server.tool(
     "listMicrosoftTeamsChannels",
     `Lists available Microsoft Teams channels.
-        Returns a list of Microsoft Teams channels, where the channel identifier can be used with ingestMicrosoftTeamsMessages to ingest messages into Graphlit knowledge base.`,
+    Requires environment variables to be configured: MICROSOFT_TEAMS_CLIENT_ID, MICROSOFT_TEAMS_CLIENT_SECRET, MICROSOFT_TEAMS_REFRESH_TOKEN.
+    Returns a list of Microsoft Teams channels, where the channel identifier can be used with ingestMicrosoftTeamsMessages to ingest messages into Graphlit knowledge base.`,
     { 
         teamId: z.string().describe("Microsoft Teams team identifier.")
     },
@@ -1277,6 +1279,7 @@ export function registerTools(server: McpServer) {
     server.tool(
     "listNotionDatabases",
     `Lists available Notion databases.
+    Requires environment variable to be configured: NOTION_API_KEY.
     Returns a list of Notion databases, where the database identifier can be used with ingestNotionPages to ingest pages into Graphlit knowledge base.`,
     { 
     },
@@ -1317,6 +1320,7 @@ export function registerTools(server: McpServer) {
     server.tool(
     "listLinearProjects",
     `Lists available Linear projects.
+    Requires environment variable to be configured: LINEAR_API_KEY.
     Returns a list of Linear projects, where the project name can be used with ingestLinearIssues to ingest issues into Graphlit knowledge base.`,
     { 
     },
@@ -1357,6 +1361,7 @@ export function registerTools(server: McpServer) {
     server.tool(
     "listSlackChannels",
     `Lists available Slack channels.
+    Requires environment variable to be configured: SLACK_BOT_TOKEN.
     Returns a list of Slack channels, where the channel name can be used with ingestSlackMessages to ingest messages into Graphlit knowledge base.`,
     { 
     },
@@ -1397,6 +1402,7 @@ export function registerTools(server: McpServer) {
     server.tool(
     "listSharePointLibraries",
     `Lists available SharePoint libraries.
+    Requires environment variables to be configured: SHAREPOINT_CLIENT_ID, SHAREPOINT_CLIENT_SECRET, SHAREPOINT_REFRESH_TOKEN.
     Returns a list of SharePoint libraries, where the selected libraryId can be used with listSharePointFolders to enumerate SharePoint folders in a library.`,
     { 
     },
@@ -1452,6 +1458,7 @@ export function registerTools(server: McpServer) {
     server.tool(
     "listSharePointFolders",
     `Lists available SharePoint folders.
+    Requires environment variables to be configured: SHAREPOINT_CLIENT_ID, SHAREPOINT_CLIENT_SECRET, SHAREPOINT_REFRESH_TOKEN.
     Returns a list of SharePoint folders, which can be used with ingestSharePointFiles to ingest files into Graphlit knowledge base.`,
     { 
         libraryId: z.string().describe("SharePoint library identifier.")
@@ -1510,8 +1517,9 @@ export function registerTools(server: McpServer) {
     `Ingests files from SharePoint library into Graphlit knowledge base.
     Accepts a SharePoint libraryId and an optional folderId to ingest files from a specific SharePoint folder.
     Libraries can be enumerated with listSharePointLibraries and library folders with listSharePointFolders.
+    Requires environment variables to be configured: SHAREPOINT_ACCOUNT_NAME, SHAREPOINT_CLIENT_ID, SHAREPOINT_CLIENT_SECRET, SHAREPOINT_REFRESH_TOKEN.
     Accepts an optional read limit for the number of files to ingest.
-    Executes asynchronously and returns the feed identifier.`,
+    Executes asynchronously, creates SharePoint feed, and returns the feed identifier.`,
     { 
         libraryId: z.string().describe("SharePoint library identifier."),
         folderId: z.string().optional().describe("SharePoint folder identifier, optional."),
@@ -1586,22 +1594,19 @@ export function registerTools(server: McpServer) {
 
     server.tool(
     "ingestOneDriveFiles",
-    `Ingests files from OneDrive folder into Graphlit knowledge base.
-    Accepts an optional read limit for the number of files to ingest.
-    Executes asynchronously and returns the feed identifier.`,
+    `Ingests files from OneDrive into Graphlit knowledge base.
+    Accepts optional OneDrive folder identifier, and an optional read limit for the number of files to ingest.
+    If no folder identifier provided, ingests files from root OneDrive folder.
+    Requires environment variables to be configured: ONEDRIVE_CLIENT_ID, ONEDRIVE_CLIENT_SECRET, ONEDRIVE_REFRESH_TOKEN.
+    Executes asynchronously, creates OneDrive feed, and returns the feed identifier.`,
     { 
+        folderId: z.string().optional().describe("OneDrive folder identifier, optional."),
         readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
     },
-    async ({ readLimit }) => {
+    async ({ folderId, readLimit }) => {
         const client = new Graphlit();
 
         try {
-        const folderId = process.env.ONEDRIVE_FOLDER_ID;
-        if (!folderId) {
-            console.error("Please set ONEDRIVE_FOLDER_ID environment variable.");
-            process.exit(1);
-        }
-
         const clientId = process.env.ONEDRIVE_CLIENT_ID;
         if (!clientId) {
             console.error("Please set ONEDRIVE_CLIENT_ID environment variable.");
@@ -1663,7 +1668,7 @@ export function registerTools(server: McpServer) {
     For example, with Google Drive URI (https://drive.google.com/drive/u/0/folders/32tzhRD12KDh2hXABY8OZRFv7Smy8WBkQ), the folder identifier is 32tzhRD12KDh2hXABY8OZRFv7Smy8WBkQ.
     If no folder identifier provided, ingests files from root Google Drive folder.
     Requires environment variables to be configured: GOOGLE_DRIVE_CLIENT_ID, GOOGLE_DRIVE_CLIENT_SECRET, GOOGLE_DRIVE_REFRESH_TOKEN.
-    Executes asynchronously and returns the feed identifier.`,
+    Executes asynchronously, creates Google Drive feed, and returns the feed identifier.`,
     { 
         folderId: z.string().optional().describe("Google Drive folder identifier, optional."),
         readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
@@ -1729,10 +1734,11 @@ export function registerTools(server: McpServer) {
 
     server.tool(
     "ingestDropboxFiles",
-    `Ingests files from Dropbox folder into Graphlit knowledge base.
+    `Ingests files from Dropbox into Graphlit knowledge base.
     Accepts optional relative path to Dropbox folder (i.e. /Pictures), and an optional read limit for the number of files to ingest.
     If no path provided, ingests files from root Dropbox folder.
-    Executes asynchronously and returns the feed identifier.`,
+    Requires environment variables to be configured: DROPBOX_APP_KEY, DROPBOX_APP_SECRET, DROPBOX_REDIRECT_URI, DROPBOX_REFRESH_TOKEN.
+    Executes asynchronously, creates Dropbox feed, and returns the feed identifier.`,
     { 
         path: z.string().optional().describe("Relative path to Dropbox folder, optional."),
         readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
@@ -1804,11 +1810,12 @@ export function registerTools(server: McpServer) {
 
     server.tool(
     "ingestBoxFiles",
-    `Ingests files from Box folder into Graphlit knowledge base.
+    `Ingests files from Box into Graphlit knowledge base.
     Accepts optional Box folder identifier, and an optional read limit for the number of files to ingest.
     If no folder identifier provided, ingests files from root Box folder (i.e. "0").
     Folder identifier can be inferred from Box URL. https://app.box.com/folder/123456 -> folder identifier is "123456".
-    Executes asynchronously and returns the feed identifier.`,
+    Requires environment variables to be configured: BOX_CLIENT_ID, BOX_CLIENT_SECRET, BOX_REDIRECT_URI, BOX_REFRESH_TOKEN.
+    Executes asynchronously, creates Box feed, and returns the feed identifier.`,
     { 
         folderId: z.string().optional().default("0").describe("Box folder identifier, optional. Defaults to root folder."),
         readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
@@ -1883,7 +1890,8 @@ export function registerTools(server: McpServer) {
     `Ingests files from GitHub repository into Graphlit knowledge base.
     Accepts GitHub repository owner and repository name and an optional read limit for the number of files to ingest.
     For example, for GitHub repository (https://github.com/openai/tiktoken), 'openai' is the repository owner, and 'tiktoken' is the repository name.
-    Executes asynchronously and returns the feed identifier.`,
+    Requires environment variable to be configured: GITHUB_PERSONAL_ACCESS_TOKEN.
+    Executes asynchronously, creates GitHub feed, and returns the feed identifier.`,
     { 
         repositoryName: z.string().describe("GitHub repository name."),
         repositoryOwner: z.string().describe("GitHub repository owner."),
@@ -1940,7 +1948,8 @@ export function registerTools(server: McpServer) {
     Accepts Notion database identifier and an optional read limit for the number of pages to ingest.
     You can list the available Notion database identifiers with listNotionDatabases.
     Or, for a Notion URL, https://www.notion.so/Example/Engineering-Wiki-114abc10cb38487e91ec906fc6c6f350, 'Engineering-Wiki-114abc10cb38487e91ec906fc6c6f350' is an example of a Notion database identifier.
-    Executes asynchronously and returns the feed identifier.`,
+    Requires environment variable to be configured: NOTION_API_KEY.
+    Executes asynchronously, creates Notion feed, and returns the feed identifier.`,
     { 
         databaseId: z.string().describe("Notion database identifier."),
         readLimit: z.number().optional().describe("Number of pages to ingest, optional. Defaults to 100.")
@@ -1990,7 +1999,8 @@ export function registerTools(server: McpServer) {
     "ingestMicrosoftTeamsMessages",
     `Ingests messages from Microsoft Teams channel into Graphlit knowledge base.
     Accepts Microsoft Teams team identifier and channel identifier, and an optional read limit for the number of messages to ingest.
-    Executes asynchronously and returns the feed identifier.`,
+    Requires environment variables to be configured: MICROSOFT_TEAMS_CLIENT_ID, MICROSOFT_TEAMS_CLIENT_SECRET, MICROSOFT_TEAMS_REFRESH_TOKEN.
+    Executes asynchronously, creates Microsoft Teams feed, and returns the feed identifier.`,
     { 
         teamId: z.string().describe("Microsoft Teams team identifier."),
         channelId: z.string().describe("Microsoft Teams channel identifier."),
@@ -2055,8 +2065,9 @@ export function registerTools(server: McpServer) {
     server.tool(
     "ingestSlackMessages",
     `Ingests messages from Slack channel into Graphlit knowledge base.
-        Accepts Slack channel name and an optional read limit for the number of messages to ingest.
-        Executes asynchronously and returns the feed identifier.`,
+    Accepts Slack channel name and an optional read limit for the number of messages to ingest.
+    Requires environment variable to be configured: SLACK_BOT_TOKEN.
+    Executes asynchronously, creates Slack feed, and returns the feed identifier.`,
     { 
         channelName: z.string().describe("Slack channel name."),
         readLimit: z.number().optional().describe("Number of messages to ingest, optional. Defaults to 100.")
@@ -2106,8 +2117,9 @@ export function registerTools(server: McpServer) {
     server.tool(
     "ingestDiscordMessages",
     `Ingests messages from Discord channel into Graphlit knowledge base.
-        Accepts Discord channel name and an optional read limit for the number of messages to ingest.
-        Executes asynchronously and returns the feed identifier.`,
+    Accepts Discord channel name and an optional read limit for the number of messages to ingest.
+    Requires environment variable to be configured: DISCORD_BOT_TOKEN.
+    Executes asynchronously, creates Discord feed, and returns the feed identifier.`,
     { 
         channelName: z.string().describe("Discord channel name."),
         readLimit: z.number().optional().describe("Number of messages to ingest, optional. Defaults to 100.")
@@ -2157,8 +2169,9 @@ export function registerTools(server: McpServer) {
     server.tool(
     "ingestTwitterPosts",
     `Ingests posts by user from Twitter/X into Graphlit knowledge base.
-     Accepts Twitter/X user name, without the leading @ symbol, and an optional read limit for the number of posts to ingest.
-     Executes asynchronously and returns the feed identifier.`,
+    Accepts Twitter/X user name, without the leading @ symbol, and an optional read limit for the number of posts to ingest.
+    Requires environment variable to be configured: TWITTER_TOKEN.
+    Executes asynchronously, creates Twitter feed, and returns the feed identifier.`,
     { 
         userName: z.string().describe("Twitter/X user name, without the leading @ symbol, i.e. 'graphlit'."),
         readLimit: z.number().optional().describe("Number of posts to ingest, optional. Defaults to 100.")
@@ -2209,7 +2222,8 @@ export function registerTools(server: McpServer) {
     "ingestTwitterSearch",
     `Searches for recent posts from Twitter/X, and ingests them into Graphlit knowledge base.
     Accepts search query, and an optional read limit for the number of posts to ingest.
-    Executes asynchronously and returns the feed identifier.`,
+    Requires environment variable to be configured: TWITTER_TOKEN.
+    Executes asynchronously, creates Twitter feed, and returns the feed identifier.`,
     { 
         query: z.string().describe("Search query"),
         readLimit: z.number().optional().describe("Number of posts to ingest, optional. Defaults to 100.")
@@ -2259,8 +2273,8 @@ export function registerTools(server: McpServer) {
     server.tool(
     "ingestRedditPosts",
     `Ingests posts from Reddit subreddit into Graphlit knowledge base.
-        Accepts a subreddit name and an optional read limit for the number of posts to ingest.
-        Executes asynchronously and returns the feed identifier.`,
+    Accepts a subreddit name and an optional read limit for the number of posts to ingest.
+    Executes asynchronously, creates Reddit feed, and returns the feed identifier.`,
     { 
         subredditName: z.string().describe("Subreddit name."),
         readLimit: z.number().optional().describe("Number of posts to ingest, optional. Defaults to 100.")
@@ -2302,7 +2316,8 @@ export function registerTools(server: McpServer) {
     "ingestGoogleEmail",
     `Ingests emails from Google Email account into Graphlit knowledge base.
     Accepts an optional read limit for the number of emails to ingest.
-    Executes asynchronously and returns the feed identifier.`,
+    Requires environment variables to be configured: GOOGLE_EMAIL_CLIENT_ID, GOOGLE_EMAIL_CLIENT_SECRET, GOOGLE_EMAIL_REFRESH_TOKEN.
+    Executes asynchronously, creates Google Email feed, and returns the feed identifier.`,
     { 
         readLimit: z.number().optional().describe("Number of emails to ingest, optional. Defaults to 100.")
     },
@@ -2310,12 +2325,6 @@ export function registerTools(server: McpServer) {
         const client = new Graphlit();
 
         try {
-        const refreshToken = process.env.GOOGLE_EMAIL_REFRESH_TOKEN;
-        if (!refreshToken) {
-            console.error("Please set GOOGLE_EMAIL_REFRESH_TOKEN environment variable.");
-            process.exit(1);
-        }
-
         const clientId = process.env.GOOGLE_EMAIL_CLIENT_ID;
         if (!clientId) {
             console.error("Please set GOOGLE_EMAIL_CLIENT_ID environment variable.");
@@ -2325,6 +2334,12 @@ export function registerTools(server: McpServer) {
         const clientSecret = process.env.GOOGLE_EMAIL_CLIENT_SECRET;
         if (!clientSecret) {
             console.error("Please set GOOGLE_EMAIL_CLIENT_SECRET environment variable.");
+            process.exit(1);
+        }
+
+        const refreshToken = process.env.GOOGLE_EMAIL_REFRESH_TOKEN;
+        if (!refreshToken) {
+            console.error("Please set GOOGLE_EMAIL_REFRESH_TOKEN environment variable.");
             process.exit(1);
         }
 
@@ -2368,7 +2383,8 @@ export function registerTools(server: McpServer) {
     "ingestMicrosoftEmail",
     `Ingests emails from Microsoft Email account into Graphlit knowledge base.
     Accepts an optional read limit for the number of emails to ingest.
-    Executes asynchronously and returns the feed identifier.`,
+    Requires environment variables to be configured: MICROSOFT_EMAIL_CLIENT_ID, MICROSOFT_EMAIL_CLIENT_SECRET, MICROSOFT_EMAIL_REFRESH_TOKEN.
+    Executes asynchronously, creates Microsoft Email feed, and returns the feed identifier.`,
     { 
         readLimit: z.number().optional().describe("Number of emails to ingest, optional. Defaults to 100.")
     },
@@ -2376,12 +2392,6 @@ export function registerTools(server: McpServer) {
         const client = new Graphlit();
 
         try {
-        const refreshToken = process.env.MICROSOFT_EMAIL_REFRESH_TOKEN;
-        if (!refreshToken) {
-            console.error("Please set MICROSOFT_EMAIL_REFRESH_TOKEN environment variable.");
-            process.exit(1);
-        }
-
         const clientId = process.env.MICROSOFT_EMAIL_CLIENT_ID;
         if (!clientId) {
             console.error("Please set MICROSOFT_EMAIL_CLIENT_ID environment variable.");
@@ -2391,6 +2401,12 @@ export function registerTools(server: McpServer) {
         const clientSecret = process.env.MICROSOFT_EMAIL_CLIENT_SECRET;
         if (!clientSecret) {
             console.error("Please set MICROSOFT_EMAIL_CLIENT_SECRET environment variable.");
+            process.exit(1);
+        }
+
+        const refreshToken = process.env.MICROSOFT_EMAIL_REFRESH_TOKEN;
+        if (!refreshToken) {
+            console.error("Please set MICROSOFT_EMAIL_REFRESH_TOKEN environment variable.");
             process.exit(1);
         }
 
@@ -2434,7 +2450,8 @@ export function registerTools(server: McpServer) {
     "ingestLinearIssues",
     `Ingests issues from Linear project into Graphlit knowledge base.
     Accepts Linear project name and an optional read limit for the number of issues to ingest.
-    Executes asynchronously and returns the feed identifier.`,
+    Requires environment variable to be configured: LINEAR_API_KEY.
+    Executes asynchronously, creates Linear issue feed, and returns the feed identifier.`,
     { 
         projectName: z.string().describe("Linear project name."),
         readLimit: z.number().optional().describe("Number of issues to ingest, optional. Defaults to 100.")
@@ -2488,7 +2505,8 @@ export function registerTools(server: McpServer) {
     `Ingests issues from GitHub repository into Graphlit knowledge base.
     Accepts GitHub repository owner and repository name and an optional read limit for the number of issues to ingest.
     For example, for GitHub repository (https://github.com/openai/tiktoken), 'openai' is the repository owner, and 'tiktoken' is the repository name.
-    Executes asynchronously and returns the feed identifier.`,
+    Requires environment variable to be configured: GITHUB_PERSONAL_ACCESS_TOKEN.
+    Executes asynchronously, creates GitHub issue feed, and returns the feed identifier.`,
     { 
         repositoryName: z.string().describe("GitHub repository name."),
         repositoryOwner: z.string().describe("GitHub repository owner."),
@@ -2543,7 +2561,8 @@ export function registerTools(server: McpServer) {
     "ingestJiraIssues",
     `Ingests issues from Atlassian Jira repository into Graphlit knowledge base.
     Accepts Atlassian Jira server URL and project name, and an optional read limit for the number of issues to ingest.
-    Executes asynchronously and returns the feed identifier.`,
+    Requires environment variables to be configured: JIRA_EMAIL, JIRA_TOKEN.
+    Executes asynchronously, creates Atlassian Jira issue feed, and returns the feed identifier.`,
     { 
         url: z.string().describe("Atlassian Jira server URL."),
         projectName: z.string().describe("Atlassian Jira project name."),

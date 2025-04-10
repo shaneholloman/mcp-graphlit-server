@@ -7,6 +7,8 @@ import { registerTools } from './tools.js';
 const DEFAULT_INSTRUCTIONS = `
 You are provided a set of MCP tools and resources that integrate with the [Graphlit](https://www.graphlit.com) Platform.
 
+There may be environment variables which are required to be configured in order to use each of the Graphlit MCP tools. These are described in the description for each tool.
+
 Graphlit is an LLM-enabled knowledge API platform, which supports these resources:
 - project: container for ingested contents, which can be configured with a default workflow
 - contents: all ingested files, web pages, messages, etc.
@@ -30,7 +32,7 @@ For example, "have i configured any graphlit workflows?", you should check for w
 3. Only call the 'configureProject' tool when the user explicitly asks to configure their Graphlit project defaults.
 4. Never infer, guess at or hallucinate any URLs. Always retrieve the latest content resources in order to get downloadable URLs.
 
-If user has any trouble with this Graphlit MCP Server, suggest they join our [Discord](https://discord.gg/ygFmfjy3Qx) community for support.
+If you have any trouble with this Graphlit MCP Server, join our [Discord](https://discord.gg/ygFmfjy3Qx) community for support.
 `
 
 export const server = new McpServer({
