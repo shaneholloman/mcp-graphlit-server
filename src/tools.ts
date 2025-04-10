@@ -18,6 +18,7 @@ import {
   NotionTypes,
   RerankingModelServiceTypes, 
   RetrievalStrategyTypes, 
+  GoogleDriveAuthenticationTypes,
   SharePointAuthenticationTypes, 
   FileTypes,
   TextTypes,
@@ -1657,22 +1658,20 @@ export function registerTools(server: McpServer) {
 
     server.tool(
     "ingestGoogleDriveFiles",
-    `Ingests files from Google Drive folder into Graphlit knowledge base.
-    Accepts an optional read limit for the number of files to ingest.
+    `Ingests files from Google Drive into Graphlit knowledge base.
+    Accepts optional Google Drive folder identifier, and an optional read limit for the number of files to ingest.
+    For example, with Google Drive URI (https://drive.google.com/drive/u/0/folders/32tzhRD12KDh2hXABY8OZRFv7Smy8WBkQ), the folder identifier is 32tzhRD12KDh2hXABY8OZRFv7Smy8WBkQ.
+    If no folder identifier provided, ingests files from root Google Drive folder.
+    Requires environment variables to be configured: GOOGLE_DRIVE_CLIENT_ID, GOOGLE_DRIVE_CLIENT_SECRET, GOOGLE_DRIVE_REFRESH_TOKEN.
     Executes asynchronously and returns the feed identifier.`,
     { 
+        folderId: z.string().optional().describe("Google Drive folder identifier, optional."),
         readLimit: z.number().optional().describe("Number of files to ingest, optional. Defaults to 100.")
     },
-    async ({ readLimit }) => {
+    async ({ folderId, readLimit }) => {
         const client = new Graphlit();
 
         try {
-        const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
-        if (!folderId) {
-            console.error("Please set GOOGLE_DRIVE_FOLDER_ID environment variable.");
-            process.exit(1);
-        }
-
         const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
         if (!clientId) {
             console.error("Please set GOOGLE_DRIVE_CLIENT_ID environment variable.");
@@ -1697,6 +1696,7 @@ export function registerTools(server: McpServer) {
             site: {
             type: FeedServiceTypes.GoogleDrive,
             googleDrive: {
+                authenticationType: GoogleDriveAuthenticationTypes.User,
                 folderId: folderId,
                 clientId: clientId,
                 clientSecret: clientSecret,
