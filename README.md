@@ -24,7 +24,6 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 </a>
 
 
-
 ## Tools
 
 ### Retrieval
@@ -35,6 +34,10 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 - Retrieve Relevant Sources
 - Retrieve Similar Images
 - Visually Describe Image
+
+### RAG
+
+- Prompt LLM Conversation
 
 ### Extraction
 
@@ -51,6 +54,7 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 - Text
 
 ### Data Connectors
+
 - Microsoft Outlook email
 - Google Mail
 - Notion
@@ -71,12 +75,14 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 - Podcasts (RSS)
 
 ### Web
+
 - Web Crawling
 - Web Search (including Podcast Search)
 - Web Mapping
 - Screenshot Page
 
 ### Notifications
+
 - Slack
 - Email
 - Webhook
@@ -111,6 +117,7 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 - Feeds
 - Collections (of Content)
 - Workflows
+- Conversations
 - Specifications
 
 ## Prerequisites
