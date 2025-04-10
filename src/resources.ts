@@ -313,10 +313,7 @@ export function registerResources(server: McpServer) {
               contents: [
                 {
                   uri: uri.toString(),
-                  text: JSON.stringify({
-                    id: response.workflow?.id,
-                    name: response.workflow?.name
-                  }, null, 2),
+                  text: JSON.stringify(response.workflow, null, 2),
                   mimeType: 'application/json'
                 }
               ]
@@ -372,11 +369,8 @@ export function registerResources(server: McpServer) {
             return {
               contents: [
                 {
-                  uri: uri.toString(),
-                  text: JSON.stringify({
-                    id: response.specification?.id,
-                    name: response.specification?.name
-                  }, null, 2),
+                  uri: uri.toString(),                  
+                  text: JSON.stringify(response.specification, null, 2),
                   mimeType: 'application/json'
                 }
               ]
