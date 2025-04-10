@@ -25,71 +25,109 @@ import {
   ContentPublishingFormats,
   ElevenLabsModels,
   IntegrationServiceTypes,
-  TwitterListingTypes
+  TwitterListingTypes,
+  ConversationSearchTypes,
+  PromptStrategyTypes
 } from "graphlit-client/dist/generated/graphql-types.js";
 
 export function registerTools(server: McpServer) {
     server.tool(
     "configureProject",
     `Configures the default content workflow for the Graphlit project. Only needed if user asks to configure the default workflow.
+    To reset the project configuration to 'factory state', assign False or null to all parameters.
+    Optionally accepts whether to configure the default specification for LLM conversations. Defaults to using OpenAI GPT-4o, if not assigned.
     Optionally accepts whether to enable high-quality document and web page preparation using a vision LLM. Defaults to using Azure AI Document Intelligence for document preparation, if not assigned.
     Optionally accepts whether to enable entity extraction using LLM into the knowledge graph. Defaults to no entity extraction, if not assigned.
     Optionally accepts the preferred model provider service type, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided.
     Returns the project identifier.`,
     { 
-        enablePreparation: z.boolean().optional().default(false).describe("Whether to enable high-quality document and web page preparation using vision LLM. Defaults to False."),
-        enableExtraction: z.boolean().optional().default(false).describe("Whether to enable entity extraction using LLM into the knowledge graph. Defaults to False."),
-        serviceType: z.nativeEnum(Types.ModelServiceTypes).optional().default(Types.ModelServiceTypes.Anthropic).describe("Preferred model provider service type, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided.")
+        specificationServiceType: z.nativeEnum(Types.ModelServiceTypes).optional().default(Types.ModelServiceTypes.Anthropic).describe("Preferred model provider service type for all specifications, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided."),
+        configureConversationSpecification: z.boolean().optional().default(false).describe("Whether to configure the default specification for LLM conversations. Defaults to False."),
+        configurePreparationSpecification: z.boolean().optional().default(false).describe("Whether to configure high-quality document and web page preparation using vision LLM. Defaults to False."),
+        configureExtractionSpecification: z.boolean().optional().default(false).describe("Whether to configure entity extraction using LLM into the knowledge graph. Defaults to False."),
     },
-    async ({ enablePreparation, enableExtraction, serviceType }) => {
+    async ({ specificationServiceType, configureConversationSpecification, configurePreparationSpecification, configureExtractionSpecification }) => {
         const client = new Graphlit();
 
         var preparationSpecificationId;
         var extractionSpecificationId;
+        var completionSpecificationId;
         var workflowId;
 
-        switch (serviceType)
+        switch (specificationServiceType)
         {
             case Types.ModelServiceTypes.Anthropic:
             case Types.ModelServiceTypes.Google:
             case Types.ModelServiceTypes.OpenAi:
                 break;
             default:
-                throw new Error(`Unsupported model service type [${serviceType}].`);
+                throw new Error(`Unsupported model service type [${specificationServiceType}].`);
         }
 
-        if (enablePreparation) {
+        if (configureConversationSpecification) {
+            var sresponse = await client.upsertSpecification({
+                name: "MCP Default Specification: Completion",
+                type: Types.SpecificationTypes.Completion,
+                serviceType: specificationServiceType,
+                anthropic: specificationServiceType == Types.ModelServiceTypes.Anthropic ? {
+                    model: Types.AnthropicModels.Claude_3_7Sonnet
+                } : undefined,
+                openAI: specificationServiceType == Types.ModelServiceTypes.OpenAi ? {
+                    model: Types.OpenAiModels.Gpt4OChat_128K
+                } : undefined,
+                google: specificationServiceType == Types.ModelServiceTypes.Google ? {
+                    model: Types.GoogleModels.Gemini_2_0Flash
+                } : undefined,
+                searchType: ConversationSearchTypes.Hybrid,
+                strategy: {
+                    embedCitations: true,
+                },
+                promptStrategy: {
+                    type: PromptStrategyTypes.OptimizeSearch, // optimize for similarity search
+                },
+                retrievalStrategy: {
+                    type: RetrievalStrategyTypes.Section // expand chunk to section
+                },
+                rerankingStrategy: {
+                    serviceType: RerankingModelServiceTypes.Cohere,
+                }
+            });
+
+            completionSpecificationId = sresponse.upsertSpecification?.id;
+        }
+
+        if (configurePreparationSpecification) {
             var sresponse = await client.upsertSpecification({
                 name: "MCP Default Specification: Preparation",
                 type: Types.SpecificationTypes.Preparation,
-                serviceType: serviceType,
-                anthropic: serviceType == Types.ModelServiceTypes.Anthropic ? {
+                serviceType: specificationServiceType,
+                anthropic: specificationServiceType == Types.ModelServiceTypes.Anthropic ? {
                     model: Types.AnthropicModels.Claude_3_7Sonnet
                 } : undefined,
-                openAI: serviceType == Types.ModelServiceTypes.OpenAi ? {
+                openAI: specificationServiceType == Types.ModelServiceTypes.OpenAi ? {
                     model: Types.OpenAiModels.Gpt4O_128K
                 } : undefined,
-                google: serviceType == Types.ModelServiceTypes.Google ? {
-                    model: Types.GoogleModels.Gemini_2_5ProExperimental
+                google: specificationServiceType == Types.ModelServiceTypes.Google ? {
+                    model: Types.GoogleModels.Gemini_2_5ProPreview
                 } : undefined,
             });
 
             preparationSpecificationId = sresponse.upsertSpecification?.id;
         }
 
-        if (enableExtraction) {
+        if (configureExtractionSpecification) {
             var sresponse = await client.upsertSpecification({
                 name: "MCP Default Specification: Extraction",
                 type: Types.SpecificationTypes.Extraction,
-                serviceType: serviceType,
-                anthropic: serviceType == Types.ModelServiceTypes.Anthropic ? {
+                serviceType: specificationServiceType,
+                anthropic: specificationServiceType == Types.ModelServiceTypes.Anthropic ? {
                     model: Types.AnthropicModels.Claude_3_7Sonnet
                 } : undefined,
-                openAI: serviceType == Types.ModelServiceTypes.OpenAi ? {
+                openAI: specificationServiceType == Types.ModelServiceTypes.OpenAi ? {
                     model: Types.OpenAiModels.Gpt4O_128K
                 } : undefined,
-                google: serviceType == Types.ModelServiceTypes.Google ? {
-                    model: Types.GoogleModels.Gemini_2_5ProExperimental
+                google: specificationServiceType == Types.ModelServiceTypes.Google ? {
+                    model: Types.GoogleModels.Gemini_2_5ProPreview
                 } : undefined,
             });
 
@@ -131,6 +169,7 @@ export function registerTools(server: McpServer) {
 
         try {
         const response = await client.updateProject({ 
+            specification: completionSpecificationId !== undefined ? { id: completionSpecificationId } : undefined,
             workflow: workflowId !== undefined ? { id: workflowId } : undefined
 
         });
@@ -142,6 +181,46 @@ export function registerTools(server: McpServer) {
             }]
         };
         
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "promptConversation",
+    `Prompts an LLM conversation against your entire Graphlit knowledge base. 
+    Similar to 'retrieveSources' but without content filtering, and uses LLM to complete the user prompt with the configured LLM.
+    Accepts an LLM user prompt and optional conversation identifier. Will either create a new conversation or continue an existing one.
+    Will use the default specification for LLM conversations, which is optionally configured with the configureProject tool.
+    Returns the conversation identifier, completed LLM message, and any citations from the LLM response.`,
+    { 
+        prompt: z.string().describe("User prompt."),
+        conversationId: z.string().optional().describe("Conversation identifier, optional."),
+    },
+    async ({ prompt, conversationId }) => {
+        const client = new Graphlit();
+
+        try {
+        const response = await client.promptConversation(prompt, conversationId);
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ 
+                id: response.promptConversation?.conversation?.id, 
+                message: response.promptConversation?.message?.message, 
+                citations: response.promptConversation?.message?.citations,
+            }, null, 2)
+            }]
+        };
         } catch (err: unknown) {
         const error = err as Error;
         return {

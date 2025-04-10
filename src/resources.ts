@@ -3,11 +3,77 @@ import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mc
 import { 
     ContentTypes, 
     ContentFilter, 
+    ConversationFilter,
     EntityState,
     GetContentQuery, 
+    GetConversationQuery,
 } from "graphlit-client/dist/generated/graphql-types.js";
   
 export function registerResources(server: McpServer) {
+    server.resource(
+      "Conversations list: Returns list of conversation resources.",
+      new ResourceTemplate("conversations://", {
+        list: async (extra) => {
+          const client = new Graphlit();
+          
+          const filter: ConversationFilter = { 
+          };
+
+          try {
+            const response = await client.queryConversations(filter);
+            
+            return {
+              resources: (response.conversations?.results || [])
+                .filter(content => content !== null)
+                .map(conversation => ({
+                  name: conversation.name,
+                  uri: `conversations://${conversation.id}`,
+                  mimeType: 'text/markdown'
+                }))
+            };
+          } catch (error) {
+            console.error("Error fetching conversation list:", error);
+            return { resources: [] };
+          }
+        }
+      }),
+      async (uri, variables) => {
+        return {
+          contents: []
+        };
+      }
+    );
+    
+    server.resource(
+      "Conversation: Returns LLM conversation messages. Accepts conversation resource URI, i.e. conversations://{id}, where 'id' is a conversation identifier.",
+      new ResourceTemplate("conversations://{id}", { list: undefined }),
+      async (uri: URL, variables) => {
+        const id = variables.id as string;
+        const client = new Graphlit();
+        
+        try {
+          const response = await client.getConversation(id);
+
+          const content = response.conversation;
+          
+          return {
+            contents: [
+              {
+                uri: uri.toString(),
+                text: formatConversation(response),
+                mimeType: 'text/markdown'
+              }
+            ]
+          };    
+        } catch (error) {
+          console.error("Error fetching conversation:", error);
+          return {
+            contents: []
+          };
+        }
+      }
+    );
+
     server.resource(
         "Feeds: Returns list of feed resources.",
         new ResourceTemplate("feeds://", {
@@ -389,7 +455,38 @@ export function registerResources(server: McpServer) {
         }
       );
   }
-    
+
+function formatConversation(response: GetConversationQuery): string {
+  const results: string[] = [];
+
+  const conversation = response.conversation;
+
+  if (!conversation) {
+    return "";
+  }
+
+  // Basic conversation details
+  results.push(`**Conversation ID:** ${conversation.id}`);
+
+  // Messages
+  if (conversation.messages?.length) {
+    conversation.messages.forEach(message => {
+      results.push(`${message?.role}:\n${message?.message}` || '');
+
+      if (message?.citations?.length) {
+        message.citations.forEach(citation => {
+          results.push(`**Cited Source**: contents://${citation?.content?.id}`);
+          results.push(`**Cited Text**:\n${citation?.text || ''}`);
+        });
+      }
+
+      results.push("\n---\n");
+    });
+  }
+
+  return results.join('\n');
+}
+
 function formatContent(response: GetContentQuery): string {
   const results: string[] = [];
 

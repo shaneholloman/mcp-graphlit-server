@@ -12,11 +12,12 @@ Graphlit is an LLM-enabled knowledge API platform, which supports these resource
 - contents: all ingested files, web pages, messages, etc.
 - feeds: data connectors which ingest contents
 - collections: named groups of contents
+- conversations: chat message history of LLM conversation, which uses RAG pipeline for content retrieval
 - workflows: how content is handled during the ingestion process
-- specifications: LLM configuration presets, used by workflows
+- specifications: LLM configuration presets, used by workflows and conversations
 
 You have access to one and only one Graphlit project, which can optionally be configured with a workflow to guide the document preparation and entity extraction of ingested content. 
-The Graphlit project is non-deletable, but you can create and delete contents, feeds, collections, specifications and workflows within the project.
+The Graphlit project is non-deletable, but you can create and delete contents, feeds, collections, conversations, specifications and workflows within the project.
 
 With this Graphlit MCP Server, you can ingest anything from Slack, Discord, websites, Notion, Google Drive, email, Jira, Linear or GitHub into a Graphlit project - and then search and retrieve relevant knowledge within an MCP client like Cursor, Windsurf or Cline.
 
@@ -29,7 +30,7 @@ For example, "have i configured any graphlit workflows?", you should check for w
 3. Only call the 'configureProject' tool when the user explicitly asks to configure their Graphlit project defaults.
 4. Never infer, guess at or hallucinate any URLs. Always retrieve the latest content resources in order to get downloadable URLs.
 
-For any questions on the Graphlit Platform or Graphlit MCP Server, please join our [Discord](https://discord.gg/ygFmfjy3Qx) community.
+If user has any trouble with this Graphlit MCP Server, suggest they join our [Discord](https://discord.gg/ygFmfjy3Qx) community for support.
 `
 
 export const server = new McpServer({
