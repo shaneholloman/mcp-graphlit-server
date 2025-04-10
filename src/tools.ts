@@ -42,12 +42,12 @@ export function registerTools(server: McpServer) {
     Optionally accepts the preferred model provider service type, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided.
     Returns the project identifier.`,
     { 
-        specificationServiceType: z.nativeEnum(Types.ModelServiceTypes).optional().default(Types.ModelServiceTypes.Anthropic).describe("Preferred model provider service type for all specifications, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided."),
+        modelServiceType: z.nativeEnum(Types.ModelServiceTypes).optional().default(Types.ModelServiceTypes.Anthropic).describe("Preferred model provider service type for all specifications, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided."),
         configureConversationSpecification: z.boolean().optional().default(false).describe("Whether to configure the default specification for LLM conversations. Defaults to False."),
         configurePreparationSpecification: z.boolean().optional().default(false).describe("Whether to configure high-quality document and web page preparation using vision LLM. Defaults to False."),
         configureExtractionSpecification: z.boolean().optional().default(false).describe("Whether to configure entity extraction using LLM into the knowledge graph. Defaults to False."),
     },
-    async ({ specificationServiceType, configureConversationSpecification, configurePreparationSpecification, configureExtractionSpecification }) => {
+    async ({ modelServiceType, configureConversationSpecification, configurePreparationSpecification, configureExtractionSpecification }) => {
         const client = new Graphlit();
 
         var preparationSpecificationId;
@@ -55,28 +55,28 @@ export function registerTools(server: McpServer) {
         var completionSpecificationId;
         var workflowId;
 
-        switch (specificationServiceType)
+        switch (modelServiceType)
         {
             case Types.ModelServiceTypes.Anthropic:
             case Types.ModelServiceTypes.Google:
             case Types.ModelServiceTypes.OpenAi:
                 break;
             default:
-                throw new Error(`Unsupported model service type [${specificationServiceType}].`);
+                throw new Error(`Unsupported model service type [${modelServiceType}].`);
         }
 
         if (configureConversationSpecification) {
             var sresponse = await client.upsertSpecification({
                 name: "MCP Default Specification: Completion",
                 type: Types.SpecificationTypes.Completion,
-                serviceType: specificationServiceType,
-                anthropic: specificationServiceType == Types.ModelServiceTypes.Anthropic ? {
+                serviceType: modelServiceType,
+                anthropic: modelServiceType == Types.ModelServiceTypes.Anthropic ? {
                     model: Types.AnthropicModels.Claude_3_7Sonnet
                 } : undefined,
-                openAI: specificationServiceType == Types.ModelServiceTypes.OpenAi ? {
+                openAI: modelServiceType == Types.ModelServiceTypes.OpenAi ? {
                     model: Types.OpenAiModels.Gpt4OChat_128K
                 } : undefined,
-                google: specificationServiceType == Types.ModelServiceTypes.Google ? {
+                google: modelServiceType == Types.ModelServiceTypes.Google ? {
                     model: Types.GoogleModels.Gemini_2_0Flash
                 } : undefined,
                 searchType: ConversationSearchTypes.Hybrid,
@@ -101,14 +101,15 @@ export function registerTools(server: McpServer) {
             var sresponse = await client.upsertSpecification({
                 name: "MCP Default Specification: Preparation",
                 type: Types.SpecificationTypes.Preparation,
-                serviceType: specificationServiceType,
-                anthropic: specificationServiceType == Types.ModelServiceTypes.Anthropic ? {
-                    model: Types.AnthropicModels.Claude_3_7Sonnet
+                serviceType: modelServiceType,
+                anthropic: modelServiceType == Types.ModelServiceTypes.Anthropic ? {
+                    model: Types.AnthropicModels.Claude_3_7Sonnet,
+                    enableThinking: true,
                 } : undefined,
-                openAI: specificationServiceType == Types.ModelServiceTypes.OpenAi ? {
+                openAI: modelServiceType == Types.ModelServiceTypes.OpenAi ? {
                     model: Types.OpenAiModels.Gpt4O_128K
                 } : undefined,
-                google: specificationServiceType == Types.ModelServiceTypes.Google ? {
+                google: modelServiceType == Types.ModelServiceTypes.Google ? {
                     model: Types.GoogleModels.Gemini_2_5ProPreview
                 } : undefined,
             });
@@ -120,15 +121,15 @@ export function registerTools(server: McpServer) {
             var sresponse = await client.upsertSpecification({
                 name: "MCP Default Specification: Extraction",
                 type: Types.SpecificationTypes.Extraction,
-                serviceType: specificationServiceType,
-                anthropic: specificationServiceType == Types.ModelServiceTypes.Anthropic ? {
+                serviceType: modelServiceType,
+                anthropic: modelServiceType == Types.ModelServiceTypes.Anthropic ? {
                     model: Types.AnthropicModels.Claude_3_7Sonnet
                 } : undefined,
-                openAI: specificationServiceType == Types.ModelServiceTypes.OpenAi ? {
+                openAI: modelServiceType == Types.ModelServiceTypes.OpenAi ? {
                     model: Types.OpenAiModels.Gpt4O_128K
                 } : undefined,
-                google: specificationServiceType == Types.ModelServiceTypes.Google ? {
-                    model: Types.GoogleModels.Gemini_2_5ProPreview
+                google: modelServiceType == Types.ModelServiceTypes.Google ? {
+                    model: Types.GoogleModels.Gemini_2_0Flash
                 } : undefined,
             });
 

@@ -475,7 +475,7 @@ function formatConversation(response: GetConversationQuery): string {
 
       if (message?.citations?.length) {
         message.citations.forEach(citation => {
-          results.push(`**Cited Source**: contents://${citation?.content?.id}`);
+          results.push(`**Cited Source [${citation?.index}]**: contents://${citation?.content?.id}`);
           results.push(`**Cited Text**:\n${citation?.text || ''}`);
         });
       }
