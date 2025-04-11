@@ -2828,7 +2828,7 @@ export function registerTools(server: McpServer) {
         name: z.string().describe("Name for the content object."),
         text: z.string().describe("Text content to ingest."),
         textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown).describe("Text type (Plain, Markdown, Html). Defaults to Markdown."),
-        id: z.string().optional().describe("Optional identifier for the content object. Will overwrite existing content, if provided.")
+        id: z.string().optional().describe("Optional content identifier. Will overwrite existing content, if provided.")
     },
     async ({ name, text, textType, id }) => {
         const client = new Graphlit();
