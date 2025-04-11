@@ -3115,6 +3115,7 @@ export function registerTools(server: McpServer) {
     Accepts the Slack channel name.
     Also accepts the text for the Slack message, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
     Hint: In Slack Markdown, images are displayed by simply putting the URL in angle brackets like <https://example.com/image.jpg> instead of using the traditional Markdown image syntax ![alt text](url). 
+    Requires environment variable to be configured: SLACK_BOT_TOKEN.
     Returns true if the notification was successfully sent, or false otherwise.`,
     { 
         channelName: z.string(),
@@ -3159,6 +3160,7 @@ export function registerTools(server: McpServer) {
     Accepts the plain text for the tweet.
     Tweet text rules: allowed - plain text, @mentions, #hashtags, URLs (auto-shortened), line breaks (\n).  
     Not allowed - markdown, HTML tags, rich text, or custom styles.
+    Requires environment variables to be configured: TWITTER_CONSUMER_API_KEY, TWITTER_CONSUMER_API_SECRET, TWITTER_ACCESS_TOKEN_KEY, TWITTER_ACCESS_TOKEN_SECRET.
     Returns true if the notification was successfully sent, or false otherwise.`,
     { 
         text: z.string()
@@ -3225,6 +3227,7 @@ export function registerTools(server: McpServer) {
     Accepts the email subject and a list of email 'to' addresses.
     Email addresses should be in RFC 5322 format. i.e. Alice Wonderland <alice@wonderland.net>, or alice@wonderland.net
     Also accepts the text for the email, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
+    Requires environment variable to be configured: FROM_EMAIL_ADDRESS.
     Returns true if the notification was successfully sent, or false otherwise.`,
     { 
         subject: z.string(),
