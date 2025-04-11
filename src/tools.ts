@@ -35,7 +35,8 @@ import {
 export function registerTools(server: McpServer) {
     server.tool(
     "configureProject",
-    `Configures the default content workflow for the Graphlit project. Only needed if user asks to configure the default workflow.
+    `Configures the default content workflow and conversation specification for the Graphlit project.
+    Only needed if user asks to configure the project defaults. *Do not* call unless specifically asked for by the user.
     To reset the project configuration to 'factory state', assign False or null to all parameters.
     Optionally accepts whether to configure the default specification for LLM conversations. Defaults to using OpenAI GPT-4o, if not assigned.
     Optionally accepts whether to enable high-quality document and web page preparation using a vision LLM. Defaults to using Azure AI Document Intelligence for document preparation, if not assigned.
