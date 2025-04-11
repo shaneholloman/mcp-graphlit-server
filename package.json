@@ -5,13 +5,13 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/graphlit/graphlit-mcp-server"
+    "url": "git+https://github.com/graphlit/graphlit-mcp-server.git"
   },
   "contributors": [
     "Kirk Marple (https://github.com/kirk-marple)"
   ],
   "bin": {
-    "graphlit-mcp-server": "./build/index.js"
+    "graphlit-mcp-server": "build/index.js"
   },
   "files": [
     "build"
