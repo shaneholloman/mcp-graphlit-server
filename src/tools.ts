@@ -288,12 +288,12 @@ export function registerTools(server: McpServer) {
     { 
         prompt: z.string().describe("LLM user prompt for content retrieval."),
         inLast: z.string().optional().describe("Recency filter for content ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
-        contentType: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."),
+        type: z.nativeEnum(ContentTypes).optional().describe("Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."),
         fileType: z.nativeEnum(FileTypes).optional().describe("File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video."),
         feeds: z.array(z.string()).optional().describe("Feed identifiers to filter content by, optional."),
         collections: z.array(z.string()).optional().describe("Collection identifiers to filter content by, optional.")
     },
-    async ({ prompt, contentType, fileType, inLast, feeds, collections }) => {
+    async ({ prompt, type, fileType, inLast, feeds, collections }) => {
         const client = new Graphlit();
 
         try {
@@ -302,7 +302,7 @@ export function registerTools(server: McpServer) {
             feeds: feeds?.map(feed => ({ id: feed })),
             collections: collections?.map(collection => ({ id: collection })),
             createdInLast: inLast, 
-            types: contentType ? [contentType] : null, 
+            types: type ? [type] : null, 
             fileTypes: fileType ? [fileType] : null
         };
 
@@ -2833,12 +2833,12 @@ export function registerTools(server: McpServer) {
     server.tool(
     "ingestText",
     `Ingests text as content into Graphlit knowledge base.
-    Accepts a name for the content object, the text itself, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
-    Optionally accepts an identifier for an existing content object. Will overwrite existing content, if provided.
-    Can use for storing long-term textual memories or the output from LLM or other tools as content resources, which can be later searched or retrieved.
+    Accepts the text itself, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
+    Optionally accepts the content name and an identifier for an existing content object. Will overwrite existing content, if provided.
+    Can use for storing the output from LLM or other tools as content resources, which can be later searched or retrieved.
     Executes *synchronously* and returns the content identifier.`,
     { 
-        name: z.string().describe("Name for the content object."),
+        name: z.string().optional().describe("Name for the content object, optional."),
         text: z.string().describe("Text content to ingest."),
         textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown).describe("Text type (Plain, Markdown, Html). Defaults to Markdown."),
         id: z.string().optional().describe("Optional content identifier. Will overwrite existing content, if provided.")
@@ -2847,12 +2847,53 @@ export function registerTools(server: McpServer) {
         const client = new Graphlit();
 
         try {
-        const response = await client.ingestText(name, text, textType, undefined, id, true);
+        const response = await client.ingestText(text, name, textType, undefined, id, true);
 
         return {
             content: [{
             type: "text",
             text: JSON.stringify({ id: response.ingestText?.id }, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+
+    server.tool(
+    "ingestMemory",
+    `Ingests short-term textual memory as content into Graphlit knowledge base.
+    Accepts an optional text type (Plain, Markdown, Html). Defaults to Markdown text type. Optionally accepts the content name.
+    Will automatically be entity extracted into a knowledge graph.
+    Use for storing short-term memories about the user or agent, which can be later searched or retrieved.
+    Can use 'queryContents' or 'retrieveSources' tools to search for memories, by specifying the 'MEMORY' content type.
+    Executes asynchronously and returns the content identifier.`,
+    { 
+        name: z.string().optional().describe("Name for the content object."),
+        text: z.string().describe("Textual memory to ingest, i.e. 'Kirk likes raccoons' or 'Graphlit is based in Seattle'"),
+        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown).describe("Text type (Plain, Markdown, Html). Defaults to Markdown."),
+        timeToLive: z.string().optional().describe("Time to live for ingested memory. Should be ISO 8601 format, for example, 'PT1H' for one hour, 'P1D' for one day, 'P7D' for one week, 'P30D' for one month. Doesn't support weeks or months explicitly."),
+    },
+    async ({ name, text, textType, timeToLive }) => {
+        const client = new Graphlit();
+
+        try {
+        // TODO: need to add TTL parameter when available
+        const response = await client.ingestMemory(text, name, textType);
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ id: response.ingestMemory?.id }, null, 2)
             }]
         };
         
