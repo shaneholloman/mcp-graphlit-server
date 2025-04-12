@@ -200,11 +200,12 @@ export function registerTools(server: McpServer) {
     
     server.tool(
     "askGraphlit",
-    `Ask questions about the Graphlit API or SDKs. Can create code samples for any API call.
-    Accepts an LLM user prompt for code generation.
+    `Ask questions about using the Graphlit Platform, or specifically about the Graphlit API or SDKs.
+    When the user asks about how to use the Graphlit API or SDKs, use this tool to provide a code sample in Python, TypeScript or C#.
+    Accepts an LLM user prompt.
     Returns the LLM prompt completion in Markdown format.`,
     { 
-        prompt: z.string().describe("LLM user prompt for code generation.")
+        prompt: z.string().describe("LLM user prompt.")
     },
     async ({ prompt }) => {
         const client = new Graphlit();
