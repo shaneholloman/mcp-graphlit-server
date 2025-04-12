@@ -44,10 +44,6 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 
 - Extract Structured JSON from Text
 
-### Memory
-
-- Memory (Short-Term)
-
 ### Ingestion
 
 - Files
@@ -57,6 +53,7 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 - Emails
 - Issues
 - Text
+- Memory (Short-Term)
 
 ### Data Connectors
 
