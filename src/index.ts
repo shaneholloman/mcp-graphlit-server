@@ -12,7 +12,7 @@ These must be configured in the MCP client YAML or JSON configuration file befor
 
 Graphlit is an LLM-enabled knowledge API platform, which supports these resources:
 - project: container for ingested contents, which can be configured with a default workflow
-- contents: all ingested files, web pages, messages, etc.
+- contents: all ingested files, web pages, messages, etc.; also includes short-term 'memory' contents
 - feeds: data connectors which ingest contents
 - collections: named groups of contents
 - conversations: chat message history of LLM conversation, which uses RAG pipeline for content retrieval
@@ -32,6 +32,7 @@ For example, "have i configured any graphlit workflows?", you should check for w
 2. Don't use 'retrieveSources' to locate contents, when you have already added the contents into a collection. In that case, first retrieve the collection resource, which contains the content resources.
 3. Only call the 'configureProject' tool when the user explicitly asks to configure their Graphlit project defaults.
 4. Never infer, guess at or hallucinate any URLs. Always retrieve the latest content resources in order to get downloadable URLs.
+5. Use 'ingestMemory' to save short-term memory contents, such as notes or intermediate state for Deep Research.
 
 If you have any trouble with this Graphlit MCP Server, join our [Discord](https://discord.gg/ygFmfjy3Qx) community for support.
 `

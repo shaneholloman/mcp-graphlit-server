@@ -44,6 +44,10 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 
 - Extract Structured JSON from Text
 
+### Memory
+
+- Memory (Short-Term)
+
 ### Ingestion
 
 - Files
