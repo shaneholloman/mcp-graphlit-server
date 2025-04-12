@@ -1668,7 +1668,8 @@ export function registerTools(server: McpServer) {
     Accepts optional Google Drive folder identifier, and an optional read limit for the number of files to ingest.
     For example, with Google Drive URI (https://drive.google.com/drive/u/0/folders/32tzhRD12KDh2hXABY8OZRFv7Smy8WBkQ), the folder identifier is 32tzhRD12KDh2hXABY8OZRFv7Smy8WBkQ.
     If no folder identifier provided, ingests files from root Google Drive folder.
-    Requires environment variables to be configured: GOOGLE_DRIVE_CLIENT_ID, GOOGLE_DRIVE_CLIENT_SECRET, GOOGLE_DRIVE_REFRESH_TOKEN.
+    Requires environment variables to be configured: GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON -or- GOOGLE_DRIVE_CLIENT_ID, GOOGLE_DRIVE_CLIENT_SECRET, GOOGLE_DRIVE_REFRESH_TOKEN.
+    If service account JSON is provided, uses service account authentication. Else, uses user authentication.
     Executes asynchronously, creates Google Drive feed, and returns the feed identifier.`,
     { 
         folderId: z.string().optional().describe("Google Drive folder identifier, optional."),
@@ -1678,38 +1679,50 @@ export function registerTools(server: McpServer) {
         const client = new Graphlit();
 
         try {
-        const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
-        if (!clientId) {
-            console.error("Please set GOOGLE_DRIVE_CLIENT_ID environment variable.");
-            process.exit(1);
-        }
+        var clientId;
+        var clientSecret;
+        var refreshToken;
+        var authenticationType = GoogleDriveAuthenticationTypes.ServiceAccount;
 
-        const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
-        if (!clientSecret) {
-            console.error("Please set GOOGLE_DRIVE_CLIENT_SECRET environment variable.");
-            process.exit(1);
-        }
+        const serviceAccountJson = process.env.GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON;
 
-        const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
-        if (!refreshToken) {
-            console.error("Please set GOOGLE_DRIVE_REFRESH_TOKEN environment variable.");
-            process.exit(1);
+        if (!serviceAccountJson) {
+            authenticationType = GoogleDriveAuthenticationTypes.User;
+
+            clientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
+            if (!clientId) {
+                console.error("Please set GOOGLE_DRIVE_CLIENT_ID environment variable.");
+                process.exit(1);
+            }
+
+            clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
+            if (!clientSecret) {
+                console.error("Please set GOOGLE_DRIVE_CLIENT_SECRET environment variable.");
+                process.exit(1);
+            }
+
+            refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
+            if (!refreshToken) {
+                console.error("Please set GOOGLE_DRIVE_REFRESH_TOKEN environment variable.");
+                process.exit(1);
+            }
         }
 
         const response = await client.createFeed({
             name: `Google Drive`,
             type: FeedTypes.Site,
             site: {
-            type: FeedServiceTypes.GoogleDrive,
-            googleDrive: {
-                authenticationType: GoogleDriveAuthenticationTypes.User,
-                folderId: folderId,
-                clientId: clientId,
-                clientSecret: clientSecret,
-                refreshToken: refreshToken,
-            },
-            isRecursive: true,
-            readLimit: readLimit || 100
+                type: FeedServiceTypes.GoogleDrive,
+                googleDrive: {
+                    authenticationType: authenticationType,
+                    folderId: folderId,
+                    clientId: clientId,
+                    clientSecret: clientSecret,
+                    refreshToken: refreshToken,
+                    serviceAccountJson: serviceAccountJson,
+                },
+                isRecursive: true,
+                readLimit: readLimit || 100
             }
         });
 
