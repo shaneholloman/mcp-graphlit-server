@@ -2715,19 +2715,19 @@ export function registerTools(server: McpServer) {
 
     server.tool(
     "webSearch",
-    `Performs web or podcast search based on search query. Can search for web pages or podcasts/podcast episodes. 
+    `Performs web or podcast search based on search query. Can search for web pages or anything about podcasts (i.e. episodes, topics, guest appearances). 
     Format the search query as what would be entered into a Google search. You can use site filtering in the search query, like 'site:twitter.com'.    
     Accepts search query as string, and optional search service type.    
     Prefer calling this tool over using 'curl' directly for any web search.
-    *Only* use Podscan search service type to search for podcasts or podcast episodes.
-    Does *not* ingest pages into Graphlit knowledge base. *Does* ingest podcast episodes as transcribed audio files into Graphlit knowledge base.    
-    When searching for podcasts or podcast episodes, *don't* include the term 'podcast' or 'episode' in the search query - that would be redundant.
-    Search service types: Tavily (web pages), Exa (web pages) and Podscan (podcast episodes). Defaults to Exa.
-    Returns URL, title and relevant Markdown text from resulting web pages or podcast episode transcripts.`,
+    Use 'PODSCAN' search service type to search podcasts.
+    Does *not* ingest pages or podcast episodes into Graphlit knowledge base.  
+    When searching podcasts, *don't* include the term 'podcast' or 'episode' in the search query - that would be redundant.
+    Search service types: Tavily (web pages), Exa (web pages) and Podscan (podcasts). Defaults to Exa.
+    Returns URL, title and relevant Markdown text from resulting web pages or podcast episode descriptions.`,
     { 
         query: z.string().describe("Search query."),
         searchService: z.nativeEnum(SearchServiceTypes).optional().default(SearchServiceTypes.Exa).describe("Search service type (Tavily, Exa, Podscan). Defaults to Exa."),
-        limit: z.number().optional().default(5).describe("Limit the number of search hits to be returned. Defaults to 5.")
+        limit: z.number().optional().default(10).describe("Limit the number of search hits to be returned. Defaults to 10.")
     },
     async ({ query, searchService, limit }) => {
         const client = new Graphlit();
