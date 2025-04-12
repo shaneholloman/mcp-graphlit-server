@@ -2726,13 +2726,14 @@ export function registerTools(server: McpServer) {
     Returns URL, title and relevant Markdown text from resulting web pages or podcast episode transcripts.`,
     { 
         query: z.string().describe("Search query."),
-        searchService: z.nativeEnum(SearchServiceTypes).optional().default(SearchServiceTypes.Exa).describe("Search service type (Tavily, Exa, Podscan). Defaults to Exa.")
+        searchService: z.nativeEnum(SearchServiceTypes).optional().default(SearchServiceTypes.Exa).describe("Search service type (Tavily, Exa, Podscan). Defaults to Exa."),
+        limit: z.number().optional().default(5).describe("Limit the number of search hits to be returned. Defaults to 5.")
     },
-    async ({ query, searchService }) => {
+    async ({ query, searchService, limit }) => {
         const client = new Graphlit();
 
         try {
-        const response = await client.searchWeb(query, searchService);
+        const response = await client.searchWeb(query, searchService, limit);
 
         return {
             content: [{
