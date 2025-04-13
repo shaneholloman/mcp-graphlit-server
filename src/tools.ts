@@ -2876,7 +2876,7 @@ export function registerTools(server: McpServer) {
     `Ingests short-term textual memory as content into Graphlit knowledge base.
     Accepts an optional text type (Plain, Markdown, Html). Defaults to Markdown text type. Optionally accepts the content name.
     Will automatically be entity extracted into a knowledge graph.
-    Use for storing short-term memories about the user or agent, which can be later searched or retrieved.
+    Use for storing short-term memories about the user or agent, which can be later searched or retrieved. Memories are transient and will be deleted after a period of time.
     Can use 'queryContents' or 'retrieveSources' tools to search for memories, by specifying the 'MEMORY' content type.
     Executes asynchronously and returns the content identifier.`,
     { 
