@@ -32,7 +32,13 @@ For example, "have i configured any graphlit workflows?", you should check for w
 2. Don't use 'retrieveSources' to locate contents, when you have already added the contents into a collection. In that case, first retrieve the collection resource, which contains the content resources.
 3. Only call the 'configureProject' tool when the user explicitly asks to configure their Graphlit project defaults.
 4. Never infer, guess at or hallucinate any URLs. Always retrieve the latest content resources in order to get downloadable URLs.
-5. Use 'ingestMemory' to save short-term memory contents, such as notes or intermediate state for Deep Research.
+5. Use 'ingestMemory' to save short-term memories, such as temporary notes or intermediate state for research. Use 'ingestText' to store long-term knowledge, such as Markdown results from research.
+6. Always use 'PODSCAN' web search type when searching for podcast episodes, podcast appearances, etc.
+
+## Short-term vs Long-term Memory:
+You can perform scatter-gather operations where you save short-term memories after each workflow step, and then gather relevant memories prior to the moving onto the next step. 
+Leverage short-term memories when evaluating the results of a workflow step, and then use long-term memories to store the final results of your workflow.
+You can collect memories in collections, and then use the 'queryContents' tool to retrieve the 'memory' contents by the collection. This will help you to keep track of your progress and avoid losing any important information.
 
 If you have any trouble with this Graphlit MCP Server, join our [Discord](https://discord.gg/ygFmfjy3Qx) community for support.
 `
