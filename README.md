@@ -9,13 +9,15 @@ The Model Context Protocol (MCP) Server enables integration between MCP clients 
 
 Ingest anything from Slack, Discord, websites, Google Drive, email, Jira, Linear or GitHub into a Graphlit project - and then search and retrieve relevant knowledge within an MCP client like Cursor, Windsurf, Goose or Cline.
 
-Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdown upon ingestion. 
+Your Graphlit project acts as a searchable, and RAG-ready knowledge base across all your developer and product management tools.
 
-Audio and video files will be transcribed upon ingestion.
+Documents (PDF, DOCX, PPTX, etc.) and HTML web pages will be extracted to Markdown upon ingestion. Audio and video files will be transcribed upon ingestion.
 
 Web crawling and web search are built-in as MCP tools, with no need to integrate other tools like Firecrawl, Exa, etc. separately.
 
 You can read more about the MCP Server use cases and features on our [blog](https://www.graphlit.com/blog/graphlit-mcp-server).
+
+Watch our latest [YouTube video](https://www.youtube.com/watch?v=Or-QqonvcAs&t=4s) on using the Graphlit MCP Server with the Goose MCP client.
 
 For any questions on using the MCP Server, please join our [Discord](https://discord.gg/ygFmfjy3Qx) community and post on the #mcp channel.
 
