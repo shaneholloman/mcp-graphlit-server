@@ -29,7 +29,8 @@ import {
   IntegrationServiceTypes,
   TwitterListingTypes,
   ConversationSearchTypes,
-  PromptStrategyTypes
+  PromptStrategyTypes,
+  OpenAiImageModels
 } from "graphlit-client/dist/generated/graphql-types.js";
 
 export function registerTools(server: McpServer) {
@@ -2958,7 +2959,7 @@ export function registerTools(server: McpServer) {
     `Screenshots web page from URL.
     Executes *synchronously* and returns the content identifier.`,
     { 
-        url: z.string()
+        url: z.string().describe("Web page URL.")
     },
     async ({ url }) => {
         const client = new Graphlit();
@@ -2994,8 +2995,8 @@ export function registerTools(server: McpServer) {
     Accepts image URL as string.
     Returns Markdown text from LLM completion.`,
     { 
-        prompt: z.string(),
-        url: z.string()
+        prompt: z.string().describe("Prompt for image description."),
+        url: z.string().describe("Image URL.")
     },
     async ({ prompt, url }) => {
         const client = new Graphlit();
@@ -3029,8 +3030,8 @@ export function registerTools(server: McpServer) {
     Accepts content identifier as string, and optional prompt for image description.
     Returns Markdown text from LLM completion.`,
     { 
-        id: z.string(),
-        prompt: z.string().optional(),
+        id: z.string().describe("Content identifier."),
+        prompt: z.string().optional().describe("Prompt for image description, optional."),
     },
     async ({ prompt, id }) => {
         const client = new Graphlit();
@@ -3094,10 +3095,10 @@ export function registerTools(server: McpServer) {
     You *must* retrieve the content resource to get the downloadable audio URL for this published audio.
     Executes *synchronously* and returns the content identifier.`,
     { 
-        name: z.string(),
-        text: z.string(),
-        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown),
-        voice: z.string().optional().default("HqW11As4VRPkApNPkAZp"),
+        name: z.string().describe("Name for the content object."),
+        text: z.string().describe("Text content to publish."),
+        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown).describe("Text type (Plain, Markdown, Html). Defaults to Markdown."),
+        voice: z.string().optional().default("HqW11As4VRPkApNPkAZp").describe("ElevenLabs voice identifier, optional."),
     },
     async ({ name, text, textType, voice }) => {
         const client = new Graphlit();
@@ -3130,15 +3131,56 @@ export function registerTools(server: McpServer) {
     );
 
     server.tool(
+    "publishImage",
+    `Publishes text as image format, and ingests into Graphlit knowledge base.
+    Accepts a name for the content object.
+    Also, accepts a prompt for image generation. For example, 'Create a cartoon image of a raccoon, saying "I Love Graphlit"'.
+    You *must* retrieve the content resource to get the downloadable image URL for this published image.
+    Executes *synchronously* and returns the content identifier.`,
+    { 
+        name: z.string().describe("Name for the content object."),
+        prompt: z.string().describe("Prompt for image generation."),
+    },
+    async ({ name, prompt }) => {
+        const client = new Graphlit();
+
+        const type = ContentPublishingServiceTypes.OpenAiImage;
+        const format = ContentPublishingFormats.Png;
+        const model = OpenAiImageModels.GptImage_1;
+
+        try {
+        const response = await client.publishText(prompt, TextTypes.Plain, { type: type, format: format, openAIImage: { model: model } }, name, undefined, true);
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify({ id: response.publishText?.id }, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
+    
+    server.tool(
     "sendWebHookNotification",
     `Sends a webhook notification to the provided URL.
     Accepts the webhook URL.
     Also accepts the text to be sent with the webhook, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
     Returns true if the notification was successfully sent, or false otherwise.`,
     { 
-        url: z.string(),
-        text: z.string(),
-        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown),
+        url: z.string().describe("Webhook URL."),
+        text: z.string().describe("Text to send."),
+        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown).describe("Text type (Plain, Markdown, Html). Defaults to Markdown."),
     },
     async ({ text, textType, url }) => {
         const client = new Graphlit();
@@ -3175,9 +3217,9 @@ export function registerTools(server: McpServer) {
     Requires environment variable to be configured: SLACK_BOT_TOKEN.
     Returns true if the notification was successfully sent, or false otherwise.`,
     { 
-        channelName: z.string(),
-        text: z.string(),
-        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown),
+        channelName: z.string().describe("Slack channel name."),
+        text: z.string().describe("Text to send."),
+        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown).describe("Text type (Plain, Markdown, Html). Defaults to Markdown."),
     },
     async ({ text, textType, channelName }) => {
         const botToken = process.env.SLACK_BOT_TOKEN;
@@ -3220,7 +3262,7 @@ export function registerTools(server: McpServer) {
     Requires environment variables to be configured: TWITTER_CONSUMER_API_KEY, TWITTER_CONSUMER_API_SECRET, TWITTER_ACCESS_TOKEN_KEY, TWITTER_ACCESS_TOKEN_SECRET.
     Returns true if the notification was successfully sent, or false otherwise.`,
     { 
-        text: z.string()
+        text: z.string().describe("Text to send."),
     },
     async ({ text }) => {
         const consumerKey = process.env.TWITTER_CONSUMER_API_KEY;
@@ -3287,10 +3329,10 @@ export function registerTools(server: McpServer) {
     Requires environment variable to be configured: FROM_EMAIL_ADDRESS.
     Returns true if the notification was successfully sent, or false otherwise.`,
     { 
-        subject: z.string(),
-        to: z.array(z.string()),
-        text: z.string(),
-        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown),
+        subject: z.string().describe("Email subject."),
+        to: z.array(z.string()).describe("Email address(es) to send the notification to."),
+        text: z.string().describe("Text to send."),
+        textType: z.nativeEnum(TextTypes).optional().default(TextTypes.Markdown).describe("Text type (Plain, Markdown, Html). Defaults to Markdown."),
     },
     async ({ text, textType, subject, to }) => {
         const from = process.env.FROM_EMAIL_ADDRESS;

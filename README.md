@@ -46,6 +46,11 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 
 - Extract Structured JSON from Text
 
+### Publishing
+
+- Publish as Audio (ElevenLabs Audio)
+- Publish as Image (OpenAI Image Generation)
+
 ### Ingestion
 
 - Files
