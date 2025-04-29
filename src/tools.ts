@@ -255,23 +255,20 @@ export function registerTools(server: McpServer) {
             for (const record of usageBatch) {
                 if (record)
                 {
-                    usage.push({
-                        //correlationId: record.correlationId,
+                    const remappedRecord: any = {
                         date: record.date,
                         name: record.name,
+                        metric: record.metric,
                         credits: record.credits,
                         count: record.count,
-                        metric: record.metric,
+                        duration: record.duration,
                         entityType: record.entityType,
                         entityId: record.entityId,
                         ownerId: record.ownerId,
                         workflow: record.workflow,
-                        duration: record.duration,
-                        /* content-specific */
                         contentType: record.contentType,
                         fileType: record.fileType,
                         uri: record.uri,
-                        /* LLM specific */
                         modelService: record.modelService,
                         modelName: record.modelName,
                         prompt: record.prompt,
@@ -279,13 +276,18 @@ export function registerTools(server: McpServer) {
                         completion: record.completion,
                         completionTokens: record.completionTokens,
                         tokens: record.tokens,
-                        /* GraphQL specific */
                         operation: record.operation,
-                        operationType: record.operationType,
-                        request: record.request,
-                        response: record.response,
-                        variables: record.variables,
-                    });
+                    };
+                    
+                    // Remove any fields that are "", null, or undefined
+                    for (const key of Object.keys(remappedRecord)) {
+                        const value = remappedRecord[key];
+                        if (value === "" || value === null || value === undefined) {
+                            delete remappedRecord[key];
+                        }
+                    }
+                    
+                    usage.push(remappedRecord);
                 }
             }
                     
