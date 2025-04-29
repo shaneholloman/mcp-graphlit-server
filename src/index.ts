@@ -36,6 +36,9 @@ For example, "have i configured any graphlit workflows?", you should check for w
 4. Never infer, guess at or hallucinate any URLs. Always retrieve the latest content resources in order to get downloadable URLs.
 5. Use 'ingestMemory' to save short-term memories, such as temporary notes or intermediate state for research. Use 'ingestText' to store long-term knowledge, such as Markdown results from research.
 6. Always use 'PODSCAN' web search type when searching for podcast episodes, podcast appearances, etc.
+7. Prioritize using feeds, rather than 'ingestUrl', when you want to ingest a website. Feeds are more efficient and faster than using 'ingestUrl'.
+If you receive a request to ingest a GitHub URL, use the 'ingestGitHubFiles' tool to ingest the repository, rather than using 'ingestUrl'.
+Always attempt to use the most-specific tool for the task at hand.
 
 ## Short-term vs Long-term Memory:
 You can perform scatter-gather operations where you save short-term memories after each workflow step, and then gather relevant memories prior to the moving onto the next step. 
