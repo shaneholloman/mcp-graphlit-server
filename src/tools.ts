@@ -223,8 +223,15 @@ export function registerTools(server: McpServer) {
     server.tool(
     "queryProjectUsage",
     `Queries project usage records.
-    Usage record name describes the operation, i.e. 'Prompt completion', 'Text Embedding', 'GraphQL' or 'Entity Event'.
-    Some usage records contain tokens used. Look for 'credits' field which describes how many credits were used by the operation.
+    Usage record name describes the operation, i.e. 'Prompt completion', 'Text embedding', 'GraphQL', 'Entity Event'.
+    'GraphQL' usage records are used for GraphQL operations, i.e. 'queryContents', 'retrieveSources', 'askGraphlit', etc.
+    'Entity Event' usage records are used for async compute operations.
+    'Text embedding' usage records are used for text embedding operations.
+    'Prompt completion' usage records are used for LLM prompt completion operations, i.e. when using 'promptConversation'.
+    'Data extraction' usage records are used for data extraction operations, using LLMs to extract knowledge graph entities.
+    Look for 'credits' field which describes how many credits were charged by the operation.
+    Look for 'promptTokens', 'completionTokens' and (total) 'tokens' fields which describe the number of tokens used by the operation.
+    Look for 'request', 'response' and 'variables' fields which describe the GraphQL operation.
     Accepts an optional recency filter for usage records 'in last' timespan.
     Returns a list of usage records, which describe the billable audit log of all Graphlit API operations.`,
     { 
@@ -240,9 +247,9 @@ export function registerTools(server: McpServer) {
         let offset = 0;
         const limit = 1000;
         const usage: any[] = [];
-        
+
         while (true) {
-            const response = await client.queryProjectUsage(startDate, inLast, [], offset, limit);
+            const response = await client.queryProjectUsage(startDate, inLast, [], [], offset, limit);
             const usageBatch = response.usage ?? [];
         
             for (const record of usageBatch) {
@@ -255,10 +262,10 @@ export function registerTools(server: McpServer) {
                         credits: record.credits,
                         count: record.count,
                         metric: record.metric,
-                        workflow: record.workflow,
                         entityType: record.entityType,
                         entityId: record.entityId,
                         ownerId: record.ownerId,
+                        workflow: record.workflow,
                         duration: record.duration,
                         /* content-specific */
                         contentType: record.contentType,
