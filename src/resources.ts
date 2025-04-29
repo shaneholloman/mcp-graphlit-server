@@ -417,14 +417,24 @@ export function registerResources(server: McpServer) {
       );
             
       server.resource(
-        "Project: Returns project metadata including credits used, available quota, and default content workflow. Accepts project resource URI, i.e. projects://{id}, where 'id' is a project identifier.",
+        "Project: Returns project metadata including credits used, tokens used, available quota, and default content workflow. Accepts project resource URI, i.e. projects://{id}, where 'id' is a project identifier.",
         new ResourceTemplate("projects://{id}", { list: undefined }),
         async (uri: URL, variables) => {
           const id = variables.id as string;
           const client = new Graphlit();
           
           try {
+            const startDate = new Date(Date.now() - 24 * 60 * 60 * 1000);  // 1 day ago
+            const duration = "P1D";  // ISO duration for 1 day
+
+            const cresponse = await client.queryProjectCredits(startDate.toISOString(), duration);
+            const credits = cresponse?.credits;
+
+            const tresponse = await client.queryProjectTokens(startDate.toISOString(), duration);
+            const tokens = tresponse?.tokens;
+
             const response = await client.getProject();
+
             return {
               contents: [
                 {
@@ -432,9 +442,10 @@ export function registerResources(server: McpServer) {
                   text: JSON.stringify({
                     id: response.project?.id,
                     name: response.project?.name,
-                    credits: response.project?.credits,
                     workflow: response.project?.workflow,
-                    quota: response.project?.quota
+                    quota: response.project?.quota,
+                    credits: credits,
+                    tokens: tokens,
                   }, null, 2),
                   mimeType: 'application/json'
                 }

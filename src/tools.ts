@@ -198,7 +198,7 @@ export function registerTools(server: McpServer) {
         }
     }
     );
-    
+
     server.tool(
     "askGraphlit",
     `Ask questions about using the Graphlit Platform, or specifically about the Graphlit API or SDKs.
