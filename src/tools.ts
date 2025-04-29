@@ -237,15 +237,31 @@ export function registerTools(server: McpServer) {
         const durationMs = parseDuration(inLast);
         const startDate = new Date(Date.now() - durationMs);            
 
-        const response = await client.queryProjectUsage(startDate, inLast);
-
+        let offset = 0;
+        const limit = 1000;
+        const usage: any[] = [];
+        
+        while (true) {
+            const response = await client.queryProjectUsage(startDate, inLast, [], offset, limit);
+            const usageBatch = response.usage ?? [];
+        
+            usage.push(...usageBatch);
+        
+            if (usageBatch.length < limit) {
+                // No more pages
+                break;
+            }
+        
+            offset += limit;
+        }
+        
         return {
             content: [{
-            type: "text",
-            text: JSON.stringify(response.usage, null, 2)
+                type: "text",
+                text: JSON.stringify(usage, null, 2)
             }]
         };
-        
+                
         } catch (err: unknown) {
         const error = err as Error;
         return {

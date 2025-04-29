@@ -385,7 +385,7 @@ export function registerResources(server: McpServer) {
       );
             
       server.resource(
-        "Project: Returns current Graphlit project metadata including credits used, tokens used, available quota, and default content workflow. Accepts project resource URI, i.e. projects://{id}, where 'id' is a project identifier.",
+        "Project: Returns current Graphlit project metadata including credits and LLM tokens used in the last day, available quota, and default content workflow. Accepts project resource URI, i.e. projects://{id}, where 'id' is a project identifier.",
         new ResourceTemplate("project://", { list: undefined }),
         async (uri: URL, variables) => {
           const id = variables.id as string;
