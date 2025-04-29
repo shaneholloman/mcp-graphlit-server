@@ -383,42 +383,10 @@ export function registerResources(server: McpServer) {
           }
         }
       );
-
-      server.resource(
-        "Projects: Returns list of project resources.",
-        new ResourceTemplate("projects://", {
-          list: async (extra) => {
-            const client = new Graphlit();
-            
-            try {
-              // NOTE: only ever one project
-              const response = await client.getProject();
-              const project = response.project;
-
-              return {
-                resources: project !== undefined && project !== null ? [
-                  {
-                    name: project.name,
-                    uri: `projects://${project.id}`
-                  }
-                ] : []
-              };
-            } catch (error) {
-              console.error("Error fetching project:", error);
-              return { resources: [] };
-            }
-          }
-        }),
-        async (uri, variables) => {
-          return {
-            contents: []
-          };
-        }
-      );
             
       server.resource(
-        "Project: Returns project metadata including credits used, tokens used, available quota, and default content workflow. Accepts project resource URI, i.e. projects://{id}, where 'id' is a project identifier.",
-        new ResourceTemplate("projects://{id}", { list: undefined }),
+        "Project: Returns current Graphlit project metadata including credits used, tokens used, available quota, and default content workflow. Accepts project resource URI, i.e. projects://{id}, where 'id' is a project identifier.",
+        new ResourceTemplate("project://", { list: undefined }),
         async (uri: URL, variables) => {
           const id = variables.id as string;
           const client = new Graphlit();
