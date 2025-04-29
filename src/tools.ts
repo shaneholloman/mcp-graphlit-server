@@ -245,8 +245,43 @@ export function registerTools(server: McpServer) {
             const response = await client.queryProjectUsage(startDate, inLast, [], offset, limit);
             const usageBatch = response.usage ?? [];
         
-            usage.push(...usageBatch);
-        
+            for (const record of usageBatch) {
+                if (record)
+                {
+                    usage.push({
+                        //correlationId: record.correlationId,
+                        date: record.date,
+                        name: record.name,
+                        credits: record.credits,
+                        count: record.count,
+                        metric: record.metric,
+                        workflow: record.workflow,
+                        entityType: record.entityType,
+                        entityId: record.entityId,
+                        ownerId: record.ownerId,
+                        duration: record.duration,
+                        /* content-specific */
+                        contentType: record.contentType,
+                        fileType: record.fileType,
+                        uri: record.uri,
+                        /* LLM specific */
+                        modelService: record.modelService,
+                        modelName: record.modelName,
+                        prompt: record.prompt,
+                        promptTokens: record.promptTokens,
+                        completion: record.completion,
+                        completionTokens: record.completionTokens,
+                        tokens: record.tokens,
+                        /* GraphQL specific */
+                        operation: record.operation,
+                        operationType: record.operationType,
+                        request: record.request,
+                        response: record.response,
+                        variables: record.variables,
+                    });
+                }
+            }
+                    
             if (usageBatch.length < limit) {
                 // No more pages
                 break;
