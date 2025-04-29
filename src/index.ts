@@ -19,6 +19,8 @@ Graphlit is an LLM-enabled knowledge API platform, which supports these resource
 - workflows: how content is handled during the ingestion process
 - specifications: LLM configuration presets, used by workflows and conversations
 
+Identifiers for all resources are unique within the Graphlit project, and are formatted as GUIDs.
+
 You have access to one and only one Graphlit project, which can optionally be configured with a workflow to guide the document preparation and entity extraction of ingested content. 
 The Graphlit project is non-deletable, but you can create and delete contents, feeds, collections, conversations, specifications and workflows within the project.
 
