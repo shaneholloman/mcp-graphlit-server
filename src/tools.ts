@@ -229,9 +229,11 @@ export function registerTools(server: McpServer) {
     'Text embedding' usage records are used for text embedding operations.
     'Prompt completion' usage records are used for LLM prompt completion operations, i.e. when using 'promptConversation'.
     'Data extraction' usage records are used for data extraction operations, using LLMs to extract knowledge graph entities.
+    Look at 'metric' field for the type of metric captured in the usage record, i.e. BYTES, TOKENS, UNITS, REQUESTS.
     Look for 'credits' field which describes how many credits were charged by the operation.
     Look for 'promptTokens', 'completionTokens' and (total) 'tokens' fields which describe the number of tokens used by the operation.
     Look for 'request', 'response' and 'variables' fields which describe the GraphQL operation.
+    Look for 'count' for the number of units used by the operation, for example, number of pages processed by document preparation.
     Accepts an optional recency filter for usage records 'in last' timespan.
     Returns a list of usage records, which describe the billable audit log of all Graphlit API operations.`,
     { 
