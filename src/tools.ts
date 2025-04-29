@@ -225,10 +225,10 @@ export function registerTools(server: McpServer) {
     `Queries project usage records.
     Usage record name describes the operation, i.e. 'Prompt completion', 'Text Embedding', 'GraphQL' or 'Entity Event'.
     Some usage records contain tokens used. Look for 'credits' field which describes how many credits were used by the operation.
-    Accepts an optional recency filter (defaults to last day) for usage records 'in last' timespan.
+    Accepts an optional recency filter for usage records 'in last' timespan.
     Returns a list of usage records, which describe the billable audit log of all Graphlit API operations.`,
     { 
-        inLast: z.string().optional().default("P1D").describe("Recency filter for usage records 'in last' timespan, optional. Defaults to last day. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
+        inLast: z.string().optional().default("PT1H").describe("Recency filter for usage records 'in last' timespan, optional. Defaults to PT1H. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
     },
     async ({ inLast }) => {
         const client = new Graphlit();
