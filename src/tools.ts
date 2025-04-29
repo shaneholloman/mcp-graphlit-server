@@ -2920,7 +2920,8 @@ export function registerTools(server: McpServer) {
     server.tool(
     "ingestUrl",
     `Ingests content from URL into Graphlit knowledge base.
-    Can scrape web pages, and can ingest individual Word documents, PDFs, audio recordings, videos, images, or any other unstructured data.
+    Can scrape a single web page, and can ingest individual Word documents, PDFs, audio recordings, videos, images, or any other unstructured data.
+    Do *not* use for crawling a web site, which is done with 'webCrawl' tool.
     Executes asynchronously and returns the content identifier.`,
     { 
         url: z.string().describe("URL to ingest content from.")
