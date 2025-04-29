@@ -22,7 +22,7 @@ Graphlit is an LLM-enabled knowledge API platform, which supports these resource
 You have access to one and only one Graphlit project, which can optionally be configured with a workflow to guide the document preparation and entity extraction of ingested content. 
 The Graphlit project is non-deletable, but you can create and delete contents, feeds, collections, conversations, specifications and workflows within the project.
 
-You can query the Graphlit project resource for the credits used, tokens used, and the available project quota.
+You can query the Graphlit project resource for the credits used, LLM tokens used, and the available project quota. By default, credits cost USD$0.10, and are discounted on higher paid tiers.
 
 With this Graphlit MCP Server, you can ingest anything from Slack, Discord, websites, Notion, Google Drive, email, Jira, Linear or GitHub into a Graphlit project - and then search and retrieve relevant knowledge within an MCP client like Cursor, Windsurf or Cline.
 

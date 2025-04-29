@@ -198,6 +198,66 @@ export function registerTools(server: McpServer) {
         }
     }
     );
+    
+    // Simple ISO duration parser
+    function parseDuration(durationStr: string): number {
+        const match = durationStr.match(
+            /^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/
+        );
+    
+        if (!match) {
+            throw new Error(`Invalid ISO 8601 duration: ${durationStr}`);
+        }
+    
+        const [, days, hours, minutes, seconds] = match.map(Number);
+    
+        const totalMs =
+            (days || 0) * 24 * 60 * 60 * 1000 +
+            (hours || 0) * 60 * 60 * 1000 +
+            (minutes || 0) * 60 * 1000 +
+            (seconds || 0) * 1000;
+    
+        return totalMs;
+    }
+
+    server.tool(
+    "queryProjectUsage",
+    `Queries project usage records.
+    Usage record name describes the operation, i.e. 'Prompt completion', 'Text Embedding', 'GraphQL' or 'Entity Event'.
+    Some usage records contain tokens used. Look for 'credits' field which describes how many credits were used by the operation.
+    Accepts an optional recency filter (defaults to last day) for usage records 'in last' timespan.
+    Returns a list of usage records, which describe the billable audit log of all Graphlit API operations.`,
+    { 
+        inLast: z.string().optional().default("P1D").describe("Recency filter for usage records 'in last' timespan, optional. Defaults to last day. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."),
+    },
+    async ({ inLast }) => {
+        const client = new Graphlit();
+
+        try {
+        const durationMs = parseDuration(inLast);
+        const startDate = new Date(Date.now() - durationMs);            
+
+        const response = await client.queryProjectUsage(startDate, inLast);
+
+        return {
+            content: [{
+            type: "text",
+            text: JSON.stringify(response.usage, null, 2)
+            }]
+        };
+        
+        } catch (err: unknown) {
+        const error = err as Error;
+        return {
+            content: [{
+            type: "text",
+            text: `Error: ${error.message}`
+            }],
+            isError: true
+        };
+        }
+    }
+    );
 
     server.tool(
     "askGraphlit",
