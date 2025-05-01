@@ -259,7 +259,7 @@ Your cline_mcp_settings.json file should be configured similar to:
 
 ### Installing via Cursor
 
-To install graphlit-mcp-server in Cursor IDE application, Cline should use NPX:
+To install graphlit-mcp-server in Cursor IDE application, Cursor should use NPX:
 
 ```bash
 npx -y graphlit-mcp-server
@@ -348,6 +348,12 @@ Only GRAPHLIT_ORGANIZATION_ID, GRAPHLIT_ENVIRONMENT_ID and GRAPHLIT_JWT_SECRET a
         }
     }
 }
+```
+
+NOTE: when running 'npx' on Windows, you may need to explicitly call npx via the command prompt.
+
+```
+"command": "C:\\Windows\\System32\\cmd.exe /c npx"
 ```
 
 ## Support
