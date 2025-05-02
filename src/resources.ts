@@ -8,7 +8,7 @@ import {
     GetContentQuery, 
     GetConversationQuery,
 } from "graphlit-client/dist/generated/graphql-types.js";
-  
+
 export function registerResources(server: McpServer) {
     server.resource(
       "Conversations list: Returns list of conversation resources.",
