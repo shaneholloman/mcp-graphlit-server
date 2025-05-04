@@ -3233,10 +3233,12 @@ export function registerTools(server: McpServer) {
         try {
         const response = await client.publishText(text, textType, { type: type, format: format, elevenLabs: { model: model, voice: voice } }, name, undefined, true);
 
+        const contents = response.publishText?.contents?.map(content => content ? ({ id: content.id }) : null).filter(Boolean);
+
         return {
             content: [{
             type: "text",
-            text: JSON.stringify({ id: response.publishText?.id }, null, 2)
+            text: JSON.stringify(contents, null, 2)
             }]
         };
         
@@ -3259,7 +3261,7 @@ export function registerTools(server: McpServer) {
     Accepts a name for the content object.
     Also, accepts a prompt for image generation. For example, 'Create a cartoon image of a raccoon, saying "I Love Graphlit"'.
     You *must* retrieve the content resource to get the downloadable image URL for this published image.
-    Executes *synchronously* and returns the content identifier.`,
+    Executes *synchronously* and returns the content identifiers.`,
     { 
         name: z.string().describe("Name for the content object."),
         prompt: z.string().describe("Prompt for image generation."),
@@ -3274,10 +3276,12 @@ export function registerTools(server: McpServer) {
         try {
         const response = await client.publishText(prompt, TextTypes.Plain, { type: type, format: format, openAIImage: { model: model } }, name, undefined, true);
 
+        const contents = response.publishText?.contents?.map(content => content ? ({ id: content.id }) : null).filter(Boolean);
+
         return {
             content: [{
             type: "text",
-            text: JSON.stringify({ id: response.publishText?.id }, null, 2)
+            text: JSON.stringify(contents, null, 2)
             }]
         };
         
