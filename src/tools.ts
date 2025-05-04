@@ -3216,7 +3216,7 @@ export function registerTools(server: McpServer) {
     Accepts a name for the content object, the text itself, and an optional text type (Plain, Markdown, Html). Defaults to Markdown text type.
     Optionally accepts an ElevenLabs voice identifier.
     You *must* retrieve the content resource to get the downloadable audio URL for this published audio.
-    Executes *synchronously* and returns the content identifier.`,
+    Executes *synchronously* and returns the content identifiers.`,
     { 
         name: z.string().describe("Name for the content object."),
         text: z.string().describe("Text content to publish."),
@@ -3265,8 +3265,9 @@ export function registerTools(server: McpServer) {
     { 
         name: z.string().describe("Name for the content object."),
         prompt: z.string().describe("Prompt for image generation."),
+        count: z.number().optional().default(1).describe("Number of images to generate, optional. Defaults to 1."),
     },
-    async ({ name, prompt }) => {
+    async ({ name, prompt, count }) => {
         const client = new Graphlit();
 
         const type = ContentPublishingServiceTypes.OpenAiImage;
@@ -3274,7 +3275,7 @@ export function registerTools(server: McpServer) {
         const model = OpenAiImageModels.GptImage_1;
 
         try {
-        const response = await client.publishText(prompt, TextTypes.Plain, { type: type, format: format, openAIImage: { model: model } }, name, undefined, true);
+        const response = await client.publishText(prompt, TextTypes.Markdown, { type: type, format: format, openAIImage: { model: model, count: count } }, name, undefined, true);
 
         const contents = response.publishText?.contents?.map(content => content ? ({ id: content.id }) : null).filter(Boolean);
 
