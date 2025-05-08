@@ -430,9 +430,10 @@ export function registerTools(server: McpServer) {
             fileTypes: fileType ? [fileType] : null
         };
 
-        const response = await client.retrieveSources(prompt, filter, undefined, { 
+        const response = await client.retrieveSources(prompt, filter, undefined, 
+        { 
             type: RetrievalStrategyTypes.Chunk, 
-            disableFallback: true 
+            disableFallback: true
         }, 
         { 
             serviceType: RerankingModelServiceTypes.Cohere 
