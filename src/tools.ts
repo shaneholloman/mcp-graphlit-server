@@ -432,7 +432,7 @@ export function registerTools(server: McpServer) {
 
         const response = await client.retrieveSources(prompt, filter, undefined, 
         { 
-            type: RetrievalStrategyTypes.Chunk, 
+            type: RetrievalStrategyTypes.Section, 
             disableFallback: true
         }, 
         { 
