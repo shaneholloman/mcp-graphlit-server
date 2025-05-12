@@ -433,7 +433,8 @@ export function registerTools(server: McpServer) {
         const response = await client.retrieveSources(prompt, filter, undefined, 
         { 
             type: RetrievalStrategyTypes.Section, 
-            disableFallback: true
+            contentLimit: 50, // number of content sources to retrieve prior to reranking
+            disableFallback: true // disable fallback to recent contents
         }, 
         { 
             serviceType: RerankingModelServiceTypes.Cohere 
