@@ -25,7 +25,6 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
   <img width="380" height="200" src="https://glama.ai/mcp/servers/fscrivteod/badge" alt="graphlit-mcp-server MCP server" />
 </a>
 
-
 ## Tools
 
 ### Retrieval
@@ -317,7 +316,7 @@ To use the Graphlit MCP Server in any MCP client application, use:
 }
 ```
 
-Optionally, you can configure the credentials for data connectors, such as Slack, Google Email and Notion. 
+Optionally, you can configure the credentials for data connectors, such as Slack, Google Email and Notion.
 Only GRAPHLIT_ORGANIZATION_ID, GRAPHLIT_ENVIRONMENT_ID and GRAPHLIT_JWT_SECRET are required.
 
 ```
@@ -360,6 +359,6 @@ NOTE: when running 'npx' on Windows, you may need to explicitly call npx via the
 
 Please refer to the [Graphlit API Documentation](https://docs.graphlit.dev/).
 
-For support with the Graphlit MCP Server, please submit a [GitHub Issue](https://github.com/graphlit/graphlit-mcp-server/issues).  
+For support with the Graphlit MCP Server, please submit a [GitHub Issue](https://github.com/graphlit/graphlit-mcp-server/issues).
 
 For further support with the Graphlit Platform, please join our [Discord](https://discord.gg/ygFmfjy3Qx) community.

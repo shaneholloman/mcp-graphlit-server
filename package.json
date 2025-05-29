@@ -22,6 +22,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "watch": "tsc --watch",
+    "check": "tsc --noEmit --incremental",
+    "format": "prettier --write .",
     "inspector": "npx @modelcontextprotocol/inspector node build/index.js"
   },
   "keywords": [
@@ -50,6 +52,7 @@
   },
   "devDependencies": {
     "@types/mime-types": "^2.1.4",
+    "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   }
 }

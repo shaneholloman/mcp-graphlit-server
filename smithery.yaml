@@ -65,19 +65,19 @@ startCommand:
       twitterConsumerApiKey:
         type: string
         default: ""
-        description: Twitter Consumer API Key (optional)        
+        description: Twitter Consumer API Key (optional)
       twitterConsumerApiSecret:
         type: string
         default: ""
-        description: Twitter Consumer API Secret (optional)        
+        description: Twitter Consumer API Secret (optional)
       twitterAccessTokenKey:
         type: string
         default: ""
-        description: Twitter Access Token Key (optional)        
+        description: Twitter Access Token Key (optional)
       twitterAccessTokenSecret:
         type: string
         default: ""
-        description: Twitter Access Token Secret (optional)        
+        description: Twitter Access Token Secret (optional)
   commandFunction:
     # A JS function that produces the CLI command based on the given config to start the MCP on stdio.
     |-

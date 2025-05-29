@@ -2,7 +2,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { registerResources } from "./resources.js";
-import { registerTools } from './tools.js';
+import { registerTools } from "./tools.js";
 
 const DEFAULT_INSTRUCTIONS = `
 You are provided a set of MCP tools and resources that integrate with the [Graphlit](https://www.graphlit.com) Platform.
@@ -48,36 +48,38 @@ Leverage short-term memories when evaluating the results of a workflow step, and
 You can collect memories in collections, and then use the 'queryContents' tool to retrieve the 'memory' contents by the collection. This will help you to keep track of your progress and avoid losing any important information.
 
 If you have any trouble with this Graphlit MCP Server, join our [Discord](https://discord.gg/ygFmfjy3Qx) community for support.
-`
+`;
 
-export const server = new McpServer({
-  name: "Graphlit MCP Server",
-  version: "1.0.0"
-}, {
-  instructions: DEFAULT_INSTRUCTIONS
-});
+export const server = new McpServer(
+  {
+    name: "Graphlit MCP Server",
+    version: "1.0.0",
+  },
+  {
+    instructions: DEFAULT_INSTRUCTIONS,
+  },
+);
 
 registerResources(server);
 registerTools(server);
 
 async function runServer() {
   try {
-    console.error('Attempting to start Graphlit MCP Server.');
+    console.error("Attempting to start Graphlit MCP Server.");
 
     const transport = new StdioServerTransport();
     await server.connect(transport);
 
-    console.error('Successfully started Graphlit MCP Server.');
-  } 
-  catch (error) {
-    console.error('Failed to start Graphlit MCP Server.', error);
+    console.error("Successfully started Graphlit MCP Server.");
+  } catch (error) {
+    console.error("Failed to start Graphlit MCP Server.", error);
 
     process.exit(1);
   }
 }
 
 runServer().catch((error) => {
-  console.error('Failed to start Graphlit MCP Server.', error);
-  
+  console.error("Failed to start Graphlit MCP Server.", error);
+
   process.exit(1);
 });
