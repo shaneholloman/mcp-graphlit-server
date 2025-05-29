@@ -57,7 +57,7 @@ export const server = new McpServer(
   },
   {
     instructions: DEFAULT_INSTRUCTIONS,
-  },
+  }
 );
 
 registerResources(server);

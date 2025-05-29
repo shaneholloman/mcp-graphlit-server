@@ -43,7 +43,7 @@ export function registerResources(server: McpServer) {
       return {
         contents: [],
       };
-    },
+    }
   );
 
   server.resource(
@@ -73,7 +73,7 @@ export function registerResources(server: McpServer) {
           contents: [],
         };
       }
-    },
+    }
   );
 
   server.resource(
@@ -103,7 +103,7 @@ export function registerResources(server: McpServer) {
       return {
         contents: [],
       };
-    },
+    }
   );
 
   server.resource(
@@ -132,7 +132,7 @@ export function registerResources(server: McpServer) {
                   error: response.feed?.error,
                 },
                 null,
-                2,
+                2
               ),
               mimeType: "application/json",
             },
@@ -144,7 +144,7 @@ export function registerResources(server: McpServer) {
           contents: [],
         };
       }
-    },
+    }
   );
 
   server.resource(
@@ -174,7 +174,7 @@ export function registerResources(server: McpServer) {
       return {
         contents: [],
       };
-    },
+    }
   );
 
   server.resource(
@@ -199,7 +199,7 @@ export function registerResources(server: McpServer) {
                     .map((content) => `contents://${content.id}`),
                 },
                 null,
-                2,
+                2
               ),
               mimeType: "application/json",
             },
@@ -211,7 +211,7 @@ export function registerResources(server: McpServer) {
           contents: [],
         };
       }
-    },
+    }
   );
 
   server.resource(
@@ -247,7 +247,7 @@ export function registerResources(server: McpServer) {
       return {
         contents: [],
       };
-    },
+    }
   );
 
   server.resource(
@@ -277,7 +277,7 @@ export function registerResources(server: McpServer) {
           contents: [],
         };
       }
-    },
+    }
   );
 
   server.resource(
@@ -307,7 +307,7 @@ export function registerResources(server: McpServer) {
       return {
         contents: [],
       };
-    },
+    }
   );
 
   server.resource(
@@ -334,7 +334,7 @@ export function registerResources(server: McpServer) {
           contents: [],
         };
       }
-    },
+    }
   );
 
   server.resource(
@@ -364,7 +364,7 @@ export function registerResources(server: McpServer) {
       return {
         contents: [],
       };
-    },
+    }
   );
 
   server.resource(
@@ -391,7 +391,7 @@ export function registerResources(server: McpServer) {
           contents: [],
         };
       }
-    },
+    }
   );
 
   server.resource(
@@ -407,13 +407,13 @@ export function registerResources(server: McpServer) {
 
         const cresponse = await client.queryProjectCredits(
           startDate.toISOString(),
-          duration,
+          duration
         );
         const credits = cresponse?.credits;
 
         const tresponse = await client.queryProjectTokens(
           startDate.toISOString(),
-          duration,
+          duration
         );
         const tokens = tresponse?.tokens;
 
@@ -432,7 +432,7 @@ export function registerResources(server: McpServer) {
                   tokens: tokens,
                 },
                 null,
-                2,
+                2
               ),
               mimeType: "application/json",
             },
@@ -444,7 +444,7 @@ export function registerResources(server: McpServer) {
           contents: [],
         };
       }
-    },
+    }
   );
 }
 
@@ -468,7 +468,7 @@ function formatConversation(response: GetConversationQuery): string {
       if (message?.citations?.length) {
         message.citations.forEach((citation) => {
           results.push(
-            `**Cited Source [${citation?.index}]**: contents://${citation?.content?.id}`,
+            `**Cited Source [${citation?.index}]**: contents://${citation?.content?.id}`
           );
           results.push(`**Cited Text**:\n${citation?.text || ""}`);
         });
@@ -540,7 +540,7 @@ function formatContent(response: GetContentQuery): string {
     results.push(
       ...issueAttributes
         .filter(([_, value]) => value)
-        .map(([label, value]) => `**${label}:** ${value}`),
+        .map(([label, value]) => `**${label}:** ${value}`)
     );
 
     if (issue.labels?.length) {
@@ -567,7 +567,7 @@ function formatContent(response: GetContentQuery): string {
     results.push(
       ...emailAttributes
         .filter(([_, value]) => value)
-        .map(([label, value]) => `**${label}:** ${value}`),
+        .map(([label, value]) => `**${label}:** ${value}`)
     );
   }
 
@@ -605,8 +605,8 @@ function formatContent(response: GetContentQuery): string {
         .slice(0, 100)
         .map(
           (collection) =>
-            `**Collection [${collection.name}]:** collections://${collection.id}`,
-        ),
+            `**Collection [${collection.name}]:** collections://${collection.id}`
+        )
     );
   }
 
@@ -621,7 +621,7 @@ function formatContent(response: GetContentQuery): string {
       ...content.children
         .filter((child) => child !== null)
         .slice(0, 100)
-        .map((child) => `**Child Content:** contents://${child.id}`),
+        .map((child) => `**Child Content:** contents://${child.id}`)
     );
   }
 
@@ -630,7 +630,7 @@ function formatContent(response: GetContentQuery): string {
     results.push(
       ...content.links
         .slice(0, 1000)
-        .map((link) => `**${link.linkType} Link:** ${link.uri}`),
+        .map((link) => `**${link.linkType} Link:** ${link.uri}`)
     );
   }
 
@@ -643,8 +643,8 @@ function formatContent(response: GetContentQuery): string {
         .slice(0, 100)
         .map(
           (observation) =>
-            `**${observation.type}:** ${observation.type.toLowerCase()}s://${observation.observable.id}`,
-        ),
+            `**${observation.type}:** ${observation.type.toLowerCase()}s://${observation.observable.id}`
+        )
     );
   }
 
@@ -656,7 +656,7 @@ function formatContent(response: GetContentQuery): string {
         results.push(
           ...(page.chunks
             ?.filter((chunk) => chunk?.text)
-            .map((chunk) => chunk?.text || "") || []),
+            .map((chunk) => chunk?.text || "") || [])
         );
         results.push("\n---\n");
       }
@@ -666,7 +666,7 @@ function formatContent(response: GetContentQuery): string {
   if (content.segments?.length) {
     content.segments.forEach((segment) => {
       results.push(
-        `**Transcript Segment [${segment.startTime}-${segment.endTime}]:**`,
+        `**Transcript Segment [${segment.startTime}-${segment.endTime}]:**`
       );
       results.push(segment.text || "");
       results.push("\n---\n");

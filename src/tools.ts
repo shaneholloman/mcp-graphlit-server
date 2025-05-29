@@ -35,10 +35,10 @@ import {
 } from "graphlit-client/dist/generated/graphql-types.js";
 
 export function registerTools(server: McpServer) {
-  // Default 5-minute recurrence schedule policy for feeds
+  // Default 15-minute recurrence schedule policy for feeds
   const schedulePolicy = {
     recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-    repeatInterval: "PT5M",
+    repeatInterval: "PT15M",
   };
   server.tool(
     "configureProject",
@@ -56,28 +56,28 @@ export function registerTools(server: McpServer) {
         .optional()
         .default(Types.ModelServiceTypes.Anthropic)
         .describe(
-          "Preferred model provider service type for all specifications, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided.",
+          "Preferred model provider service type for all specifications, i.e. Anthropic, OpenAI, Google. Defaults to Anthropic if not provided."
         ),
       configureConversationSpecification: z
         .boolean()
         .optional()
         .default(false)
         .describe(
-          "Whether to configure the default specification for LLM conversations. Defaults to False.",
+          "Whether to configure the default specification for LLM conversations. Defaults to False."
         ),
       configurePreparationSpecification: z
         .boolean()
         .optional()
         .default(false)
         .describe(
-          "Whether to configure high-quality document and web page preparation using vision LLM. Defaults to False.",
+          "Whether to configure high-quality document and web page preparation using vision LLM. Defaults to False."
         ),
       configureExtractionSpecification: z
         .boolean()
         .optional()
         .default(false)
         .describe(
-          "Whether to configure entity extraction using LLM into the knowledge graph. Defaults to False.",
+          "Whether to configure entity extraction using LLM into the knowledge graph. Defaults to False."
         ),
     },
     async ({
@@ -100,7 +100,7 @@ export function registerTools(server: McpServer) {
           break;
         default:
           throw new Error(
-            `Unsupported model service type [${modelServiceType}].`,
+            `Unsupported model service type [${modelServiceType}].`
           );
       }
 
@@ -275,13 +275,13 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   // Simple ISO duration parser
   function parseDuration(durationStr: string): number {
     const match = durationStr.match(
-      /^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/,
+      /^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/
     );
 
     if (!match) {
@@ -321,7 +321,7 @@ export function registerTools(server: McpServer) {
         .optional()
         .default("PT1H")
         .describe(
-          "Recency filter for usage records 'in last' timespan, optional. Defaults to PT1H. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly.",
+          "Recency filter for usage records 'in last' timespan, optional. Defaults to PT1H. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."
         ),
     },
     async ({ inLast }) => {
@@ -342,7 +342,7 @@ export function registerTools(server: McpServer) {
             [],
             [],
             offset,
-            limit,
+            limit
           );
           const usageBatch = response.usage ?? [];
 
@@ -412,7 +412,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -452,7 +452,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -478,7 +478,7 @@ export function registerTools(server: McpServer) {
       try {
         const response = await client.promptConversation(
           prompt,
-          conversationId,
+          conversationId
         );
 
         return {
@@ -492,7 +492,7 @@ export function registerTools(server: McpServer) {
                   citations: response.promptConversation?.message?.citations,
                 },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -509,7 +509,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -527,19 +527,19 @@ export function registerTools(server: McpServer) {
         .string()
         .optional()
         .describe(
-          "Recency filter for content ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly.",
+          "Recency filter for content ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."
         ),
       type: z
         .nativeEnum(ContentTypes)
         .optional()
         .describe(
-          "Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text.",
+          "Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."
         ),
       fileType: z
         .nativeEnum(FileTypes)
         .optional()
         .describe(
-          "File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video.",
+          "File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video."
         ),
       feeds: z
         .array(z.string())
@@ -574,7 +574,7 @@ export function registerTools(server: McpServer) {
           },
           {
             serviceType: RerankingModelServiceTypes.Cohere,
-          },
+          }
         );
 
         const sources = response.retrieveSources?.results || [];
@@ -594,7 +594,7 @@ export function registerTools(server: McpServer) {
                   mimeType: "text/markdown",
                 },
                 null,
-                2,
+                2
               ),
             })),
         };
@@ -610,7 +610,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   const PointFilter = z.object({
@@ -646,13 +646,13 @@ export function registerTools(server: McpServer) {
       url: z
         .string()
         .describe(
-          "URL of image which will be used for similarity search using image embeddings.",
+          "URL of image which will be used for similarity search using image embeddings."
         ),
       inLast: z
         .string()
         .optional()
         .describe(
-          "Recency filter for images ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly.",
+          "Recency filter for images ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."
         ),
       feeds: z
         .array(z.string())
@@ -663,14 +663,14 @@ export function registerTools(server: McpServer) {
         .optional()
         .describe("Collection identifiers to filter images by, optional."),
       location: PointFilter.optional().describe(
-        "Geo-location filter for search by latitude, longitude and optional distance radius.",
+        "Geo-location filter for search by latitude, longitude and optional distance radius."
       ),
       limit: z
         .number()
         .optional()
         .default(100)
         .describe(
-          "Limit the number of images to be returned. Defaults to 100.",
+          "Limit the number of images to be returned. Defaults to 100."
         ),
     },
     async ({ url, inLast, feeds, collections, location, limit }) => {
@@ -683,7 +683,7 @@ export function registerTools(server: McpServer) {
         const fetchResponse = await fetch(url);
         if (!fetchResponse.ok) {
           throw new Error(
-            `Failed to fetch data from ${url}: ${fetchResponse.statusText}`,
+            `Failed to fetch data from ${url}: ${fetchResponse.statusText}`
           );
         }
         const arrayBuffer = await fetchResponse.arrayBuffer();
@@ -728,7 +728,7 @@ export function registerTools(server: McpServer) {
                   mimeType: content.mimeType,
                 },
                 null,
-                2,
+                2
               ),
             })),
         };
@@ -744,7 +744,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -758,13 +758,13 @@ export function registerTools(server: McpServer) {
       schema: z
         .string()
         .describe(
-          "JSON schema which describes the data which will be extracted. JSON schema needs be of type 'object' and include 'properties' and 'required' fields.",
+          "JSON schema which describes the data which will be extracted. JSON schema needs be of type 'object' and include 'properties' and 'required' fields."
         ),
       prompt: z
         .string()
         .optional()
         .describe(
-          "Text prompt which is provided to LLM to guide data extraction, optional.",
+          "Text prompt which is provided to LLM to guide data extraction, optional."
         ),
     },
     async ({ text, schema, prompt }) => {
@@ -779,7 +779,7 @@ export function registerTools(server: McpServer) {
         const response = await client.extractText(
           prompt || DEFAULT_PROMPT,
           text,
-          [{ name: DEFAULT_NAME, schema: schema }],
+          [{ name: DEFAULT_NAME, schema: schema }]
         );
 
         return {
@@ -793,7 +793,7 @@ export function registerTools(server: McpServer) {
                       .map((item) => item.value)
                   : [],
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -810,7 +810,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -841,7 +841,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 { id: response.createCollection?.id },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -858,7 +858,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -878,7 +878,7 @@ export function registerTools(server: McpServer) {
       try {
         const response = await client.addContentsToCollections(
           contents?.map((content) => ({ id: content })),
-          [{ id: id }],
+          [{ id: id }]
         );
 
         return {
@@ -901,7 +901,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -921,7 +921,7 @@ export function registerTools(server: McpServer) {
       try {
         const response = await client.removeContentsFromCollection(
           contents?.map((content) => ({ id: content })),
-          { id: id },
+          { id: id }
         );
 
         return {
@@ -931,7 +931,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 { id: response.removeContentsFromCollection?.id },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -948,7 +948,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -985,7 +985,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1022,7 +1022,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1060,7 +1060,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1098,7 +1098,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1113,7 +1113,7 @@ export function registerTools(server: McpServer) {
         .nativeEnum(FeedTypes)
         .optional()
         .describe(
-          "Feed type filter, optional. One of: Discord, Email, Intercom, Issue, MicrosoftTeams, Notion, Reddit, Rss, Search, Site, Slack, Web, YouTube, Zendesk.",
+          "Feed type filter, optional. One of: Discord, Email, Intercom, Issue, MicrosoftTeams, Notion, Reddit, Rss, Search, Site, Slack, Web, YouTube, Zendesk."
         ),
       limit: z
         .number()
@@ -1152,7 +1152,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1167,7 +1167,7 @@ export function registerTools(server: McpServer) {
         .optional()
         .default(100)
         .describe(
-          "Limit the number of collections to be deleted. Defaults to 100.",
+          "Limit the number of collections to be deleted. Defaults to 100."
         ),
     },
     async ({ limit }) => {
@@ -1200,7 +1200,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1214,7 +1214,7 @@ export function registerTools(server: McpServer) {
         .optional()
         .default(100)
         .describe(
-          "Limit the number of conversations to be deleted. Defaults to 100.",
+          "Limit the number of conversations to be deleted. Defaults to 100."
         ),
     },
     async ({ limit }) => {
@@ -1247,7 +1247,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1261,20 +1261,20 @@ export function registerTools(server: McpServer) {
         .nativeEnum(ContentTypes)
         .optional()
         .describe(
-          "Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text.",
+          "Content type filter, optional. One of: Email, Event, File, Issue, Message, Page, Post, Text."
         ),
       fileType: z
         .nativeEnum(FileTypes)
         .optional()
         .describe(
-          "File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video.",
+          "File type filter, optional. One of: Animation, Audio, Code, Data, Document, Drawing, Email, Geometry, Image, Package, PointCloud, Shape, Video."
         ),
       limit: z
         .number()
         .optional()
         .default(1000)
         .describe(
-          "Limit the number of contents to be deleted. Defaults to 1000.",
+          "Limit the number of contents to be deleted. Defaults to 1000."
         ),
     },
     async ({ contentType, fileType, limit }) => {
@@ -1309,7 +1309,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1335,7 +1335,7 @@ export function registerTools(server: McpServer) {
         .string()
         .optional()
         .describe(
-          "Recency filter for content ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly.",
+          "Recency filter for content ingested 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."
         ),
       feeds: z
         .array(z.string())
@@ -1346,14 +1346,14 @@ export function registerTools(server: McpServer) {
         .optional()
         .describe("Collection identifiers to filter contents by, optional."),
       location: PointFilter.optional().describe(
-        "Geo-location filter for search by latitude, longitude and optional distance radius.",
+        "Geo-location filter for search by latitude, longitude and optional distance radius."
       ),
       limit: z
         .number()
         .optional()
         .default(100)
         .describe(
-          "Limit the number of contents to be returned. Defaults to 100.",
+          "Limit the number of contents to be returned. Defaults to 100."
         ),
     },
     async ({
@@ -1402,7 +1402,7 @@ export function registerTools(server: McpServer) {
                   mimeType: content.mimeType,
                 },
                 null,
-                2,
+                2
               ),
             })),
         };
@@ -1418,7 +1418,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1433,7 +1433,7 @@ export function registerTools(server: McpServer) {
         .optional()
         .default(100)
         .describe(
-          "Limit the number of collections to be returned. Defaults to 100.",
+          "Limit the number of collections to be returned. Defaults to 100."
         ),
     },
     async ({ name, limit }) => {
@@ -1461,7 +1461,7 @@ export function registerTools(server: McpServer) {
                   resourceUri: `collections://${collection.id}`,
                 },
                 null,
-                2,
+                2
               ),
             })),
         };
@@ -1477,7 +1477,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1520,7 +1520,7 @@ export function registerTools(server: McpServer) {
                   resourceUri: `feeds://${feed.id}`,
                 },
                 null,
-                2,
+                2
               ),
             })),
         };
@@ -1536,7 +1536,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1551,14 +1551,14 @@ export function registerTools(server: McpServer) {
         .string()
         .optional()
         .describe(
-          "Recency filter for conversations created 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly.",
+          "Recency filter for conversations created 'in last' timespan, optional. Should be ISO 8601 format, for example, 'PT1H' for last hour, 'P1D' for last day, 'P7D' for last week, 'P30D' for last month. Doesn't support weeks or months explicitly."
         ),
       limit: z
         .number()
         .optional()
         .default(100)
         .describe(
-          "Limit the number of conversations to be returned. Defaults to 100.",
+          "Limit the number of conversations to be returned. Defaults to 100."
         ),
     },
     async ({ query, inLast, limit }) => {
@@ -1588,7 +1588,7 @@ export function registerTools(server: McpServer) {
                   resourceUri: `conversations://${conversation.id}`,
                 },
                 null,
-                2,
+                2
               ),
             })),
         };
@@ -1604,7 +1604,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1628,7 +1628,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 { done: response.isContentDone?.result },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -1645,7 +1645,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1669,7 +1669,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 { done: response.isFeedDone?.result },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -1686,7 +1686,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   /*
@@ -1844,7 +1844,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1887,7 +1887,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1930,7 +1930,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -1946,7 +1946,7 @@ export function registerTools(server: McpServer) {
         const clientId = process.env.SHAREPOINT_CLIENT_ID;
         if (!clientId) {
           console.error(
-            "Please set SHAREPOINT_CLIENT_ID environment variable.",
+            "Please set SHAREPOINT_CLIENT_ID environment variable."
           );
           process.exit(1);
         }
@@ -1954,7 +1954,7 @@ export function registerTools(server: McpServer) {
         const clientSecret = process.env.SHAREPOINT_CLIENT_SECRET;
         if (!clientSecret) {
           console.error(
-            "Please set SHAREPOINT_CLIENT_SECRET environment variable.",
+            "Please set SHAREPOINT_CLIENT_SECRET environment variable."
           );
           process.exit(1);
         }
@@ -1962,7 +1962,7 @@ export function registerTools(server: McpServer) {
         const refreshToken = process.env.SHAREPOINT_REFRESH_TOKEN;
         if (!refreshToken) {
           console.error(
-            "Please set SHAREPOINT_REFRESH_TOKEN environment variable.",
+            "Please set SHAREPOINT_REFRESH_TOKEN environment variable."
           );
           process.exit(1);
         }
@@ -1981,7 +1981,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 response.sharePointLibraries?.results,
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -1998,7 +1998,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2016,7 +2016,7 @@ export function registerTools(server: McpServer) {
         const clientId = process.env.SHAREPOINT_CLIENT_ID;
         if (!clientId) {
           console.error(
-            "Please set SHAREPOINT_CLIENT_ID environment variable.",
+            "Please set SHAREPOINT_CLIENT_ID environment variable."
           );
           process.exit(1);
         }
@@ -2024,7 +2024,7 @@ export function registerTools(server: McpServer) {
         const clientSecret = process.env.SHAREPOINT_CLIENT_SECRET;
         if (!clientSecret) {
           console.error(
-            "Please set SHAREPOINT_CLIENT_SECRET environment variable.",
+            "Please set SHAREPOINT_CLIENT_SECRET environment variable."
           );
           process.exit(1);
         }
@@ -2032,7 +2032,7 @@ export function registerTools(server: McpServer) {
         const refreshToken = process.env.SHAREPOINT_REFRESH_TOKEN;
         if (!refreshToken) {
           console.error(
-            "Please set SHAREPOINT_REFRESH_TOKEN environment variable.",
+            "Please set SHAREPOINT_REFRESH_TOKEN environment variable."
           );
           process.exit(1);
         }
@@ -2044,7 +2044,7 @@ export function registerTools(server: McpServer) {
             clientSecret: clientSecret,
             refreshToken: refreshToken,
           },
-          libraryId,
+          libraryId
         );
 
         return {
@@ -2054,7 +2054,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 response.sharePointFolders?.results,
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -2071,7 +2071,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2081,7 +2081,7 @@ export function registerTools(server: McpServer) {
     Libraries can be enumerated with listSharePointLibraries and library folders with listSharePointFolders.
     Requires environment variables to be configured: SHAREPOINT_ACCOUNT_NAME, SHAREPOINT_CLIENT_ID, SHAREPOINT_CLIENT_SECRET, SHAREPOINT_REFRESH_TOKEN.
     Accepts an optional read limit for the number of files to ingest.
-    Executes asynchronously, creates SharePoint feed, and returns the feed identifier.`,
+    Executes asynchronously, creates SharePoint feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       libraryId: z.string().describe("SharePoint library identifier."),
       folderId: z
@@ -2092,15 +2092,22 @@ export function registerTools(server: McpServer) {
         .number()
         .optional()
         .describe("Number of files to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content every 15 minutes. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
     },
-    async ({ libraryId, folderId, readLimit }) => {
+    async ({ libraryId, folderId, readLimit, recurring }) => {
       const client = new Graphlit();
 
       try {
         const accountName = process.env.SHAREPOINT_ACCOUNT_NAME;
         if (!accountName) {
           console.error(
-            "Please set SHAREPOINT_ACCOUNT_NAME environment variable.",
+            "Please set SHAREPOINT_ACCOUNT_NAME environment variable."
           );
           process.exit(1);
         }
@@ -2108,7 +2115,7 @@ export function registerTools(server: McpServer) {
         const clientId = process.env.SHAREPOINT_CLIENT_ID;
         if (!clientId) {
           console.error(
-            "Please set SHAREPOINT_CLIENT_ID environment variable.",
+            "Please set SHAREPOINT_CLIENT_ID environment variable."
           );
           process.exit(1);
         }
@@ -2116,7 +2123,7 @@ export function registerTools(server: McpServer) {
         const clientSecret = process.env.SHAREPOINT_CLIENT_SECRET;
         if (!clientSecret) {
           console.error(
-            "Please set SHAREPOINT_CLIENT_SECRET environment variable.",
+            "Please set SHAREPOINT_CLIENT_SECRET environment variable."
           );
           process.exit(1);
         }
@@ -2124,7 +2131,7 @@ export function registerTools(server: McpServer) {
         const refreshToken = process.env.SHAREPOINT_REFRESH_TOKEN;
         if (!refreshToken) {
           console.error(
-            "Please set SHAREPOINT_REFRESH_TOKEN environment variable.",
+            "Please set SHAREPOINT_REFRESH_TOKEN environment variable."
           );
           process.exit(1);
         }
@@ -2146,7 +2153,7 @@ export function registerTools(server: McpServer) {
             isRecursive: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring ? schedulePolicy : undefined,
         });
 
         return {
@@ -2169,7 +2176,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2178,7 +2185,7 @@ export function registerTools(server: McpServer) {
     Accepts optional OneDrive folder identifier, and an optional read limit for the number of files to ingest.
     If no folder identifier provided, ingests files from root OneDrive folder.
     Requires environment variables to be configured: ONEDRIVE_CLIENT_ID, ONEDRIVE_CLIENT_SECRET, ONEDRIVE_REFRESH_TOKEN.
-    Executes asynchronously, creates OneDrive feed, and returns the feed identifier.`,
+    Executes asynchronously, creates a recurring OneDrive feed that checks for new content every 5 minutes, and returns the feed identifier. Since this is a recurring feed, isFeedDone is not needed.`,
     {
       folderId: z
         .string()
@@ -2202,7 +2209,7 @@ export function registerTools(server: McpServer) {
         const clientSecret = process.env.ONEDRIVE_CLIENT_SECRET;
         if (!clientSecret) {
           console.error(
-            "Please set ONEDRIVE_CLIENT_SECRET environment variable.",
+            "Please set ONEDRIVE_CLIENT_SECRET environment variable."
           );
           process.exit(1);
         }
@@ -2210,7 +2217,7 @@ export function registerTools(server: McpServer) {
         const refreshToken = process.env.ONEDRIVE_REFRESH_TOKEN;
         if (!refreshToken) {
           console.error(
-            "Please set ONEDRIVE_REFRESH_TOKEN environment variable.",
+            "Please set ONEDRIVE_REFRESH_TOKEN environment variable."
           );
           process.exit(1);
         }
@@ -2252,7 +2259,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2292,7 +2299,7 @@ export function registerTools(server: McpServer) {
           clientId = process.env.GOOGLE_DRIVE_CLIENT_ID;
           if (!clientId) {
             console.error(
-              "Please set GOOGLE_DRIVE_CLIENT_ID environment variable.",
+              "Please set GOOGLE_DRIVE_CLIENT_ID environment variable."
             );
             process.exit(1);
           }
@@ -2300,7 +2307,7 @@ export function registerTools(server: McpServer) {
           clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET;
           if (!clientSecret) {
             console.error(
-              "Please set GOOGLE_DRIVE_CLIENT_SECRET environment variable.",
+              "Please set GOOGLE_DRIVE_CLIENT_SECRET environment variable."
             );
             process.exit(1);
           }
@@ -2308,7 +2315,7 @@ export function registerTools(server: McpServer) {
           refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
           if (!refreshToken) {
             console.error(
-              "Please set GOOGLE_DRIVE_REFRESH_TOKEN environment variable.",
+              "Please set GOOGLE_DRIVE_REFRESH_TOKEN environment variable."
             );
             process.exit(1);
           }
@@ -2353,7 +2360,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2392,7 +2399,7 @@ export function registerTools(server: McpServer) {
         const redirectUri = process.env.DROPBOX_REDIRECT_URI;
         if (!redirectUri) {
           console.error(
-            "Please set DROPBOX_REDIRECT_URI environment variable.",
+            "Please set DROPBOX_REDIRECT_URI environment variable."
           );
           process.exit(1);
         }
@@ -2400,7 +2407,7 @@ export function registerTools(server: McpServer) {
         const refreshToken = process.env.DROPBOX_REFRESH_TOKEN;
         if (!refreshToken) {
           console.error(
-            "Please set DROPBOX_REFRESH_TOKEN environment variable.",
+            "Please set DROPBOX_REFRESH_TOKEN environment variable."
           );
           process.exit(1);
         }
@@ -2443,7 +2450,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2531,7 +2538,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2556,7 +2563,7 @@ export function registerTools(server: McpServer) {
         const personalAccessToken = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
         if (!personalAccessToken) {
           console.error(
-            "Please set GITHUB_PERSONAL_ACCESS_TOKEN environment variable.",
+            "Please set GITHUB_PERSONAL_ACCESS_TOKEN environment variable."
           );
           process.exit(1);
         }
@@ -2597,7 +2604,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2657,7 +2664,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2681,7 +2688,7 @@ export function registerTools(server: McpServer) {
         const clientId = process.env.MICROSOFT_TEAMS_CLIENT_ID;
         if (!clientId) {
           console.error(
-            "Please set MICROSOFT_TEAMS_CLIENT_ID environment variable.",
+            "Please set MICROSOFT_TEAMS_CLIENT_ID environment variable."
           );
           process.exit(1);
         }
@@ -2689,7 +2696,7 @@ export function registerTools(server: McpServer) {
         const clientSecret = process.env.MICROSOFT_TEAMS_CLIENT_SECRET;
         if (!clientSecret) {
           console.error(
-            "Please set MICROSOFT_TEAMS_CLIENT_SECRET environment variable.",
+            "Please set MICROSOFT_TEAMS_CLIENT_SECRET environment variable."
           );
           process.exit(1);
         }
@@ -2697,7 +2704,7 @@ export function registerTools(server: McpServer) {
         const refreshToken = process.env.MICROSOFT_TEAMS_REFRESH_TOKEN;
         if (!refreshToken) {
           console.error(
-            "Please set MICROSOFT_TEAMS_REFRESH_TOKEN environment variable.",
+            "Please set MICROSOFT_TEAMS_REFRESH_TOKEN environment variable."
           );
           process.exit(1);
         }
@@ -2737,7 +2744,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2796,7 +2803,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2855,7 +2862,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2868,7 +2875,7 @@ export function registerTools(server: McpServer) {
       userName: z
         .string()
         .describe(
-          "Twitter/X user name, without the leading @ symbol, i.e. 'graphlit'.",
+          "Twitter/X user name, without the leading @ symbol, i.e. 'graphlit'."
         ),
       readLimit: z
         .number()
@@ -2918,7 +2925,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -2977,7 +2984,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3026,7 +3033,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3048,7 +3055,7 @@ export function registerTools(server: McpServer) {
         const clientId = process.env.GOOGLE_EMAIL_CLIENT_ID;
         if (!clientId) {
           console.error(
-            "Please set GOOGLE_EMAIL_CLIENT_ID environment variable.",
+            "Please set GOOGLE_EMAIL_CLIENT_ID environment variable."
           );
           process.exit(1);
         }
@@ -3056,7 +3063,7 @@ export function registerTools(server: McpServer) {
         const clientSecret = process.env.GOOGLE_EMAIL_CLIENT_SECRET;
         if (!clientSecret) {
           console.error(
-            "Please set GOOGLE_EMAIL_CLIENT_SECRET environment variable.",
+            "Please set GOOGLE_EMAIL_CLIENT_SECRET environment variable."
           );
           process.exit(1);
         }
@@ -3064,7 +3071,7 @@ export function registerTools(server: McpServer) {
         const refreshToken = process.env.GOOGLE_EMAIL_REFRESH_TOKEN;
         if (!refreshToken) {
           console.error(
-            "Please set GOOGLE_EMAIL_REFRESH_TOKEN environment variable.",
+            "Please set GOOGLE_EMAIL_REFRESH_TOKEN environment variable."
           );
           process.exit(1);
         }
@@ -3106,7 +3113,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3128,7 +3135,7 @@ export function registerTools(server: McpServer) {
         const clientId = process.env.MICROSOFT_EMAIL_CLIENT_ID;
         if (!clientId) {
           console.error(
-            "Please set MICROSOFT_EMAIL_CLIENT_ID environment variable.",
+            "Please set MICROSOFT_EMAIL_CLIENT_ID environment variable."
           );
           process.exit(1);
         }
@@ -3136,7 +3143,7 @@ export function registerTools(server: McpServer) {
         const clientSecret = process.env.MICROSOFT_EMAIL_CLIENT_SECRET;
         if (!clientSecret) {
           console.error(
-            "Please set MICROSOFT_EMAIL_CLIENT_SECRET environment variable.",
+            "Please set MICROSOFT_EMAIL_CLIENT_SECRET environment variable."
           );
           process.exit(1);
         }
@@ -3144,7 +3151,7 @@ export function registerTools(server: McpServer) {
         const refreshToken = process.env.MICROSOFT_EMAIL_REFRESH_TOKEN;
         if (!refreshToken) {
           console.error(
-            "Please set MICROSOFT_EMAIL_REFRESH_TOKEN environment variable.",
+            "Please set MICROSOFT_EMAIL_REFRESH_TOKEN environment variable."
           );
           process.exit(1);
         }
@@ -3186,7 +3193,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3247,7 +3254,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3272,7 +3279,7 @@ export function registerTools(server: McpServer) {
         const personalAccessToken = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
         if (!personalAccessToken) {
           console.error(
-            "Please set GITHUB_PERSONAL_ACCESS_TOKEN environment variable.",
+            "Please set GITHUB_PERSONAL_ACCESS_TOKEN environment variable."
           );
           process.exit(1);
         }
@@ -3313,7 +3320,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3383,7 +3390,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3433,7 +3440,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3471,7 +3478,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3492,14 +3499,14 @@ export function registerTools(server: McpServer) {
         .optional()
         .default(SearchServiceTypes.Exa)
         .describe(
-          "Search service type (Tavily, Exa, Podscan). Defaults to Exa.",
+          "Search service type (Tavily, Exa, Podscan). Defaults to Exa."
         ),
       limit: z
         .number()
         .optional()
         .default(10)
         .describe(
-          "Limit the number of search hits to be returned. Defaults to 10.",
+          "Limit the number of search hits to be returned. Defaults to 10."
         ),
     },
     async ({ query, searchService, limit }) => {
@@ -3528,7 +3535,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3578,7 +3585,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3616,7 +3623,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3641,7 +3648,7 @@ export function registerTools(server: McpServer) {
         .string()
         .optional()
         .describe(
-          "Optional content identifier. Will overwrite existing content, if provided.",
+          "Optional content identifier. Will overwrite existing content, if provided."
         ),
     },
     async ({ name, text, textType, id }) => {
@@ -3654,7 +3661,7 @@ export function registerTools(server: McpServer) {
           textType,
           undefined,
           id,
-          true,
+          true
         );
 
         return {
@@ -3677,7 +3684,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3693,7 +3700,7 @@ export function registerTools(server: McpServer) {
       text: z
         .string()
         .describe(
-          "Textual memory to ingest, i.e. 'Kirk likes raccoons' or 'Graphlit is based in Seattle'",
+          "Textual memory to ingest, i.e. 'Kirk likes raccoons' or 'Graphlit is based in Seattle'"
         ),
       textType: z
         .nativeEnum(TextTypes)
@@ -3704,7 +3711,7 @@ export function registerTools(server: McpServer) {
         .string()
         .optional()
         .describe(
-          "Time to live for ingested memory. Should be ISO 8601 format, for example, 'PT1H' for one hour, 'P1D' for one day, 'P7D' for one week, 'P30D' for one month. Doesn't support weeks or months explicitly.",
+          "Time to live for ingested memory. Should be ISO 8601 format, for example, 'PT1H' for one hour, 'P1D' for one day, 'P7D' for one week, 'P30D' for one month. Doesn't support weeks or months explicitly."
         ),
     },
     async ({ name, text, textType, timeToLive }) => {
@@ -3734,7 +3741,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3761,7 +3768,7 @@ export function registerTools(server: McpServer) {
         const response = await client.ingestEncodedFile(
           fileName,
           base64Data,
-          mimeType,
+          mimeType
         );
 
         return {
@@ -3771,7 +3778,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 { id: response.ingestEncodedFile?.id },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -3788,7 +3795,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3811,7 +3818,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 { id: response.screenshotPage?.id },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -3828,7 +3835,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3854,7 +3861,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 { message: response.describeImage?.message },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -3871,7 +3878,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3911,7 +3918,7 @@ export function registerTools(server: McpServer) {
         if (content?.imageUri != null) {
           const response = await client.describeImage(
             prompt || DEFAULT_PROMPT,
-            content.imageUri,
+            content.imageUri
           );
 
           return {
@@ -3921,7 +3928,7 @@ export function registerTools(server: McpServer) {
                 text: JSON.stringify(
                   { message: response.describeImage?.message },
                   null,
-                  2,
+                  2
                 ),
               },
             ],
@@ -3948,7 +3955,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -3990,7 +3997,7 @@ export function registerTools(server: McpServer) {
           },
           name,
           undefined,
-          true,
+          true
         );
 
         const contents = response.publishText?.contents
@@ -4017,7 +4024,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -4054,7 +4061,7 @@ export function registerTools(server: McpServer) {
           },
           name,
           undefined,
-          true,
+          true
         );
 
         const contents = response.publishText?.contents
@@ -4081,7 +4088,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -4106,7 +4113,7 @@ export function registerTools(server: McpServer) {
         const response = await client.sendNotification(
           { type: IntegrationServiceTypes.WebHook, uri: url },
           text,
-          textType,
+          textType
         );
 
         return {
@@ -4116,7 +4123,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 { success: response.sendNotification?.result },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -4133,7 +4140,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -4169,7 +4176,7 @@ export function registerTools(server: McpServer) {
             slack: { token: botToken, channel: channelName },
           },
           text,
-          textType,
+          textType
         );
 
         return {
@@ -4179,7 +4186,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 { success: response.sendNotification?.result },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -4196,7 +4203,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -4214,7 +4221,7 @@ export function registerTools(server: McpServer) {
       const consumerKey = process.env.TWITTER_CONSUMER_API_KEY;
       if (!consumerKey) {
         console.error(
-          "Please set TWITTER_CONSUMER_API_KEY environment variable.",
+          "Please set TWITTER_CONSUMER_API_KEY environment variable."
         );
         process.exit(1);
       }
@@ -4222,7 +4229,7 @@ export function registerTools(server: McpServer) {
       const consumerSecret = process.env.TWITTER_CONSUMER_API_SECRET;
       if (!consumerSecret) {
         console.error(
-          "Please set TWITTER_CONSUMER_API_SECRET environment variable.",
+          "Please set TWITTER_CONSUMER_API_SECRET environment variable."
         );
         process.exit(1);
       }
@@ -4230,7 +4237,7 @@ export function registerTools(server: McpServer) {
       const accessTokenKey = process.env.TWITTER_ACCESS_TOKEN_KEY;
       if (!accessTokenKey) {
         console.error(
-          "Please set TWITTER_ACCESS_TOKEN_KEY environment variable.",
+          "Please set TWITTER_ACCESS_TOKEN_KEY environment variable."
         );
         process.exit(1);
       }
@@ -4238,7 +4245,7 @@ export function registerTools(server: McpServer) {
       const accessTokenSecret = process.env.TWITTER_ACCESS_TOKEN_SECRET;
       if (!accessTokenSecret) {
         console.error(
-          "Please set TWITTER_ACCESS_TOKEN_SECRET environment variable.",
+          "Please set TWITTER_ACCESS_TOKEN_SECRET environment variable."
         );
         process.exit(1);
       }
@@ -4257,7 +4264,7 @@ export function registerTools(server: McpServer) {
             },
           },
           text,
-          TextTypes.Plain,
+          TextTypes.Plain
         );
 
         return {
@@ -4267,7 +4274,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 { success: response.sendNotification?.result },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -4284,7 +4291,7 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 
   server.tool(
@@ -4320,7 +4327,7 @@ export function registerTools(server: McpServer) {
         const response = await client.sendNotification(
           { type: IntegrationServiceTypes.Email, email: { subject, from, to } },
           text,
-          textType,
+          textType
         );
 
         return {
@@ -4330,7 +4337,7 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 { success: response.sendNotification?.result },
                 null,
-                2,
+                2
               ),
             },
           ],
@@ -4347,6 +4354,6 @@ export function registerTools(server: McpServer) {
           isError: true,
         };
       }
-    },
+    }
   );
 }
