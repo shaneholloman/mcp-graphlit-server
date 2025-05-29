@@ -2097,10 +2097,17 @@ export function registerTools(server: McpServer) {
         .optional()
         .default(false)
         .describe(
-          "Whether to create a recurring feed that checks for new content every 15 minutes. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed for completion polling."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
         ),
     },
-    async ({ libraryId, folderId, readLimit, recurring }) => {
+    async ({ libraryId, folderId, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -2153,7 +2160,12 @@ export function registerTools(server: McpServer) {
             isRecursive: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: recurring ? schedulePolicy : undefined,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2185,7 +2197,7 @@ export function registerTools(server: McpServer) {
     Accepts optional OneDrive folder identifier, and an optional read limit for the number of files to ingest.
     If no folder identifier provided, ingests files from root OneDrive folder.
     Requires environment variables to be configured: ONEDRIVE_CLIENT_ID, ONEDRIVE_CLIENT_SECRET, ONEDRIVE_REFRESH_TOKEN.
-    Executes asynchronously, creates a recurring OneDrive feed that checks for new content every 5 minutes, and returns the feed identifier. Since this is a recurring feed, isFeedDone is not needed.`,
+    Executes asynchronously, creates OneDrive feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       folderId: z
         .string()
@@ -2195,8 +2207,22 @@ export function registerTools(server: McpServer) {
         .number()
         .optional()
         .describe("Number of files to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ folderId, readLimit }) => {
+    async ({ folderId, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -2236,7 +2262,12 @@ export function registerTools(server: McpServer) {
             isRecursive: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2270,7 +2301,7 @@ export function registerTools(server: McpServer) {
     If no folder identifier provided, ingests files from root Google Drive folder.
     Requires environment variables to be configured: GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON -or- GOOGLE_DRIVE_CLIENT_ID, GOOGLE_DRIVE_CLIENT_SECRET, GOOGLE_DRIVE_REFRESH_TOKEN.
     If service account JSON is provided, uses service account authentication. Else, uses user authentication.
-    Executes asynchronously, creates Google Drive feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Google Drive feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       folderId: z
         .string()
@@ -2280,8 +2311,22 @@ export function registerTools(server: McpServer) {
         .number()
         .optional()
         .describe("Number of files to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ folderId, readLimit }) => {
+    async ({ folderId, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -2337,7 +2382,12 @@ export function registerTools(server: McpServer) {
             isRecursive: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2369,7 +2419,7 @@ export function registerTools(server: McpServer) {
     Accepts optional relative path to Dropbox folder (i.e. /Pictures), and an optional read limit for the number of files to ingest.
     If no path provided, ingests files from root Dropbox folder.
     Requires environment variables to be configured: DROPBOX_APP_KEY, DROPBOX_APP_SECRET, DROPBOX_REDIRECT_URI, DROPBOX_REFRESH_TOKEN.
-    Executes asynchronously, creates Dropbox feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Dropbox feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       path: z
         .string()
@@ -2379,8 +2429,22 @@ export function registerTools(server: McpServer) {
         .number()
         .optional()
         .describe("Number of files to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ path, readLimit }) => {
+    async ({ path, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -2427,7 +2491,12 @@ export function registerTools(server: McpServer) {
             isRecursive: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2460,7 +2529,7 @@ export function registerTools(server: McpServer) {
     If no folder identifier provided, ingests files from root Box folder (i.e. "0").
     Folder identifier can be inferred from Box URL. https://app.box.com/folder/123456 -> folder identifier is "123456".
     Requires environment variables to be configured: BOX_CLIENT_ID, BOX_CLIENT_SECRET, BOX_REDIRECT_URI, BOX_REFRESH_TOKEN.
-    Executes asynchronously, creates Box feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Box feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       folderId: z
         .string()
@@ -2471,8 +2540,22 @@ export function registerTools(server: McpServer) {
         .number()
         .optional()
         .describe("Number of files to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ folderId, readLimit }) => {
+    async ({ folderId, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -2515,7 +2598,12 @@ export function registerTools(server: McpServer) {
             isRecursive: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2547,7 +2635,7 @@ export function registerTools(server: McpServer) {
     Accepts GitHub repository owner and repository name and an optional read limit for the number of files to ingest.
     For example, for GitHub repository (https://github.com/openai/tiktoken), 'openai' is the repository owner, and 'tiktoken' is the repository name.
     Requires environment variable to be configured: GITHUB_PERSONAL_ACCESS_TOKEN.
-    Executes asynchronously, creates GitHub feed, and returns the feed identifier.`,
+    Executes asynchronously, creates GitHub feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       repositoryName: z.string().describe("GitHub repository name."),
       repositoryOwner: z.string().describe("GitHub repository owner."),
@@ -2555,8 +2643,28 @@ export function registerTools(server: McpServer) {
         .number()
         .optional()
         .describe("Number of files to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ repositoryOwner, repositoryName, readLimit }) => {
+    async ({
+      repositoryOwner,
+      repositoryName,
+      readLimit,
+      recurring,
+      repeatInterval,
+    }) => {
       const client = new Graphlit();
 
       try {
@@ -2581,7 +2689,12 @@ export function registerTools(server: McpServer) {
             isRecursive: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2614,15 +2727,29 @@ export function registerTools(server: McpServer) {
     You can list the available Notion database identifiers with listNotionDatabases.
     Or, for a Notion URL, https://www.notion.so/Example/Engineering-Wiki-114abc10cb38487e91ec906fc6c6f350, 'Engineering-Wiki-114abc10cb38487e91ec906fc6c6f350' is an example of a Notion database identifier.
     Requires environment variable to be configured: NOTION_API_KEY.
-    Executes asynchronously, creates Notion feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Notion feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       databaseId: z.string().describe("Notion database identifier."),
       readLimit: z
         .number()
         .optional()
         .describe("Number of pages to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ databaseId, readLimit }) => {
+    async ({ databaseId, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -2641,7 +2768,12 @@ export function registerTools(server: McpServer) {
             token: token,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2672,7 +2804,7 @@ export function registerTools(server: McpServer) {
     `Ingests messages from Microsoft Teams channel into Graphlit knowledge base.
     Accepts Microsoft Teams team identifier and channel identifier, and an optional read limit for the number of messages to ingest.
     Requires environment variables to be configured: MICROSOFT_TEAMS_CLIENT_ID, MICROSOFT_TEAMS_CLIENT_SECRET, MICROSOFT_TEAMS_REFRESH_TOKEN.
-    Executes asynchronously, creates Microsoft Teams feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Microsoft Teams feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       teamId: z.string().describe("Microsoft Teams team identifier."),
       channelId: z.string().describe("Microsoft Teams channel identifier."),
@@ -2680,8 +2812,22 @@ export function registerTools(server: McpServer) {
         .number()
         .optional()
         .describe("Number of messages to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ teamId, channelId, readLimit }) => {
+    async ({ teamId, channelId, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -2721,7 +2867,12 @@ export function registerTools(server: McpServer) {
             teamId: teamId,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2752,15 +2903,29 @@ export function registerTools(server: McpServer) {
     `Ingests messages from Slack channel into Graphlit knowledge base.
     Accepts Slack channel name and an optional read limit for the number of messages to ingest.
     Requires environment variable to be configured: SLACK_BOT_TOKEN.
-    Executes asynchronously, creates Slack feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Slack feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       channelName: z.string().describe("Slack channel name."),
       readLimit: z
         .number()
         .optional()
         .describe("Number of messages to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ channelName, readLimit }) => {
+    async ({ channelName, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -2780,7 +2945,12 @@ export function registerTools(server: McpServer) {
             includeAttachments: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2811,15 +2981,29 @@ export function registerTools(server: McpServer) {
     `Ingests messages from Discord channel into Graphlit knowledge base.
     Accepts Discord channel name and an optional read limit for the number of messages to ingest.
     Requires environment variable to be configured: DISCORD_BOT_TOKEN.
-    Executes asynchronously, creates Discord feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Discord feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       channelName: z.string().describe("Discord channel name."),
       readLimit: z
         .number()
         .optional()
         .describe("Number of messages to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ channelName, readLimit }) => {
+    async ({ channelName, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -2839,7 +3023,12 @@ export function registerTools(server: McpServer) {
             includeAttachments: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2870,7 +3059,7 @@ export function registerTools(server: McpServer) {
     `Ingests posts by user from Twitter/X into Graphlit knowledge base.
     Accepts Twitter/X user name, without the leading @ symbol, and an optional read limit for the number of posts to ingest.
     Requires environment variable to be configured: TWITTER_TOKEN.
-    Executes asynchronously, creates Twitter feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Twitter feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       userName: z
         .string()
@@ -2881,8 +3070,22 @@ export function registerTools(server: McpServer) {
         .number()
         .optional()
         .describe("Number of posts to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ userName, readLimit }) => {
+    async ({ userName, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -2902,7 +3105,12 @@ export function registerTools(server: McpServer) {
             includeAttachments: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2933,15 +3141,29 @@ export function registerTools(server: McpServer) {
     `Searches for recent posts from Twitter/X, and ingests them into Graphlit knowledge base.
     Accepts search query, and an optional read limit for the number of posts to ingest.
     Requires environment variable to be configured: TWITTER_TOKEN.
-    Executes asynchronously, creates Twitter feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Twitter feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       query: z.string().describe("Search query"),
       readLimit: z
         .number()
         .optional()
         .describe("Number of posts to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ query, readLimit }) => {
+    async ({ query, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -2961,7 +3183,12 @@ export function registerTools(server: McpServer) {
             includeAttachments: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -2991,15 +3218,29 @@ export function registerTools(server: McpServer) {
     "ingestRedditPosts",
     `Ingests posts from Reddit subreddit into Graphlit knowledge base.
     Accepts a subreddit name and an optional read limit for the number of posts to ingest.
-    Executes asynchronously, creates Reddit feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Reddit feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       subredditName: z.string().describe("Subreddit name."),
       readLimit: z
         .number()
         .optional()
         .describe("Number of posts to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ subredditName, readLimit }) => {
+    async ({ subredditName, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -3010,7 +3251,12 @@ export function registerTools(server: McpServer) {
             subredditName: subredditName,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -3041,14 +3287,28 @@ export function registerTools(server: McpServer) {
     `Ingests emails from Google Email account into Graphlit knowledge base.
     Accepts an optional read limit for the number of emails to ingest.
     Requires environment variables to be configured: GOOGLE_EMAIL_CLIENT_ID, GOOGLE_EMAIL_CLIENT_SECRET, GOOGLE_EMAIL_REFRESH_TOKEN.
-    Executes asynchronously, creates Google Email feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Google Email feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       readLimit: z
         .number()
         .optional()
         .describe("Number of emails to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ readLimit }) => {
+    async ({ readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -3090,7 +3350,12 @@ export function registerTools(server: McpServer) {
             includeAttachments: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -3121,14 +3386,28 @@ export function registerTools(server: McpServer) {
     `Ingests emails from Microsoft Email account into Graphlit knowledge base.
     Accepts an optional read limit for the number of emails to ingest.
     Requires environment variables to be configured: MICROSOFT_EMAIL_CLIENT_ID, MICROSOFT_EMAIL_CLIENT_SECRET, MICROSOFT_EMAIL_REFRESH_TOKEN.
-    Executes asynchronously, creates Microsoft Email feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Microsoft Email feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       readLimit: z
         .number()
         .optional()
         .describe("Number of emails to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ readLimit }) => {
+    async ({ readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -3170,7 +3449,12 @@ export function registerTools(server: McpServer) {
             includeAttachments: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -3201,15 +3485,29 @@ export function registerTools(server: McpServer) {
     `Ingests issues from Linear project into Graphlit knowledge base.
     Accepts Linear project name and an optional read limit for the number of issues to ingest.
     Requires environment variable to be configured: LINEAR_API_KEY.
-    Executes asynchronously, creates Linear issue feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Linear issue feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       projectName: z.string().describe("Linear project name."),
       readLimit: z
         .number()
         .optional()
         .describe("Number of issues to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ projectName, readLimit }) => {
+    async ({ projectName, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -3231,7 +3529,12 @@ export function registerTools(server: McpServer) {
             includeAttachments: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -3263,7 +3566,7 @@ export function registerTools(server: McpServer) {
     Accepts GitHub repository owner and repository name and an optional read limit for the number of issues to ingest.
     For example, for GitHub repository (https://github.com/openai/tiktoken), 'openai' is the repository owner, and 'tiktoken' is the repository name.
     Requires environment variable to be configured: GITHUB_PERSONAL_ACCESS_TOKEN.
-    Executes asynchronously, creates GitHub issue feed, and returns the feed identifier.`,
+    Executes asynchronously, creates GitHub issue feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       repositoryName: z.string().describe("GitHub repository name."),
       repositoryOwner: z.string().describe("GitHub repository owner."),
@@ -3271,8 +3574,28 @@ export function registerTools(server: McpServer) {
         .number()
         .optional()
         .describe("Number of issues to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ repositoryName, repositoryOwner, readLimit }) => {
+    async ({
+      repositoryName,
+      repositoryOwner,
+      readLimit,
+      recurring,
+      repeatInterval,
+    }) => {
       const client = new Graphlit();
 
       try {
@@ -3297,7 +3620,12 @@ export function registerTools(server: McpServer) {
             includeAttachments: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -3328,7 +3656,7 @@ export function registerTools(server: McpServer) {
     `Ingests issues from Atlassian Jira repository into Graphlit knowledge base.
     Accepts Atlassian Jira server URL and project name, and an optional read limit for the number of issues to ingest.
     Requires environment variables to be configured: JIRA_EMAIL, JIRA_TOKEN.
-    Executes asynchronously, creates Atlassian Jira issue feed, and returns the feed identifier.`,
+    Executes asynchronously, creates Atlassian Jira issue feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       url: z.string().describe("Atlassian Jira server URL."),
       projectName: z.string().describe("Atlassian Jira project name."),
@@ -3336,8 +3664,22 @@ export function registerTools(server: McpServer) {
         .number()
         .optional()
         .describe("Number of issues to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ url, projectName, readLimit }) => {
+    async ({ url, projectName, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -3367,7 +3709,12 @@ export function registerTools(server: McpServer) {
             includeAttachments: true,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -3398,15 +3745,29 @@ export function registerTools(server: McpServer) {
     `Crawls web pages from web site into Graphlit knowledge base.
     Accepts a URL and an optional read limit for the number of pages to crawl.
     Uses sitemap.xml to discover pages to be crawled from website.
-    Executes asynchronously and returns the feed identifier.`,
+    Executes asynchronously and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       url: z.string().describe("Web site URL."),
       readLimit: z
         .number()
         .optional()
         .describe("Number of web pages to ingest, optional. Defaults to 100."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ url, readLimit }) => {
+    async ({ url, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -3417,7 +3778,12 @@ export function registerTools(server: McpServer) {
             uri: url,
             readLimit: readLimit || 100,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
@@ -3543,15 +3909,29 @@ export function registerTools(server: McpServer) {
     `Ingests posts from RSS feed into Graphlit knowledge base.
     For podcast RSS feeds, audio will be downloaded, transcribed and ingested into Graphlit knowledge base.
     Accepts RSS URL and an optional read limit for the number of posts to read.
-    Executes asynchronously and returns the feed identifier.`,
+    Executes asynchronously and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       url: z.string().describe("RSS URL."),
       readLimit: z
         .number()
         .optional()
         .describe("Number of issues to posts, optional. Defaults to 25."),
+      recurring: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Whether to create a recurring feed that checks for new content. Defaults to false (one-time execution). When true, isFeedDone is not needed."
+        ),
+      repeatInterval: z
+        .string()
+        .optional()
+        .default("PT15M")
+        .describe(
+          "ISO 8601 duration for recurring interval (e.g., 'PT5M' for 5 minutes, 'PT15M' for 15 minutes, 'PT1H' for 1 hour). Must be at least PT5M. Only used when recurring is true."
+        ),
     },
-    async ({ url, readLimit }) => {
+    async ({ url, readLimit, recurring, repeatInterval }) => {
       const client = new Graphlit();
 
       try {
@@ -3562,7 +3942,12 @@ export function registerTools(server: McpServer) {
             uri: url,
             readLimit: readLimit || 25,
           },
-          schedulePolicy: schedulePolicy,
+          schedulePolicy: recurring
+            ? {
+                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+                repeatInterval: repeatInterval || "PT15M",
+              }
+            : undefined,
         });
 
         return {
