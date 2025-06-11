@@ -8,6 +8,7 @@
     "strict": true,
     "noImplicitAny": false,
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "lib": ["ES2022", "esnext.intl"]
   },

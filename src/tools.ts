@@ -32,7 +32,7 @@ import {
   PromptStrategyTypes,
   OpenAiImageModels,
   TimedPolicyRecurrenceTypes,
-} from "graphlit-client/dist/generated/graphql-types.js";
+} from "graphlit-client/dist/generated/graphql-types";
 
 export function registerTools(server: McpServer) {
   // Default 15-minute recurrence schedule policy for feeds

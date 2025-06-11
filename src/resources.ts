@@ -10,7 +10,7 @@ import {
   EntityState,
   GetContentQuery,
   GetConversationQuery,
-} from "graphlit-client/dist/generated/graphql-types.js";
+} from "graphlit-client/dist/generated/graphql-types";
 
 export function registerResources(server: McpServer) {
   server.resource(
