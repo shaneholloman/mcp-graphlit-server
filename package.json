@@ -1,6 +1,6 @@
 {
   "name": "graphlit-mcp-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Graphlit MCP Server",
   "type": "module",
   "repository": {
@@ -50,7 +50,7 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "graphlit-client": "^1.0.20250611004"
+    "graphlit-client": "^1.0.20250611010"
   },
   "devDependencies": {
     "@types/mime-types": "^2.1.4",
