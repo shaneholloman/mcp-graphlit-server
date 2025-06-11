@@ -20,6 +20,8 @@
     "node": ">=18.0.0"
   },
   "scripts": {
+    "start": "node ./build/index.js",
+    "dev": "ts-node ./src/index.ts",
     "build": "tsc -p tsconfig.json",
     "watch": "tsc --watch",
     "check": "tsc --noEmit --incremental",
@@ -48,11 +50,12 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "graphlit-client": "^1.0.20250611001"
+    "graphlit-client": "^1.0.20250611002"
   },
   "devDependencies": {
     "@types/mime-types": "^2.1.4",
     "prettier": "^3.5.3",
+    "react": "^19.1.0",
     "typescript": "^5.8.2"
   }
 }
