@@ -50,7 +50,7 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
-    "graphlit-client": "^1.0.20250612003"
+    "graphlit-client": "^1.0.20250612006"
   },
   "devDependencies": {
     "@types/mime-types": "^3.0.1",
