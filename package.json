@@ -49,8 +49,8 @@
   "author": "Unstruk Data Inc.",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1",
-    "graphlit-client": "^1.0.20250615006"
+    "@modelcontextprotocol/sdk": "^1.12.3",
+    "graphlit-client": "^1.0.20250617002"
   },
   "devDependencies": {
     "@types/mime-types": "^3.0.1",
