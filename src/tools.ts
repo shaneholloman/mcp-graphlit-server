@@ -4046,6 +4046,7 @@ export function registerTools(server: McpServer) {
           textType,
           undefined,
           id,
+          undefined,
           true
         );
 
