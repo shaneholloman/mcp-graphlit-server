@@ -118,6 +118,13 @@ For any questions on using the MCP Server, please join our [Discord](https://dis
 - List SharePoint Folders
 - List Linear Projects
 - List Notion Databases
+- List Notion Pages
+- List Dropbox Folders
+- List Box Folders
+- List Discord Guilds
+- List Discord Channels
+- List Google Calendars
+- List Microsoft Calendars
 
 ## Resources
 
