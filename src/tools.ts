@@ -1848,6 +1848,351 @@ export function registerTools(server: McpServer) {
   );
 
   server.tool(
+    "listDropboxFolders",
+    `Lists available Dropbox folders.
+    Requires environment variables to be configured: DROPBOX_APP_KEY, DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN.
+    Returns a list of Dropbox folders that can be used with file ingestion tools.`,
+    {
+      folderPath: z
+        .string()
+        .optional()
+        .describe("The folder path to list folders from. If not provided, lists from root."),
+    },
+    async ({ folderPath }) => {
+      const client = new Graphlit();
+
+      try {
+        const appKey = process.env.DROPBOX_APP_KEY;
+        const appSecret = process.env.DROPBOX_APP_SECRET;
+        const refreshToken = process.env.DROPBOX_REFRESH_TOKEN;
+        
+        if (!appKey || !appSecret || !refreshToken) {
+          console.error("Please set DROPBOX_APP_KEY, DROPBOX_APP_SECRET, and DROPBOX_REFRESH_TOKEN environment variables.");
+          process.exit(1);
+        }
+
+        const response = await client.queryDropboxFolders(
+          {
+            appKey: appKey,
+            appSecret: appSecret,
+            refreshToken: refreshToken,
+          },
+          folderPath
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(response.dropboxFolders?.results, null, 2),
+            },
+          ],
+        };
+      } catch (err: unknown) {
+        const error = err as Error;
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.tool(
+    "listBoxFolders",
+    `Lists available Box folders.
+    Requires environment variables to be configured: BOX_CLIENT_ID, BOX_CLIENT_SECRET, BOX_REFRESH_TOKEN.
+    Returns a list of Box folders that can be used with file ingestion tools.`,
+    {
+      folderId: z
+        .string()
+        .optional()
+        .describe("The folder ID to list folders from. If not provided, lists from root."),
+    },
+    async ({ folderId }) => {
+      const client = new Graphlit();
+
+      try {
+        const clientId = process.env.BOX_CLIENT_ID;
+        const clientSecret = process.env.BOX_CLIENT_SECRET;
+        const refreshToken = process.env.BOX_REFRESH_TOKEN;
+        
+        if (!clientId || !clientSecret || !refreshToken) {
+          console.error("Please set BOX_CLIENT_ID, BOX_CLIENT_SECRET, and BOX_REFRESH_TOKEN environment variables.");
+          process.exit(1);
+        }
+
+        const response = await client.queryBoxFolders(
+          {
+            clientId: clientId,
+            clientSecret: clientSecret,
+            refreshToken: refreshToken,
+          },
+          folderId
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(response.boxFolders?.results, null, 2),
+            },
+          ],
+        };
+      } catch (err: unknown) {
+        const error = err as Error;
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.tool(
+    "listDiscordGuilds",
+    `Lists available Discord guilds (servers).
+    Requires environment variable to be configured: DISCORD_BOT_TOKEN.
+    Returns a list of Discord guilds that the bot has access to.`,
+    {},
+    async ({}) => {
+      const client = new Graphlit();
+
+      try {
+        const token = process.env.DISCORD_BOT_TOKEN;
+        if (!token) {
+          console.error("Please set DISCORD_BOT_TOKEN environment variable.");
+          process.exit(1);
+        }
+
+        const response = await client.queryDiscordGuilds({
+          token: token,
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(response.discordGuilds?.results, null, 2),
+            },
+          ],
+        };
+      } catch (err: unknown) {
+        const error = err as Error;
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.tool(
+    "listDiscordChannels",
+    `Lists available Discord channels in a guild.
+    Requires environment variable to be configured: DISCORD_BOT_TOKEN.
+    Returns a list of Discord channels that can be used with Discord ingestion tools.`,
+    {
+      guildId: z.string().describe("The Discord guild (server) ID to list channels from."),
+    },
+    async ({ guildId }) => {
+      const client = new Graphlit();
+
+      try {
+        const token = process.env.DISCORD_BOT_TOKEN;
+        if (!token) {
+          console.error("Please set DISCORD_BOT_TOKEN environment variable.");
+          process.exit(1);
+        }
+
+        const response = await client.queryDiscordChannels({
+          token: token,
+          guildId: guildId,
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(response.discordChannels?.results, null, 2),
+            },
+          ],
+        };
+      } catch (err: unknown) {
+        const error = err as Error;
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.tool(
+    "listNotionPages",
+    `Lists pages from a Notion database.
+    Requires environment variable to be configured: NOTION_API_KEY.
+    Returns a list of Notion pages in the specified database.`,
+    {
+      databaseId: z.string().describe("The Notion database identifier to list pages from."),
+    },
+    async ({ databaseId }) => {
+      const client = new Graphlit();
+
+      try {
+        const token = process.env.NOTION_API_KEY;
+        if (!token) {
+          console.error("Please set NOTION_API_KEY environment variable.");
+          process.exit(1);
+        }
+
+        const response = await client.queryNotionPages(
+          {
+            token: token,
+          },
+          databaseId
+        );
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(response.notionPages?.results, null, 2),
+            },
+          ],
+        };
+      } catch (err: unknown) {
+        const error = err as Error;
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.tool(
+    "listGoogleCalendars",
+    `Lists available Google calendars.
+    Requires environment variables to be configured: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN.
+    Returns a list of Google calendars that can be used with calendar ingestion tools.`,
+    {},
+    async ({}) => {
+      const client = new Graphlit();
+
+      try {
+        const clientId = process.env.GOOGLE_CLIENT_ID;
+        const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+        const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+        
+        if (!clientId || !clientSecret || !refreshToken) {
+          console.error("Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN environment variables.");
+          process.exit(1);
+        }
+
+        const response = await client.queryGoogleCalendars({
+          clientId: clientId,
+          clientSecret: clientSecret,
+          refreshToken: refreshToken,
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(response.googleCalendars?.results, null, 2),
+            },
+          ],
+        };
+      } catch (err: unknown) {
+        const error = err as Error;
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.tool(
+    "listMicrosoftCalendars",
+    `Lists available Microsoft calendars.
+    Requires environment variables to be configured: MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET, MICROSOFT_REFRESH_TOKEN.
+    Returns a list of Microsoft calendars that can be used with calendar ingestion tools.`,
+    {},
+    async ({}) => {
+      const client = new Graphlit();
+
+      try {
+        const clientId = process.env.MICROSOFT_CLIENT_ID;
+        const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
+        const refreshToken = process.env.MICROSOFT_REFRESH_TOKEN;
+        
+        if (!clientId || !clientSecret || !refreshToken) {
+          console.error("Please set MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET, and MICROSOFT_REFRESH_TOKEN environment variables.");
+          process.exit(1);
+        }
+
+        const response = await client.queryMicrosoftCalendars({
+          clientId: clientId,
+          clientSecret: clientSecret,
+          refreshToken: refreshToken,
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(response.microsoftCalendars?.results, null, 2),
+            },
+          ],
+        };
+      } catch (err: unknown) {
+        const error = err as Error;
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
+
+  server.tool(
     "listLinearProjects",
     `Lists available Linear projects.
     Requires environment variable to be configured: LINEAR_API_KEY.
