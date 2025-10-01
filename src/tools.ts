@@ -2763,7 +2763,7 @@ export function registerTools(server: McpServer) {
     `Ingests files from Dropbox into Graphlit knowledge base.
     Accepts optional relative path to Dropbox folder (i.e. /Pictures), and an optional read limit for the number of files to ingest.
     If no path provided, ingests files from root Dropbox folder.
-    Requires environment variables to be configured: DROPBOX_APP_KEY, DROPBOX_APP_SECRET, DROPBOX_REDIRECT_URI, DROPBOX_REFRESH_TOKEN.
+    Requires environment variables to be configured: DROPBOX_APP_KEY, DROPBOX_APP_SECRET, DROPBOX_REFRESH_TOKEN.
     Executes asynchronously, creates Dropbox feed, and returns the feed identifier. Optionally creates a recurring feed that checks for new content every 15 minutes when 'recurring' is set to true.`,
     {
       path: z
@@ -2805,14 +2805,6 @@ export function registerTools(server: McpServer) {
           process.exit(1);
         }
 
-        const redirectUri = process.env.DROPBOX_REDIRECT_URI;
-        if (!redirectUri) {
-          console.error(
-            "Please set DROPBOX_REDIRECT_URI environment variable."
-          );
-          process.exit(1);
-        }
-
         const refreshToken = process.env.DROPBOX_REFRESH_TOKEN;
         if (!refreshToken) {
           console.error(
@@ -2830,7 +2822,6 @@ export function registerTools(server: McpServer) {
               path: path,
               appKey: appKey,
               appSecret: appSecret,
-              redirectUri: redirectUri,
               refreshToken: refreshToken,
             },
             isRecursive: true,
