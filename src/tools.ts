@@ -112,20 +112,20 @@ export function registerTools(server: McpServer) {
           anthropic:
             modelServiceType == Types.ModelServiceTypes.Anthropic
               ? {
-                  model: Types.AnthropicModels.Claude_3_7Sonnet,
-                }
+                model: Types.AnthropicModels.Claude_3_7Sonnet,
+              }
               : undefined,
           openAI:
             modelServiceType == Types.ModelServiceTypes.OpenAi
               ? {
-                  model: Types.OpenAiModels.Gpt4OChat_128K,
-                }
+                model: Types.OpenAiModels.Gpt4OChat_128K,
+              }
               : undefined,
           google:
             modelServiceType == Types.ModelServiceTypes.Google
               ? {
-                  model: Types.GoogleModels.Gemini_2_0Flash,
-                }
+                model: Types.GoogleModels.Gemini_2_0Flash,
+              }
               : undefined,
           searchType: ConversationSearchTypes.Hybrid,
           strategy: {
@@ -153,21 +153,21 @@ export function registerTools(server: McpServer) {
           anthropic:
             modelServiceType == Types.ModelServiceTypes.Anthropic
               ? {
-                  model: Types.AnthropicModels.Claude_3_7Sonnet,
-                  enableThinking: true,
-                }
+                model: Types.AnthropicModels.Claude_3_7Sonnet,
+                enableThinking: true,
+              }
               : undefined,
           openAI:
             modelServiceType == Types.ModelServiceTypes.OpenAi
               ? {
-                  model: Types.OpenAiModels.Gpt4O_128K,
-                }
+                model: Types.OpenAiModels.Gpt4O_128K,
+              }
               : undefined,
           google:
             modelServiceType == Types.ModelServiceTypes.Google
               ? {
-                  model: Types.GoogleModels.Gemini_2_5ProPreview,
-                }
+                model: Types.GoogleModels.Gemini_2_5ProPreview,
+              }
               : undefined,
         });
 
@@ -182,20 +182,20 @@ export function registerTools(server: McpServer) {
           anthropic:
             modelServiceType == Types.ModelServiceTypes.Anthropic
               ? {
-                  model: Types.AnthropicModels.Claude_3_7Sonnet,
-                }
+                model: Types.AnthropicModels.Claude_3_7Sonnet,
+              }
               : undefined,
           openAI:
             modelServiceType == Types.ModelServiceTypes.OpenAi
               ? {
-                  model: Types.OpenAiModels.Gpt4O_128K,
-                }
+                model: Types.OpenAiModels.Gpt4O_128K,
+              }
               : undefined,
           google:
             modelServiceType == Types.ModelServiceTypes.Google
               ? {
-                  model: Types.GoogleModels.Gemini_2_0Flash,
-                }
+                model: Types.GoogleModels.Gemini_2_0Flash,
+              }
               : undefined,
         });
 
@@ -207,40 +207,40 @@ export function registerTools(server: McpServer) {
         preparation:
           preparationSpecificationId !== undefined
             ? {
-                jobs: [
-                  {
-                    connector: {
-                      type: Types.FilePreparationServiceTypes.ModelDocument,
-                      modelDocument: {
-                        specification: { id: preparationSpecificationId },
-                      },
+              jobs: [
+                {
+                  connector: {
+                    type: Types.FilePreparationServiceTypes.ModelDocument,
+                    modelDocument: {
+                      specification: { id: preparationSpecificationId },
                     },
                   },
-                ],
-              }
+                },
+              ],
+            }
             : undefined,
         extraction:
           extractionSpecificationId !== undefined
             ? {
-                jobs: [
-                  {
-                    connector: {
-                      type: Types.EntityExtractionServiceTypes.ModelText,
-                      modelText: {
-                        specification: { id: extractionSpecificationId },
-                      },
+              jobs: [
+                {
+                  connector: {
+                    type: Types.EntityExtractionServiceTypes.ModelText,
+                    modelText: {
+                      specification: { id: extractionSpecificationId },
                     },
                   },
-                  {
-                    connector: {
-                      type: Types.EntityExtractionServiceTypes.ModelImage,
-                      modelImage: {
-                        specification: { id: extractionSpecificationId },
-                      },
+                },
+                {
+                  connector: {
+                    type: Types.EntityExtractionServiceTypes.ModelImage,
+                    modelImage: {
+                      specification: { id: extractionSpecificationId },
                     },
                   },
-                ],
-              }
+                },
+              ],
+            }
             : undefined,
       });
 
@@ -789,8 +789,8 @@ export function registerTools(server: McpServer) {
               text: JSON.stringify(
                 response.extractText
                   ? response.extractText
-                      .filter((item) => item !== null)
-                      .map((item) => item.value)
+                    .filter((item) => item !== null)
+                    .map((item) => item.value)
                   : [],
                 null,
                 2
@@ -1810,7 +1810,7 @@ export function registerTools(server: McpServer) {
     Requires environment variable to be configured: NOTION_API_KEY.
     Returns a list of Notion databases, where the database identifier can be used with ingestNotionPages to ingest pages into Graphlit knowledge base.`,
     {},
-    async ({}) => {
+    async ({ }) => {
       const client = new Graphlit();
 
       try {
@@ -1865,7 +1865,7 @@ export function registerTools(server: McpServer) {
         const appKey = process.env.DROPBOX_APP_KEY;
         const appSecret = process.env.DROPBOX_APP_SECRET;
         const refreshToken = process.env.DROPBOX_REFRESH_TOKEN;
-        
+
         if (!appKey || !appSecret || !refreshToken) {
           console.error("Please set DROPBOX_APP_KEY, DROPBOX_APP_SECRET, and DROPBOX_REFRESH_TOKEN environment variables.");
           process.exit(1);
@@ -1921,7 +1921,7 @@ export function registerTools(server: McpServer) {
         const clientId = process.env.BOX_CLIENT_ID;
         const clientSecret = process.env.BOX_CLIENT_SECRET;
         const refreshToken = process.env.BOX_REFRESH_TOKEN;
-        
+
         if (!clientId || !clientSecret || !refreshToken) {
           console.error("Please set BOX_CLIENT_ID, BOX_CLIENT_SECRET, and BOX_REFRESH_TOKEN environment variables.");
           process.exit(1);
@@ -1965,7 +1965,7 @@ export function registerTools(server: McpServer) {
     Requires environment variable to be configured: DISCORD_BOT_TOKEN.
     Returns a list of Discord guilds that the bot has access to.`,
     {},
-    async ({}) => {
+    async ({ }) => {
       const client = new Graphlit();
 
       try {
@@ -2102,14 +2102,14 @@ export function registerTools(server: McpServer) {
     Requires environment variables to be configured: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN.
     Returns a list of Google calendars that can be used with calendar ingestion tools.`,
     {},
-    async ({}) => {
+    async ({ }) => {
       const client = new Graphlit();
 
       try {
         const clientId = process.env.GOOGLE_CLIENT_ID;
         const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
         const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
-        
+
         if (!clientId || !clientSecret || !refreshToken) {
           console.error("Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN environment variables.");
           process.exit(1);
@@ -2150,14 +2150,14 @@ export function registerTools(server: McpServer) {
     Requires environment variables to be configured: MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET, MICROSOFT_REFRESH_TOKEN.
     Returns a list of Microsoft calendars that can be used with calendar ingestion tools.`,
     {},
-    async ({}) => {
+    async ({ }) => {
       const client = new Graphlit();
 
       try {
         const clientId = process.env.MICROSOFT_CLIENT_ID;
         const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
         const refreshToken = process.env.MICROSOFT_REFRESH_TOKEN;
-        
+
         if (!clientId || !clientSecret || !refreshToken) {
           console.error("Please set MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET, and MICROSOFT_REFRESH_TOKEN environment variables.");
           process.exit(1);
@@ -2198,7 +2198,7 @@ export function registerTools(server: McpServer) {
     Requires environment variable to be configured: LINEAR_API_KEY.
     Returns a list of Linear projects, where the project name can be used with ingestLinearIssues to ingest issues into Graphlit knowledge base.`,
     {},
-    async ({}) => {
+    async ({ }) => {
       const client = new Graphlit();
 
       try {
@@ -2241,7 +2241,7 @@ export function registerTools(server: McpServer) {
     Requires environment variable to be configured: SLACK_BOT_TOKEN.
     Returns a list of Slack channels, where the channel name can be used with ingestSlackMessages to ingest messages into Graphlit knowledge base.`,
     {},
-    async ({}) => {
+    async ({ }) => {
       const client = new Graphlit();
 
       try {
@@ -2284,7 +2284,7 @@ export function registerTools(server: McpServer) {
     Requires environment variables to be configured: SHAREPOINT_CLIENT_ID, SHAREPOINT_CLIENT_SECRET, SHAREPOINT_REFRESH_TOKEN.
     Returns a list of SharePoint libraries, where the selected libraryId can be used with listSharePointFolders to enumerate SharePoint folders in a library.`,
     {},
-    async ({}) => {
+    async ({ }) => {
       const client = new Graphlit();
 
       try {
@@ -2507,9 +2507,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -2609,9 +2609,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -2729,9 +2729,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -2829,9 +2829,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -2936,9 +2936,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3027,9 +3027,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3106,9 +3106,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3205,9 +3205,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3283,9 +3283,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3361,9 +3361,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3443,9 +3443,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3521,9 +3521,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3589,9 +3589,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3688,9 +3688,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3787,9 +3787,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3867,9 +3867,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -3958,9 +3958,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -4047,9 +4047,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -4116,9 +4116,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
@@ -4192,7 +4192,7 @@ export function registerTools(server: McpServer) {
     Use 'PODSCAN' search service type to search podcasts.
     Does *not* ingest pages or podcast episodes into Graphlit knowledge base.  
     When searching podcasts, *don't* include the term 'podcast' or 'episode' in the search query - that would be redundant.
-    Search service types: Tavily (web pages), Exa (web pages) and Podscan (podcasts). Defaults to Exa.
+    Search service types: Tavily (web pages), Exa (web pages), ExaCode (code & docs) and Podscan (podcasts). Defaults to Exa.
     Returns URL, title and relevant Markdown text from resulting web pages or podcast episode descriptions.`,
     {
       query: z.string().describe("Search query."),
@@ -4201,7 +4201,7 @@ export function registerTools(server: McpServer) {
         .optional()
         .default(SearchServiceTypes.Exa)
         .describe(
-          "Search service type (Tavily, Exa, Podscan). Defaults to Exa."
+          "Search service type (Tavily, Exa, ExaCode, Podscan). Defaults to Exa."
         ),
       limit: z
         .number()
@@ -4280,9 +4280,9 @@ export function registerTools(server: McpServer) {
           },
           schedulePolicy: recurring
             ? {
-                recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
-                repeatInterval: repeatInterval || "PT15M",
-              }
+              recurrenceType: TimedPolicyRecurrenceTypes.Repeat,
+              repeatInterval: repeatInterval || "PT15M",
+            }
             : undefined,
         });
 
